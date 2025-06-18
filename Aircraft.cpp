@@ -422,13 +422,13 @@ void __fastcall TCPAWorkerThread::Execute() {
         mgr->insertAircraftList->Clear();
         // 남은 객체 출력
         for (int i = 0; i < mgr->removeAircraftList->Count; i++) {
-            TInsertAircraftPair *obj = (TInsertAircraftPair*)mgr->removeAircraftList->Items[i];
+            TRemoveAircraftPair *obj = (TRemoveAircraftPair*)mgr->removeAircraftList->Items[i];
             mgr->Remove(obj->i_key_size, obj->p_key_data);
         }
 
         // 메모리 해제
         for (int i = 0; i < mgr->removeAircraftList->Count; i++) {
-            delete (TInsertAircraftPair*)(mgr->removeAircraftList->Items[i]);
+            delete (TRemoveAircraftPair*)(mgr->removeAircraftList->Items[i]);
         }
         mgr->removeAircraftList->Clear();
         printf("Update cache\n");
