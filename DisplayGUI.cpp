@@ -27,6 +27,8 @@
 #include "AircraftDB.h"
 #include "csv.h"
 
+#define USE_WORKER_THREAD
+
 #define AIRCRAFT_DATABASE_URL   "https://opensky-network.org/datasets/metadata/aircraftDatabase.zip"
 #define AIRCRAFT_DATABASE_FILE   "aircraftDatabase.csv"
 #define ARTCC_BOUNDARY_FILE      "Ground_Level_ARTCC_Boundary_Data_2025-05-15.csv"
@@ -199,14 +201,6 @@ __fastcall TForm1::TForm1(TComponent* Owner)
   TrackHook.Valid_CC=false;
   TrackHook.Valid_CPA=false;
 
-  HashTable = ght_create(50000);
-
-  if ( !HashTable)
-	{
-	  throw Sysutils::Exception("Create Hash Failed");
-	}
-  ght_set_rehash(HashTable, TRUE);
-
   AreaTemp=NULL;
   Areas= new TList;
 
@@ -229,6 +223,14 @@ __fastcall TForm1::TForm1(TComponent* Owner)
  BigQueryRowCount=0;
  BigQueryFileCount=0;
  InitAircraftDB(AircraftDBPathFileName);
+  CpaCache = new TCPAResultCache();
+//
+//    // 워커 생성
+#ifdef USE_WORKER_THREAD
+// YAKI_TEST_CODE
+    WorkerThread = new TCPAWorkerThread(CpaCache);
+    WorkerThread->Start(); // Execute() 시작
+#endif
  printf("init complete\n");
 }
 //---------------------------------------------------------------------------
@@ -347,8 +349,7 @@ void __fastcall TForm1::DrawObjects(void)
   glVertex2f(ScrX,ScrY-20.0);
   glVertex2f(ScrX,ScrY+20.0);
   glEnd();
-
-
+#if 1
   uint32_t *Key;
   ght_iterator_t iterator;
   TADS_B_Aircraft* Data,*DataCPA;
@@ -429,9 +430,9 @@ void __fastcall TForm1::DrawObjects(void)
 	  }
 	 }
 
-    AircraftCountLabel->Caption=IntToStr((int)ght_size(HashTable));
-	for(Data = (TADS_B_Aircraft *)ght_first(HashTable, &iterator,(const void **) &Key);
-			  Data; Data = (TADS_B_Aircraft *)ght_next(HashTable, &iterator, (const void **)&Key))
+    AircraftCountLabel->Caption=IntToStr((int)AircraftManager::GetInstance()->GetSize());
+	for(Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetFirst(&iterator,(const void **) &Key);
+			  Data; Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iterator, (const void **)&Key))
 	{
 	  if (Data->HaveLatLon)
 	  {
@@ -446,11 +447,17 @@ void __fastcall TForm1::DrawObjects(void)
 		 Data->Heading=0.0;
 		 glColor4f(1.0, 0.0, 0.0, 1.0);
 		}
-
+#ifndef YAKI_TEST_CODE
+       DrawAirplaneImage(ScrX,ScrY,g_EarthView->GetCurrentZoom()/50 > 1.5 ? 1.5 : g_EarthView->GetCurrentZoom()/50 < 0.5 ? 0.5 : g_EarthView->GetCurrentZoom()/50,Data->Heading,Data->SpriteImage);
+       if (g_EarthView->GetCurrentZoom()/100 > 0.7f) {
+           glRasterPos2i(ScrX+30,ScrY-10);
+           ObjectDisplay->Draw2DText(Data->HexAddr);
+       }
+#else
 	   DrawAirplaneImage(ScrX,ScrY,1.5,Data->Heading,Data->SpriteImage);
 	   glRasterPos2i(ScrX+30,ScrY-10);
 	   ObjectDisplay->Draw2DText(Data->HexAddr);
-
+#endif
 	   if ((Data->HaveSpeedAndHeading) && (TimeToGoCheckBox->State==cbChecked))
 	   {
 		double lat,lon,az;
@@ -471,7 +478,7 @@ void __fastcall TForm1::DrawObjects(void)
  ViewableAircraftCountLabel->Caption=ViewableAircraft;
  if (TrackHook.Valid_CC)
  {
-		Data= (TADS_B_Aircraft *)ght_get(HashTable, sizeof(TrackHook.ICAO_CC), (void *)&TrackHook.ICAO_CC);
+		Data= (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetAircraft(sizeof(TrackHook.ICAO_CC), (void *)&TrackHook.ICAO_CC);
 		if (Data)
 		{
 		ICAOLabel->Caption=Data->HexAddr;
@@ -507,7 +514,7 @@ void __fastcall TForm1::DrawObjects(void)
 
         glColor4f(1.0, 0.0, 0.0, 1.0);
         LatLon2XY(Data->Latitude,Data->Longitude, ScrX, ScrY);
-        DrawTrackHook(ScrX, ScrY);
+        DrawTrackHook(ScrX, ScrY, g_EarthView->GetCurrentZoom()/50 > 1.0 ? 1.0 : g_EarthView->GetCurrentZoom()/50 < 0.2 ? 0.2 : g_EarthView->GetCurrentZoom()/50);
         }
 
 		else
@@ -527,7 +534,7 @@ void __fastcall TForm1::DrawObjects(void)
  if (TrackHook.Valid_CPA)
  {
   bool CpaDataIsValid=false;
-  DataCPA= (TADS_B_Aircraft *)ght_get(HashTable, sizeof(TrackHook.ICAO_CPA), (void *)&TrackHook.ICAO_CPA);
+  DataCPA= (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetAircraft(sizeof(TrackHook.ICAO_CPA), (void *)&TrackHook.ICAO_CPA);
   if ((DataCPA) && (TrackHook.Valid_CC))
 	{
 
@@ -579,7 +586,177 @@ void __fastcall TForm1::DrawObjects(void)
 	CpaDistanceValue->Caption="None";
    }
  }
+#ifndef USE_WORKER_THREAD
+// YAKI_TEST_CODE
+    HookTrackAll();
+#else
+    std::vector<TCpaPair> pairs;
+
+    if (CpaCache) {
+        CpaCache->Get(pairs);
+    }
+
+    for (auto &pair : pairs) {
+        if (!pair.Valid) continue;
+
+        double ScrX, ScrY;
+        printf("Draw CPA\n");
+
+        // 항공기1 -> CPA 위치
+#if 1
+         glColor4f(0.0, 1.0, 0.0, 1.0);
+         glBegin(GL_LINE_STRIP);
+         LatLon2XY(pair.a_Lat,pair.a_Lon, ScrX, ScrY);
+         glVertex2f(ScrX, ScrY);
+         LatLon2XY(pair.Lat1,pair.Lon1, ScrX, ScrY);
+         glVertex2f(ScrX, ScrY);
+         glEnd();
+         glBegin(GL_LINE_STRIP);
+         LatLon2XY(pair.b_Lat,pair.b_Lon, ScrX, ScrY);
+         glVertex2f(ScrX, ScrY);
+         LatLon2XY(pair.Lat2,pair.Lon2, ScrX, ScrY);
+         glVertex2f(ScrX, ScrY);
+         glEnd();
+         glColor4f(1.0, 0.0, 0.0, 1.0);
+         glBegin(GL_LINE_STRIP);
+         LatLon2XY(pair.Lat1,pair.Lon1, ScrX, ScrY);
+         glVertex2f(ScrX, ScrY);
+         LatLon2XY(pair.Lat2,pair.Lon2, ScrX, ScrY);
+         glVertex2f(ScrX, ScrY);
+         glEnd();
+#else
+        glColor4f(0.0, 1.0, 0.0, 1.0);
+        glLineWidth(3.0f);
+        glBegin(GL_LINE_STRIP);
+        LatLon2XY(pair.Lat1, pair.Lon1, ScrX, ScrY);
+        glVertex2f(ScrX, ScrY);
+        LatLon2XY(pair.Lat2, pair.Lon2, ScrX, ScrY);
+        glVertex2f(ScrX, ScrY);
+        glEnd();
+#endif
+    }
+ #endif
+#endif
 }
+#ifndef YAKI_TEST_CODE
+ // deg -> radian 변환 매크로
+constexpr double DEG2RAD = M_PI / 180.0;
+
+// 결과: km 단위 거리 반환
+double Haversine(double lat1_deg, double lon1_deg, double lat2_deg, double lon2_deg)
+{
+    const double R = 6371.0; // 지구 반경 (km)
+
+    // 위도, 경도를 radian으로 변환
+    double lat1 = lat1_deg * DEG2RAD;
+    double lon1 = lon1_deg * DEG2RAD;
+    double lat2 = lat2_deg * DEG2RAD;
+    double lon2 = lon2_deg * DEG2RAD;
+
+    double dlat = lat2 - lat1;
+    double dlon = lon2 - lon1;
+
+    double a = std::sin(dlat / 2) * std::sin(dlat / 2) +
+               std::cos(lat1) * std::cos(lat2) *
+               std::sin(dlon / 2) * std::sin(dlon / 2);
+
+    double c = 2 * std::atan2(std::sqrt(a), std::sqrt(1 - a));
+
+    return R * c; // km
+}
+
+// Nautical Miles(NM)로 바로 얻고 싶으면:
+double HaversineNM(double lat1, double lon1, double lat2, double lon2)
+{
+    const double KM_TO_NM = 0.539957;
+    return Haversine(lat1, lon1, lat2, lon2) * KM_TO_NM;
+}
+#endif
+ void __fastcall TForm1::HookTrackAll()
+ {
+  double ScrX, ScrY;
+  uint32_t *Key;
+  ght_iterator_t iterator, iteratorCPA;
+  TADS_B_Aircraft* Data,*DataCPA;
+  for(Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetFirst(&iterator,(const void **) &Key);
+			  Data; Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iterator, (const void **)&Key))
+  {
+      if (!Data->HaveLatLon) {
+          continue;
+      }
+      iteratorCPA = iterator;
+      for(DataCPA = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iteratorCPA, (const void **)&Key);
+                  DataCPA; DataCPA = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iteratorCPA, (const void **)&Key)) {
+  #ifndef YAKI_TEST_CODE
+	  if (DataCPA->HaveLatLon)
+	  {
+          double tcpa,cpa_distance_nm, vertical_cpa;
+          double lat1, lon1,lat2, lon2, junk;
+          if (HaversineNM(Data->Latitude, Data->Longitude,DataCPA->Latitude, DataCPA->Longitude) >= 30) {
+              continue;
+          }
+          if (computeCPA(Data->Latitude, Data->Longitude, Data->Altitude,
+                         Data->Speed,Data->Heading,
+                         DataCPA->Latitude, DataCPA->Longitude, DataCPA->Altitude,
+                         DataCPA->Speed,DataCPA->Heading,
+                         tcpa,cpa_distance_nm, vertical_cpa))
+          {
+#ifndef YAKI_TEST_CODE
+            if (tcpa >= 300.0) {
+                continue;
+            }
+#endif
+#define KM_TO_NM 0.539957    // Convert km to nautical miles
+#define FEET_TO_KM 0.0003048 // Convert feet to km
+            vertical_cpa = vertical_cpa * FEET_TO_KM * KM_TO_NM;
+            double dist = std::sqrt(cpa_distance_nm * cpa_distance_nm + vertical_cpa * vertical_cpa);
+            if (!std::isnan(dist) && dist >= 1.0f) {
+               continue;
+
+            }
+            if (VDirect(Data->Latitude,Data->Longitude,
+                        Data->Heading,Data->Speed/3600.0*tcpa,&lat1,&lon1,&junk)==OKNOERROR)
+            {
+              if (VDirect(DataCPA->Latitude,DataCPA->Longitude,
+                          DataCPA->Heading,DataCPA->Speed/3600.0*tcpa,&lat2,&lon2,&junk)==OKNOERROR)
+               {
+                 glColor4f(0.0, 1.0, 0.0, 1.0);
+                 glLineWidth(4.0f); // YAKI_TEST_CODE
+                 glBegin(GL_LINE_STRIP);
+                 LatLon2XY(Data->Latitude,Data->Longitude, ScrX, ScrY);
+                 glVertex2f(ScrX, ScrY);
+                 LatLon2XY(lat1,lon1, ScrX, ScrY);
+                 glVertex2f(ScrX, ScrY);
+                 glEnd();
+                 glBegin(GL_LINE_STRIP);
+                 LatLon2XY(DataCPA->Latitude,DataCPA->Longitude, ScrX, ScrY);
+                 glVertex2f(ScrX, ScrY);
+                 LatLon2XY(lat2,lon2, ScrX, ScrY);
+                 glVertex2f(ScrX, ScrY);
+                 glEnd();
+                 glColor4f(1.0, 0.0, 0.0, 1.0);
+//                 glLineWidth(10.0f); // YAKI_TEST_CODE
+                 glBegin(GL_LINE_STRIP);
+                 LatLon2XY(lat1,lon1, ScrX, ScrY);
+                 glVertex2f(ScrX, ScrY);
+                 LatLon2XY(lat2,lon2, ScrX, ScrY);
+                 glVertex2f(ScrX, ScrY);
+                 glEnd();
+#ifdef YAKI_TEST_CODE
+                 SetMapCenter((lat1 + lat2) / 2.0, (lon1 + lon2) / 2.0);
+#endif
+               }
+            }
+#ifdef YAKI_TEST_CODE
+			ShowMessage("Warning: Possible collision within 5 minutes!\n");
+#endif
+          }
+      }
+  #endif
+      //printf("HookTrackAll\n");
+    }
+  }
+ }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::ObjectDisplayMouseDown(TObject *Sender,
 	  TMouseButton Button, TShiftState Shift, int X, int Y)
@@ -715,8 +892,8 @@ void __fastcall TForm1::Exit1Click(TObject *Sender)
 
   MinRange=16.0;
 
-  for(Data = (TADS_B_Aircraft *)ght_first(HashTable, &iterator,(const void **) &Key);
-			  Data; Data = (TADS_B_Aircraft *)ght_next(HashTable, &iterator, (const void **)&Key))
+  for(Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetFirst(&iterator,(const void **) &Key);
+			  Data; Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iterator, (const void **)&Key))
 	{
 	  if (Data->HaveLatLon)
 	  {
@@ -733,8 +910,7 @@ void __fastcall TForm1::Exit1Click(TObject *Sender)
 	if (MinRange< 0.2)
 	{
 	  TADS_B_Aircraft * ADS_B_Aircraft =(TADS_B_Aircraft *)
-			ght_get(HashTable,sizeof(Current_ICAO),
-					&Current_ICAO);
+			AircraftManager::GetInstance()->GetAircraft(sizeof(Current_ICAO), &Current_ICAO);
 	  if (ADS_B_Aircraft)
 	  {
 		if (!CPA_Hook)
@@ -825,12 +1001,12 @@ void __fastcall TForm1::Purge(void)
 
   if (PurgeStale->Checked==false) return;
 
-  for(Data = (TADS_B_Aircraft *)ght_first(HashTable, &iterator,(const void **) &Key);
-			  Data; Data = (TADS_B_Aircraft *)ght_next(HashTable, &iterator, (const void **)&Key))
+  for(Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetFirst(&iterator,(const void **) &Key);
+			  Data; Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iterator, (const void **)&Key))
 	{
 	  if ((CurrentTime-Data->LastSeen)>=StaleTimeInMs)
 	  {
-	  p = ght_remove(HashTable,sizeof(*Key), Key);;
+	  p = AircraftManager::GetInstance()->Remove(sizeof(*Key), Key);
 	  if (!p)
 		ShowMessage("Removing the current iterated entry failed! This is a BUG\n");
 
@@ -852,11 +1028,11 @@ void __fastcall TForm1::PurgeButtonClick(TObject *Sender)
   TADS_B_Aircraft* Data;
   void *p;
 
-  for(Data = (TADS_B_Aircraft *)ght_first(HashTable, &iterator,(const void **) &Key);
-			  Data; Data = (TADS_B_Aircraft *)ght_next(HashTable, &iterator, (const void **)&Key))
+  for(Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetFirst(&iterator,(const void **) &Key);
+			  Data; Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iterator, (const void **)&Key))
 	{
 
-	  p = ght_remove(HashTable,sizeof(*Key), Key);
+	  p = AircraftManager::GetInstance()->Remove(sizeof(*Key), Key);
 	  if (!p)
 		ShowMessage("Removing the current iterated entry failed! This is a BUG\n");
 
@@ -1098,7 +1274,8 @@ void __fastcall TTCPClientRawHandleThread::HandleInput(void)
 	addr = (mm.AA[0] << 16) | (mm.AA[1] << 8) | mm.AA[2];
 
 
-	ADS_B_Aircraft =(TADS_B_Aircraft *) ght_get(Form1->HashTable,sizeof(addr),&addr);
+	//ADS_B_Aircraft =(TADS_B_Aircraft *) ght_get(Form1->HashTable,sizeof(addr),&addr);
+    ADS_B_Aircraft =(TADS_B_Aircraft *) AircraftManager::GetInstance()->GetAircraft(sizeof(addr), &addr);
 	if (ADS_B_Aircraft)
 	  {
       	//Form1->MsgLog->Lines->Add("Retrived");
@@ -1118,7 +1295,7 @@ void __fastcall TTCPClientRawHandleThread::HandleInput(void)
 	   ADS_B_Aircraft->SpriteImage=Form1->CurrentSpriteImage;
 	   if (Form1->CycleImages->Checked)
 		 Form1->CurrentSpriteImage=(Form1->CurrentSpriteImage+1)%Form1->NumSpriteImages;
-	   if (ght_insert(Form1->HashTable,ADS_B_Aircraft,sizeof(addr), &addr) < 0)
+	   if (AircraftManager::GetInstance()->Insert(ADS_B_Aircraft, sizeof(addr), &addr) < 0)
 		  {
 			printf("ght_insert Error - Should Not Happen\n");
 		  }
@@ -1416,7 +1593,7 @@ void __fastcall TTCPClientSBSHandleThread::Execute(void)
 	if (!UseFileInsteadOfNetwork)
 	 {
 	  try {
-		   if (!Form1->IdTCPClientSBS->Connected()) Terminate();
+		   if (!Form1->IdTCPClientSBS->Connected())	Terminate();
 	       StringMsgBuffer=Form1->IdTCPClientSBS->IOHandler->ReadLn();
 		  }
        catch (...)

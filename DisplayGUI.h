@@ -24,6 +24,7 @@
 #include <IdTCPClient.hpp>
 #include <IdTCPConnection.hpp>
 #include "cspin.h"
+#include "Aircraft.h"
 
 typedef float T_GL_Color[4];
 
@@ -240,7 +241,7 @@ public:		// User declarations
     void __fastcall CreateBigQueryCSV(void);
     void __fastcall CloseBigQueryCSV(void);
     bool __fastcall LoadARTCCBoundaries(AnsiString FileName);
-
+	void __fastcall HookTrackAll();
 
 	int                        MouseDownX,MouseDownY;
 	bool                       MouseDown;
@@ -260,7 +261,6 @@ public:		// User declarations
 	bool                       LoadMapFromInternet;
 	TList                     *Areas;
 	TArea                     *AreaTemp;
-	ght_hash_table_t          *HashTable;
 	TTCPClientRawHandleThread *TCPClientRawHandleThread;
     TTCPClientSBSHandleThread *TCPClientSBSHandleThread;
 	TStreamWriter              *RecordRawStream;
@@ -278,6 +278,8 @@ public:		// User declarations
 	int                        CurrentSpriteImage;
     AnsiString                 AircraftDBPathFileName;
     AnsiString                 ARTCCBoundaryDataPathFileName;
+    TCPAResultCache *CpaCache;
+    TCPAWorkerThread *WorkerThread;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;

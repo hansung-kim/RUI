@@ -4,7 +4,8 @@
 
 #include "Aircraft.h"
 #include "TimeFunctions.h"
-
+#include "CPA.h"
+#include "LatLonConv.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 static int cprModFunction(int a, int b);
@@ -204,3 +205,235 @@ static void decodeCPR(TADS_B_Aircraft *a)
 
  }
   //---------------------------------------------------------------------------
+  AircraftManager* AircraftManager::instance = nullptr;
+
+  AircraftManager::AircraftManager() {
+    HashTable = ght_create(50000);
+    if ( !HashTable)
+    {
+        throw Sysutils::Exception("Create Hash Failed");
+    }
+    ght_set_rehash(HashTable, TRUE);
+    insertAircraftList = new TList;
+    removeAircraftList = new TList;
+    computeCPA = false;
+
+}
+AircraftManager::~AircraftManager() {
+    ght_finalize(HashTable);
+    if (insertAircraftList) {
+         delete insertAircraftList;
+    }
+    if (removeAircraftList) {
+         delete removeAircraftList;
+    }
+}
+
+AircraftManager* AircraftManager::GetInstance() {
+    if (instance == nullptr) {
+        instance = new AircraftManager();
+    }
+    return instance;
+}
+
+TADS_B_Aircraft* AircraftManager::GetAircraft(unsigned int i_key_size, const void *p_key_data) {
+	return (TADS_B_Aircraft *)ght_get(HashTable, i_key_size, p_key_data);
+}
+
+int AircraftManager::Insert(TADS_B_Aircraft* ADS_B_Aircraft, unsigned int i_key_size, const void *p_key_data) {
+    if (computeCPA) {
+        TInsertAircraftPair *insertAircraft = new TInsertAircraftPair;
+        insertAircraft->ADS_B_Aircraft = ADS_B_Aircraft;
+        insertAircraft->i_key_size = i_key_size;
+        insertAircraft->p_key_data = p_key_data;
+        insertAircraftList->Add(insertAircraft);
+        return 0;
+    }
+    return ght_insert(HashTable, ADS_B_Aircraft, i_key_size, p_key_data);
+}
+
+unsigned int AircraftManager::GetSize() {
+    return ght_size(HashTable);
+}
+
+void *AircraftManager::GetFirst(ght_iterator_t *p_iterator, const void **pp_key) {
+    return ght_first(HashTable, p_iterator, pp_key);
+}
+
+void *AircraftManager::GetNext(ght_iterator_t *p_iterator, const void **pp_key) {
+    return ght_next(HashTable, p_iterator, pp_key);
+}
+
+void *AircraftManager::Remove(unsigned int i_key_size, const void *p_key_data) {
+    if (computeCPA) {
+        TRemoveAircraftPair *removeAircraft = new TRemoveAircraftPair;
+        removeAircraft->i_key_size = i_key_size;
+        removeAircraft->p_key_data = p_key_data;
+        removeAircraftList->Add(removeAircraft);
+        return (void*)p_key_data; // YAKI_TEST_CODE
+    }
+    return ght_remove(HashTable, i_key_size, p_key_data);
+}
+
+void AircraftManager::MutexLock() {
+    Mtx.lock();
+}
+void AircraftManager::MutexUnlock() {
+    Mtx.unlock();
+}
+
+constexpr double KM_TO_NM = 0.539957;
+constexpr double FEET_TO_KM = 0.0003048;
+
+__fastcall TCPAWorkerThread::TCPAWorkerThread(TCPAResultCache* cache)
+    : TThread(true), Cache(cache)
+{
+    FreeOnTerminate = false;
+}
+#ifndef YAKI_TEST_CODE
+ // deg -> radian 변환 매크로
+constexpr double DEG2RAD = M_PI / 180.0;
+
+// 결과: km 단위 거리 반환
+static double Haversine(double lat1_deg, double lon1_deg, double lat2_deg, double lon2_deg)
+{
+    const double R = 6371.0; // 지구 반경 (km)
+
+    // 위도, 경도를 radian으로 변환
+    double lat1 = lat1_deg * DEG2RAD;
+    double lon1 = lon1_deg * DEG2RAD;
+    double lat2 = lat2_deg * DEG2RAD;
+    double lon2 = lon2_deg * DEG2RAD;
+
+    double dlat = lat2 - lat1;
+    double dlon = lon2 - lon1;
+
+    double a = std::sin(dlat / 2) * std::sin(dlat / 2) +
+               std::cos(lat1) * std::cos(lat2) *
+               std::sin(dlon / 2) * std::sin(dlon / 2);
+
+    double c = 2 * std::atan2(std::sqrt(a), std::sqrt(1 - a));
+
+    return R * c; // km
+}
+
+// Nautical Miles(NM)로 바로 얻고 싶으면:
+static double HaversineNM(double lat1, double lon1, double lat2, double lon2)
+{
+    const double KM_TO_NM = 0.539957;
+    return Haversine(lat1, lon1, lat2, lon2) * KM_TO_NM;
+}
+#endif
+void __fastcall TCPAWorkerThread::Execute() {
+    while (!Terminated) {
+        std::vector<TCpaPair> NewCache;
+
+        auto mgr = AircraftManager::GetInstance();
+        ght_iterator_t it1, it2;
+        uint32_t* key1;
+        uint32_t* key2;
+//        mgr->MutexLock();
+        mgr->computeCPA = true;
+        TADS_B_Aircraft* a1 = (TADS_B_Aircraft*)mgr->GetFirst(&it1, (const void**)&key1);
+        while (a1) {
+
+            if (!a1->HaveLatLon) {
+            	a1 = (TADS_B_Aircraft*)mgr->GetNext(&it1, (const void**)&key1);
+            	continue;
+            }
+
+            it2 = it1;
+            TADS_B_Aircraft* a2 = (TADS_B_Aircraft*)mgr->GetNext(&it2, (const void**)&key2);
+            while (a2) {
+                if (!a2->HaveLatLon) {
+                    a2 = (TADS_B_Aircraft*)mgr->GetNext(&it2, (const void**)&key2);
+                	continue;
+                }
+#if 1
+                double h = HaversineNM(a1->Latitude, a1->Longitude, a2->Latitude, a2->Longitude);
+                if (h >= 30.0) {
+                    a2 = (TADS_B_Aircraft*)mgr->GetNext(&it2, (const void**)&key2);
+                	continue;
+                }
+#endif
+                double tcpa, cpa_distance, v_cpa;
+                if (computeCPA(
+                        a1->Latitude, a1->Longitude, a1->Altitude,
+                        a1->Speed, a1->Heading,
+                        a2->Latitude, a2->Longitude, a2->Altitude,
+                        a2->Speed, a2->Heading,
+                        tcpa, cpa_distance, v_cpa)) {
+
+                    if (tcpa >= 300.0) {
+                    	a2 = (TADS_B_Aircraft*)mgr->GetNext(&it2, (const void**)&key2);
+                        continue;
+                    }
+
+                    v_cpa *= FEET_TO_KM * KM_TO_NM;
+                    double dist = std::sqrt(cpa_distance * cpa_distance + v_cpa * v_cpa);
+#if 1
+                    if (std::isnan(dist) || dist >= 1.0) {
+                        a2 = (TADS_B_Aircraft*)mgr->GetNext(&it2, (const void**)&key2);
+                        continue;
+                    }
+#endif
+                    double lat1, lon1, lat2, lon2, junk;
+                    if (VDirect(a1->Latitude, a1->Longitude, a1->Heading, a1->Speed / 3600.0 * tcpa, &lat1, &lon1, &junk) != OKNOERROR) {
+						a2 = (TADS_B_Aircraft*)mgr->GetNext(&it2, (const void**)&key2);
+                    	continue;
+                    }
+                    if (VDirect(a2->Latitude, a2->Longitude, a2->Heading, a2->Speed / 3600.0 * tcpa, &lat2, &lon2, &junk) != OKNOERROR) {
+						a2 = (TADS_B_Aircraft*)mgr->GetNext(&it2, (const void**)&key2);
+                        continue;
+                    }
+                    TCpaPair pair;
+                    pair.ICAO1 = a1->ICAO;
+                    pair.ICAO2 = a2->ICAO;
+                    pair.a_Lat = a1->Latitude;
+                    pair.a_Lon = a1->Longitude;
+                    pair.b_Lat = a2->Latitude;
+                    pair.b_Lon = a2->Longitude;
+                    pair.Lat1 = lat1;
+                    pair.Lon1 = lon1;
+                    pair.Lat2 = lat2;
+                    pair.Lon2 = lon2;
+                    pair.Tcpa = tcpa;
+                    pair.Dist = dist;
+                    pair.Valid = true;
+
+                    NewCache.push_back(pair);
+                }
+                a2 = (TADS_B_Aircraft*)mgr->GetNext(&it2, (const void**)&key2);
+            }
+            a1 = (TADS_B_Aircraft*)mgr->GetNext(&it1, (const void**)&key1);
+        }
+//        mgr->MutexUnlock();
+        mgr->computeCPA = false;
+        // 남은 객체 출력
+        for (int i = 0; i < mgr->insertAircraftList->Count; i++) {
+            TInsertAircraftPair *obj = (TInsertAircraftPair*)mgr->insertAircraftList->Items[i];
+            mgr->Insert(obj->ADS_B_Aircraft, obj->i_key_size, obj->p_key_data);
+        }
+
+        // 메모리 해제
+        for (int i = 0; i < mgr->insertAircraftList->Count; i++) {
+            delete (TInsertAircraftPair*)(mgr->insertAircraftList->Items[i]);
+        }
+        mgr->insertAircraftList->Clear();
+        // 남은 객체 출력
+        for (int i = 0; i < mgr->removeAircraftList->Count; i++) {
+            TInsertAircraftPair *obj = (TInsertAircraftPair*)mgr->removeAircraftList->Items[i];
+            mgr->Remove(obj->i_key_size, obj->p_key_data);
+        }
+
+        // 메모리 해제
+        for (int i = 0; i < mgr->removeAircraftList->Count; i++) {
+            delete (TInsertAircraftPair*)(mgr->insertAircraftList->Items[i]);
+        }
+        mgr->removeAircraftList->Clear();
+        printf("Update cache\n");
+        Cache->Update(NewCache);
+        TThread::Sleep(500); // 0.5초마다 갱신
+    }
+}
+
