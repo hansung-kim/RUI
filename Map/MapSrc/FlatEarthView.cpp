@@ -154,3 +154,6 @@ void FlatEarthView::NormalizeEye() {
 	if (m_Eye.h > MAX_HEIGHT)	m_Eye.h = MAX_HEIGHT;
 }
 
+double FlatEarthView::GetCurrentZoom() {
+    return MAX_HEIGHT / m_Eye.h;
+}

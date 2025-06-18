@@ -42,6 +42,7 @@ public:
 	int StartMovement(int flags);
 	int StopMovement(int flags);
 	int SingleMovement(int flags);
+    double GetCurrentZoom();
 
 private:
 	/**

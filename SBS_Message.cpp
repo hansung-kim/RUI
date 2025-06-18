@@ -287,7 +287,7 @@ bool SBS_Message_Decode( char *msg)
      //printf("%06X\n",(int)addr);
      if (non_icao) addr |= MODES_NON_ICAO_ADDRESS;
 
-     ADS_B_Aircraft =(TADS_B_Aircraft *) ght_get(Form1->HashTable,sizeof(addr),&addr);
+     ADS_B_Aircraft =(TADS_B_Aircraft *) AircraftManager::GetInstance()->GetAircraft(sizeof(addr),&addr);
      if (ADS_B_Aircraft==NULL)
         {
          ADS_B_Aircraft= new TADS_B_Aircraft;
@@ -303,7 +303,7 @@ bool SBS_Message_Decode( char *msg)
          ADS_B_Aircraft->SpriteImage=Form1->CurrentSpriteImage;
          if (Form1->CycleImages->Checked)
               Form1->CurrentSpriteImage=(Form1->CurrentSpriteImage+1)%Form1->NumSpriteImages;
-		 if (ght_insert(Form1->HashTable,ADS_B_Aircraft,sizeof(addr), &addr) < 0)
+		 if (AircraftManager::GetInstance()->Insert(ADS_B_Aircraft,sizeof(addr), &addr) < 0)
              {
 			  printf("ght_insert Error-Should Not Happen");
              }
