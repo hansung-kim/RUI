@@ -428,7 +428,7 @@ void __fastcall TCPAWorkerThread::Execute() {
 
         // 메모리 해제
         for (int i = 0; i < mgr->removeAircraftList->Count; i++) {
-            delete (TInsertAircraftPair*)(mgr->insertAircraftList->Items[i]);
+            delete (TInsertAircraftPair*)(mgr->removeAircraftList->Items[i]);
         }
         mgr->removeAircraftList->Clear();
         printf("Update cache\n");
