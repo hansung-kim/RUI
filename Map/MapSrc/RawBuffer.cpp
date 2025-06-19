@@ -9,13 +9,14 @@
 
 #pragma package(smart_init)
 
-RawBuffer::RawBuffer(void *data, size_t size) {
+RawBuffer::RawBuffer(void *data, size_t size, bool isJpeg) {
 	m_Data = new unsigned char [size];
 	memcpy(m_Data, data, size);
 	m_Size = size;
+    m_IsJpeg = isJpeg;
 }
 
-RawBuffer::RawBuffer(int f) {
+RawBuffer::RawBuffer(int f, bool isJpeg) {
 	struct stat st;
 	if(fstat(f, &st) == -1)
 		throw SysException("fstat() failed", errno);
@@ -26,6 +27,7 @@ RawBuffer::RawBuffer(int f) {
 		throw SysException("read() failed", errno);
 	}
 	m_Size = st.st_size;
+    m_IsJpeg = isJpeg;
 }
 
 RawBuffer::~RawBuffer() {
@@ -40,3 +42,6 @@ void *RawBuffer::Data() {
 	return m_Data;
 }
 
+bool RawBuffer::isJpeg() {
+	return m_IsJpeg;
+}

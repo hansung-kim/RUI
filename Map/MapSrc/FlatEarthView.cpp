@@ -135,7 +135,7 @@ int FlatEarthView::SingleMovement(int flags) {
 	if (flags & NAV_ZOOM_IN)
 		m_Eye.h /= 1.3;
 	if (flags & NAV_ZOOM_OUT)
-		m_Eye.h *= 1.3;
+    	m_Eye.h *= 1.3;
 	NormalizeEye();
 
 	return 1;
@@ -157,3 +157,4 @@ void FlatEarthView::NormalizeEye() {
 double FlatEarthView::GetCurrentZoom() {
     return MAX_HEIGHT / m_Eye.h;
 }
+

@@ -10,8 +10,8 @@
 #define SkyVector_VFR          1
 #define SkyVector_IFR_Low      2
 #define SkyVector_IFR_High     3
-#define SkyVector              4
-
+#define OpenStreetMap          4
+#define SkyVector              5
 /**
  * Connection to Google server.
  *

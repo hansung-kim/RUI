@@ -39,13 +39,15 @@ void FilesystemStorage::Process(TilePtr tile) {
 
 			}
 
-			RawBuffer *buf = new RawBuffer(f);
+			RawBuffer *buf = new RawBuffer(f, tile->GetType() == TILETYPE_TEXTURE);
 
 			try {
 				tile->Load(buf, m_pSaveStorage != 0);
 			} catch (...) {
 				close(f);
+#ifdef YAKI_TEST_CODE // double free?
 				delete buf;
+#endif
 				throw;
 			}
 
@@ -108,7 +110,8 @@ std::string FilesystemStorage::PathFromCoordsGE(int x, int y, int level, int typ
 
 	if (type == TILETYPE_TEXTURE)
 		ext =(char *) ".jpg";
-
+    else if (type == TILETYPE_TEXTURE_PNG)
+		ext =(char *) ".png";
 	int deepness = 0;
 	for (; level >= 0; level--) {
 		int middle = 1 << level;

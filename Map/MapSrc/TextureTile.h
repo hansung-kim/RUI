@@ -29,7 +29,7 @@ public:
 	 * @param level level of tile
 	 * @param parent parent in quadtree (NULL for root)
 	 */
-	TextureTile(int x, int y, int level, TextureTilePtr parent);
+	TextureTile(int x, int y, int level, TextureTilePtr parent, int type);
 
 	/**
 	 * Destructor.
@@ -120,6 +120,10 @@ protected:
 
 private:
 	Texture		*m_Texture;	///< The texture itself
+#ifndef YAKI_TEST_CODE
+public:
+    int m_Type;
+#endif
 };
 
 

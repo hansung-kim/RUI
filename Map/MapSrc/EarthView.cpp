@@ -46,8 +46,10 @@ int EarthView::StopMovement(int flags) {
 int EarthView::SingleMovement(int flags) {
 	return 0;
 }
+
 #define MIN_HEIGHT 10.0/40000000.0
 #define MAX_HEIGHT 1.0
 double EarthView::GetCurrentZoom() {
     return MAX_HEIGHT / m_Eye.h;
 }
+

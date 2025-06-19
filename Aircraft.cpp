@@ -214,18 +214,14 @@ static void decodeCPR(TADS_B_Aircraft *a)
         throw Sysutils::Exception("Create Hash Failed");
     }
     ght_set_rehash(HashTable, TRUE);
-    insertAircraftList = new TList;
-    removeAircraftList = new TList;
+    aircraftList = new TList;
     computeCPA = false;
 
 }
 AircraftManager::~AircraftManager() {
     ght_finalize(HashTable);
-    if (insertAircraftList) {
-         delete insertAircraftList;
-    }
-    if (removeAircraftList) {
-         delete removeAircraftList;
+    if (aircraftList) {
+         delete aircraftList;
     }
 }
 
@@ -242,11 +238,11 @@ TADS_B_Aircraft* AircraftManager::GetAircraft(unsigned int i_key_size, const voi
 
 int AircraftManager::Insert(TADS_B_Aircraft* ADS_B_Aircraft, unsigned int i_key_size, const void *p_key_data) {
     if (computeCPA) {
-        TInsertAircraftPair *insertAircraft = new TInsertAircraftPair;
+        TAircraftPair *insertAircraft = new TAircraftPair;
         insertAircraft->ADS_B_Aircraft = ADS_B_Aircraft;
         insertAircraft->i_key_size = i_key_size;
         insertAircraft->p_key_data = p_key_data;
-        insertAircraftList->Add(insertAircraft);
+        aircraftList->Add(insertAircraft);
         return 0;
     }
     return ght_insert(HashTable, ADS_B_Aircraft, i_key_size, p_key_data);
@@ -266,10 +262,11 @@ void *AircraftManager::GetNext(ght_iterator_t *p_iterator, const void **pp_key) 
 
 void *AircraftManager::Remove(unsigned int i_key_size, const void *p_key_data) {
     if (computeCPA) {
-        TRemoveAircraftPair *removeAircraft = new TRemoveAircraftPair;
+        TAircraftPair *removeAircraft = new TAircraftPair;
+        removeAircraft->ADS_B_Aircraft = NULL;
         removeAircraft->i_key_size = i_key_size;
         removeAircraft->p_key_data = p_key_data;
-        removeAircraftList->Add(removeAircraft);
+        aircraftList->Add(removeAircraft);
         return (void*)p_key_data; // YAKI_TEST_CODE
     }
     return ght_remove(HashTable, i_key_size, p_key_data);
@@ -410,27 +407,20 @@ void __fastcall TCPAWorkerThread::Execute() {
 //        mgr->MutexUnlock();
         mgr->computeCPA = false;
         // 남은 객체 출력
-        for (int i = 0; i < mgr->insertAircraftList->Count; i++) {
-            TInsertAircraftPair *obj = (TInsertAircraftPair*)mgr->insertAircraftList->Items[i];
-            mgr->Insert(obj->ADS_B_Aircraft, obj->i_key_size, obj->p_key_data);
+        for (int i = 0; i < mgr->aircraftList->Count; i++) {
+            TAircraftPair *obj = (TAircraftPair*)mgr->aircraftList->Items[i];
+            if (obj->ADS_B_Aircraft) {
+	            mgr->Insert(obj->ADS_B_Aircraft, obj->i_key_size, obj->p_key_data);
+            } else {
+	            mgr->Remove(obj->i_key_size, obj->p_key_data);
+            }
         }
 
         // 메모리 해제
-        for (int i = 0; i < mgr->insertAircraftList->Count; i++) {
-            delete (TInsertAircraftPair*)(mgr->insertAircraftList->Items[i]);
+        for (int i = 0; i < mgr->aircraftList->Count; i++) {
+            delete (TAircraftPair*)(mgr->aircraftList->Items[i]);
         }
-        mgr->insertAircraftList->Clear();
-        // 남은 객체 출력
-        for (int i = 0; i < mgr->removeAircraftList->Count; i++) {
-            TRemoveAircraftPair *obj = (TRemoveAircraftPair*)mgr->removeAircraftList->Items[i];
-            mgr->Remove(obj->i_key_size, obj->p_key_data);
-        }
-
-        // 메모리 해제
-        for (int i = 0; i < mgr->removeAircraftList->Count; i++) {
-            delete (TRemoveAircraftPair*)(mgr->removeAircraftList->Items[i]);
-        }
-        mgr->removeAircraftList->Clear();
+        mgr->aircraftList->Clear();
         printf("Update cache\n");
         Cache->Update(NewCache);
         TThread::Sleep(500); // 0.5초마다 갱신

@@ -236,6 +236,21 @@ void Texture::my_png_error_fn(png_structp png_ptr, png_const_charp error_msg) {
 	longjmp(myerr->jmpbuf, 1);
 }
 
+struct MemoryBuffer {
+    const unsigned char* data;
+    size_t size;
+    size_t offset;
+};
+
+void my_png_read_mem(png_structp png_ptr, png_bytep outBytes, png_size_t byteCountToRead) {
+    MemoryBuffer* mem = (MemoryBuffer*)png_get_io_ptr(png_ptr);
+    if (mem->offset + byteCountToRead > mem->size) {
+        png_error(png_ptr, "Read past end of memory buffer");
+    }
+    memcpy(outBytes, mem->data + mem->offset, byteCountToRead);
+    mem->offset += byteCountToRead;
+}
+
 void Texture::LoadPNG(int source, ...) {
 	if (m_Pixels || m_ID)
 		throw Exception("texture already loaded");
@@ -246,7 +261,7 @@ void Texture::LoadPNG(int source, ...) {
 	png_bytep	*row_pointers = 0;
 
 	FILE		*infile = 0;
-
+	MemoryBuffer memBuffer = {0};
 	/* variable arguments stuff */
 	va_start(va, source);
 
@@ -260,6 +275,11 @@ void Texture::LoadPNG(int source, ...) {
 		if (source == TEXTURE_SOURCE_FILE) {
 			if ((infile = fopen(va_arg(va, char*), "rb")) == 0)
 				throw SysException("fopen() failed", errno);
+		} else if (source == TEXTURE_SOURCE_MEM) { // YAKI_TEST_CODE
+            memBuffer.data = (const unsigned char*)va_arg(va, void*);
+            memBuffer.size = va_arg(va, size_t);
+            memBuffer.offset = 0;
+            infile = nullptr; // ¢¥o AI¡ío CE¢¯a ¨ú©ªA¨ö
 		} else {
 			throw Exception("bad source in png loaging");
 		}
@@ -267,7 +287,14 @@ void Texture::LoadPNG(int source, ...) {
 		/* read signature */
 		png_byte sig[8] = {0};
 
-		fread(sig, 8, 1, infile);
+        if (source == TEXTURE_SOURCE_FILE) {
+	      fread(sig, 8, 1, infile);
+        } else {
+            if (memBuffer.size < 8)
+                throw Exception("PNG memory buffer too small for signature");
+            memcpy(sig, memBuffer.data, 8);
+            memBuffer.offset = 8;
+        }
 
 		if (!png_check_sig(sig, 8))
 			throw Exception("bad PNG signature");
@@ -280,7 +307,11 @@ void Texture::LoadPNG(int source, ...) {
 			throw Exception("cannot create PNG info struct");
 
 		/* init read function */
-		png_set_read_fn(png_ptr, (void*)infile, my_png_read_fn);
+		if (source == TEXTURE_SOURCE_FILE) {
+            png_set_read_fn(png_ptr, (void*)infile, my_png_read_fn);
+        } else {
+            png_set_read_fn(png_ptr, (void*)&memBuffer, my_png_read_mem);
+        }
 
 		/* read header */
 		png_set_sig_bytes(png_ptr, 8);

@@ -4,8 +4,8 @@
 #pragma hdrstop
 #include <tchar.h>
 //---------------------------------------------------------------------------
-USEFORM("DisplayGUI.cpp", Form1);
 USEFORM("AreaDialog.cpp", AreaConfirm);
+USEFORM("DisplayGUI.cpp", Form1);
 //---------------------------------------------------------------------------
 static FILE* pCout = NULL;
 static void SetStdOutToNewConsole(void);

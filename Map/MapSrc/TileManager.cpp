@@ -8,7 +8,7 @@
 //---------------------------------------------------------------------------
 
 #pragma package(smart_init)
-TileManager::TileManager(TileStorage *ts): m_TextureRoot(new TextureTile(0, 0, 0, TextureTilePtr(0))) {
+TileManager::TileManager(TileStorage *ts, bool isJpeg): m_TextureRoot(new TextureTile(0, 0, 0, TextureTilePtr(0), isJpeg ? TILETYPE_TEXTURE : TILETYPE_TEXTURE_PNG)) {
 	m_FirstTileStorage = ts;
 	m_nTextureTiles = 1;
 }
@@ -27,7 +27,7 @@ TextureTilePtr TileManager::GetTexture(int x, int y, int level) {
 		int dy = cy & 1;
 
 		if (cur->GetChild(dx, dy) == 0) {
-			TextureTilePtr child = new TextureTile(cx, cy, curlevel, cur);
+			TextureTilePtr child = new TextureTile(cx, cy, curlevel, cur, m_TextureRoot->m_Type);
 
 			cur->SetChild(dx, dy, child);
 			m_nTextureTiles++;

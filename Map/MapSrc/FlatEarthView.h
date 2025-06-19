@@ -43,7 +43,6 @@ public:
 	int StopMovement(int flags);
 	int SingleMovement(int flags);
     double GetCurrentZoom();
-
 private:
 	/**
 	 * Fix eye coordinates after movements

@@ -26,7 +26,7 @@ public:
 	 *
 	 * @param ts tile storage to pass tile to for loading
 	 */
-	TileManager(TileStorage *ts);
+	TileManager(TileStorage *ts, bool isJpeg);
 
 	/**
 	 * Destructor.

@@ -300,12 +300,21 @@ void DrawAirTrackUnknown(float x, float y)
   glCallList(SURFACE_TRACK_FRIEND);
   glPopMatrix();
  }
+  void DrawAirport(float x, float y, float scale)
+ {
+  glPushMatrix();
+  glTranslated(x,y,0.0);
+  glScaled(scale, scale, 1.0);
+  glCallList(SURFACE_TRACK_FRIEND);
+  glPopMatrix();
+ }
 //---------------------------------------------------------------------------
  void DrawTrackHook(float x, float y, float scale)
  {
   glPushMatrix();
   glTranslated(x,y,0.0);
   glScaled(scale, scale, 1.0);
+
   glCallList(TRACKHOOK);
   glPopMatrix();
  }

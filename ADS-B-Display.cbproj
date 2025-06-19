@@ -1,12 +1,12 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{6D615CF9-EB86-4627-9031-02A1337715C9}</ProjectGuid>
-        <ProjectVersion>20.1</ProjectVersion>
+        <ProjectVersion>20.3</ProjectVersion>
         <FrameworkType>VCL</FrameworkType>
         <AppType>Application</AppType>
         <MainSource>ADS-B-Display.cpp</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Release</Config>
+        <Config Condition="'$(Config)'==''">Debug</Config>
         <Platform Condition="'$(Platform)'==''">Win64</Platform>
         <ProjectName Condition="'$(ProjectName)'==''">ADS-B-Display</ProjectName>
         <TargetedPlatforms>1048579</TargetedPlatforms>
@@ -87,7 +87,7 @@
         <ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\release\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
         <ProjectType>CppVCLApplication</ProjectType>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
-        <AllPackageLibs>rtl.lib;vcl.lib;IndySystem.lib;IndyCore.lib;bcbsmp.lib;vclx.lib;OpenGLPanel_DP.lib</AllPackageLibs>
+        <AllPackageLibs>rtl.lib;vcl.lib;IndySystem.lib;IndyCore.lib;bcbsmp.lib;vclx.lib;OpenGLPanel_DP.lib;IndyProtocols.lib</AllPackageLibs>
         <_TCHARMapping>wchar_t</_TCHARMapping>
         <Multithreaded>true</Multithreaded>
         <Icon_MainIcon>$(BDS)\bin\cbuilder_PROJECTICON.ico</Icon_MainIcon>
@@ -128,6 +128,8 @@
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
         <BCC_PCHName_Clang>ADS-B-DisplayPCH1.h</BCC_PCHName_Clang>
+        <BCC_EnableBatchCompilation>true</BCC_EnableBatchCompilation>
+        <UsePackages>false</UsePackages>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
         <BCC_OptimizeForSpeed>false</BCC_OptimizeForSpeed>
@@ -159,7 +161,7 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
-        <LinkPackageImports>rtl.bpi;vcl.bpi;IndySystem.bpi;IndyCore.bpi;bcbsmp.bpi;vclx.bpi;OpenGLPanel_DP.bpi</LinkPackageImports>
+        <LinkPackageImports>rtl.bpi;vcl.bpi;IndySystem.bpi;IndyCore.bpi;bcbsmp.bpi;vclx.bpi;OpenGLPanel_DP.bpi;IndyProtocols.bpi</LinkPackageImports>
         <BCC_IncludePath>Map\jpeg;Map\png;Map\zlib;Map\libgefetch;Map\libwwfetch;HashTable\Lib;$(BCC_IncludePath)</BCC_IncludePath>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
@@ -186,6 +188,8 @@
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DynamicRTL>false</DynamicRTL>
+        <Debugger_SymbolSourcePath>D:\Worksapce\SW Architect\diff\ADS-B-Display\Map\libgefetch;$(Debugger_SymbolSourcePath)</Debugger_SymbolSourcePath>
+        <Debugger_DebugSourcePath>D:\Worksapce\SW Architect\diff\ADS-B-Display\Map;$(Debugger_DebugSourcePath)</Debugger_DebugSourcePath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64x)'!=''">
         <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
@@ -205,6 +209,10 @@
         <CppCompile Include="AircraftDB.cpp">
             <DependentOn>AircraftDB.h</DependentOn>
             <BuildOrder>38</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="AirportDB.cpp">
+            <DependentOn>AirportDB.h</DependentOn>
+            <BuildOrder>40</BuildOrder>
         </CppCompile>
         <CppCompile Include="AreaDialog.cpp">
             <Form>AreaConfirm</Form>
@@ -309,9 +317,6 @@
             <DependentOn>Map\MapSrc\TileManager.h</DependentOn>
             <BuildOrder>27</BuildOrder>
         </CppCompile>
-        <None Include="Map\MapSrc\TileStorage.h">
-            <BuildOrder>28</BuildOrder>
-        </None>
         <CppCompile Include="Map\MapSrc\Timer.cpp">
             <DependentOn>Map\MapSrc\Timer.h</DependentOn>
             <BuildOrder>28</BuildOrder>
@@ -331,6 +336,10 @@
             <DependentOn>PointInPolygon.h</DependentOn>
             <BuildOrder>32</BuildOrder>
         </CppCompile>
+        <CppCompile Include="RouteDB.cpp">
+            <DependentOn>RouteDB.h</DependentOn>
+            <BuildOrder>41</BuildOrder>
+        </CppCompile>
         <CppCompile Include="SBS_Message.cpp">
             <DependentOn>SBS_Message.h</DependentOn>
             <BuildOrder>40</BuildOrder>
@@ -346,8 +355,8 @@
             <DependentOn>TriangulatPoly.h</DependentOn>
             <BuildOrder>32</BuildOrder>
         </CppCompile>
-        <FormResources Include="DisplayGUI.dfm"/>
         <FormResources Include="AreaDialog.dfm"/>
+        <FormResources Include="DisplayGUI.dfm"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>
@@ -377,9 +386,11 @@
                 <Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\bcboffice2k290.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\bcbofficexp290.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k290.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp290.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>
             </CPlusPlusBuilder.Personality>
-            <Deployment Version="4">
+            <Deployment Version="5">
                 <DeployFile Condition="'$(DynamicRTL)'=='true'" LocalName="$(BDS)\Redist\osx32\libcgcrtl.dylib" Class="DependencyModule">
                     <Platform Name="OSX32">
                         <Overwrite>true</Overwrite>
@@ -430,18 +441,14 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName=".\Win32\Debug\ADS-B-Display.exe" Configuration="Debug" Class="ProjectOutput">
-                    <Platform Name="Win32">
-                        <RemoteName>ADS-B-Display.exe</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName=".\Win64\Release\ADS-B-Display.exe" Configuration="Release" Class="ProjectOutput">
+                <DeployFile LocalName=".\Win32\Debug\ADS-B-Display.exe" Configuration="Debug" Class="ProjectOutput"/>
+                <DeployFile LocalName=".\Win64\Debug\ADS-B-Display.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win64">
                         <RemoteName>ADS-B-Display.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile LocalName=".\Win64\Release\ADS-B-Display.exe" Configuration="Release" Class="ProjectOutput"/>
                 <DeployClass Name="AdditionalDebugSymbols">
                     <Platform Name="iOSSimulator">
                         <Operation>1</Operation>
@@ -452,16 +459,6 @@
                     </Platform>
                     <Platform Name="Win32">
                         <Operation>0</Operation>
-                    </Platform>
-                </DeployClass>
-                <DeployClass Name="AndroidClasses">
-                    <Platform Name="Android">
-                        <RemoteDir>classes</RemoteDir>
-                        <Operation>64</Operation>
-                    </Platform>
-                    <Platform Name="Android64">
-                        <RemoteDir>classes</RemoteDir>
-                        <Operation>64</Operation>
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="AndroidFileProvider">
@@ -563,6 +560,16 @@
                     </Platform>
                     <Platform Name="Android64">
                         <RemoteDir>res\values-v31</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="AndroidSplashStylesV35">
+                    <Platform Name="Android">
+                        <RemoteDir>res\values-v35</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\values-v35</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>

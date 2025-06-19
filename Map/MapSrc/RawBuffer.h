@@ -28,7 +28,7 @@ public:
 	 * @param data pointed to beginning of data
 	 * @param size size of data in bytes
 	 */
-	RawBuffer(void *data, size_t size);
+	RawBuffer(void *data, size_t size, bool isJpeg = true);
 
 	/**
 	 * Construct RawBuffer reading data from file.
@@ -38,7 +38,7 @@ public:
 	 *
 	 * @param f source file descriptor
 	 */
-	RawBuffer(int f);
+	RawBuffer(int f, bool isJpeg = true);
 
 	/**
 	 * Destructor.
@@ -56,10 +56,13 @@ public:
 	 * Returns pointer to data.
 	 */
 	void *Data();
-
+    bool isJpeg();
 protected:
 	unsigned char	*m_Data;	///< Pointer to data
 	size_t		m_Size;		///< Size of data
+#ifndef YAKI_TEST_CODE
+    bool m_IsJpeg;
+#endif
 };
 
 //---------------------------------------------------------------------------

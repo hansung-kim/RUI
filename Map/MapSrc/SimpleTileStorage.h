@@ -81,7 +81,7 @@ private:
 	HANDLE          SemQueueCount;      ///<  Condition to wake up thread after sleep
 	HANDLE          ThreadKillEvent;
 	HANDLE          m_Thread;		///< Thread in which all actual loading/saving goes asynchronously
-
+    bool m_Terminate;
 protected:
 	TileStorage	*m_pNextLoadStorage;	///< Storage to pass tile to for loading, if we couldn't load it
 	TileStorage	*m_pSaveStorage;	///< Storage to pass tile to for saving

@@ -76,10 +76,16 @@ bool computeCPA(double lat1, double lon1,double altitude1, double speed1, double
 
     // TCPA Calculation using vector projection
 	tcpa = -(dx * dvx + dy * dvy + dz * dvz) / (dvx * dvx + dvy * dvy + dvz * dvz);
-
+#ifdef YAKI_TEST_CODE
+    if (tcpa >= 300.0) {
+        return false;
+    }
+#endif
     // If TCPA is negative, the aircraft are diverging, no CPA will occur
     if (tcpa < 0) {
+#ifdef YAKI_TEST_CODE
         printf("Aircraft are diverging; no CPA will occur.\n");
+#endif
         return(false);
     }
 
@@ -112,8 +118,10 @@ bool computeCPA(double lat1, double lon1,double altitude1, double speed1, double
 	cpa_distance_nm = horizontal_cpa * KM_TO_NM;
 
     // Output the results
+#ifdef YAKI_TEST_CODE
     printf("TCPA: %.2f seconds\n", tcpa);
     printf("CPA Distance: %.2f NM (horizontal), %.2f feet (vertical)\n", cpa_distance_nm, vertical_cpa);
+#endif
 	return(true);
 }
  //---------------------------------------------------------------------------

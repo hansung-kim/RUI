@@ -23,7 +23,7 @@
 #define SKYVECTOR_CHART_IFR_HIGH "304"
 #define SKYVECTOR_KEY             "V7pMh4xRihf1nr61"
 #define SKYVECTOR_EDITION         "2504"
-
+#define OPENSTREETMAP_URL         "https://tile.openstreetmap.org"
 
 KeyholeConnection::KeyholeConnection(int type)
 {
@@ -57,13 +57,18 @@ KeyholeConnection::KeyholeConnection(int type)
 	  Chart=SKYVECTOR_CHART_IFR_HIGH;
 	  Edition=SKYVECTOR_EDITION;
 	}
+    else if (type == OpenStreetMap) {
+	 ServerType= OpenStreetMap;
+	 url=OPENSTREETMAP_URL;
+    }
 	if ((m_GEFetch = gefetch_init(url)) == 0)
 		throw Exception("gefetch_init() failed");
 }
 
 KeyholeConnection::~KeyholeConnection() {
-	if (m_GEFetch)
+	if (m_GEFetch) {
 		gefetch_cleanup(m_GEFetch);
+    }
 }
 
 void KeyholeConnection::Process(TilePtr tile) {
@@ -76,6 +81,9 @@ void KeyholeConnection::Process(TilePtr tile) {
 	{
 	  res = gefetch_fetch_image_skyvector(m_GEFetch,Key,Chart,Edition, tile->GetX(), tile->GetY(), tile->GetLevel());
     }
+    else if (ServerType == OpenStreetMap) {
+      res = gefetch_fetch_image_openstreetmap(m_GEFetch, tile->GetX(), tile->GetY(), tile->GetLevel());
+    }
 
 	if ((res == GEFETCH_NOT_FOUND) ||  (res == GEFETCH_INVALID_ZOOM))
 	{
@@ -87,7 +95,7 @@ void KeyholeConnection::Process(TilePtr tile) {
 		throw Exception("gefetch_fetch_image() failed");
 	}
 
-	RawBuffer *buf = new RawBuffer(gefetch_get_data_ptr(m_GEFetch), gefetch_get_data_size(m_GEFetch));
+	RawBuffer *buf = new RawBuffer(gefetch_get_data_ptr(m_GEFetch), gefetch_get_data_size(m_GEFetch), ServerType != OpenStreetMap);
 
 	try {
 		tile->Load(buf, m_pSaveStorage != 0);

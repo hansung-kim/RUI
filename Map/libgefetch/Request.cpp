@@ -207,9 +207,10 @@ int Request::SendHTTP(LPCSTR url,BYTE *post,
 	*httpcode = -1;
     ParseURL(url,protocol,sizeof(protocol),host,sizeof(host),		// Parse the URL
         request,sizeof(request),&port);
+#ifdef YAKI_TEST_CODE
     if(strcmp(protocol,"HTTP"))
         return 1;
-
+#endif
     err = WSAStartup (0x0101, &WsaData);							// Init Winsock
     if(err!=0)
         return 1;

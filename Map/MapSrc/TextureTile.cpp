@@ -9,10 +9,11 @@
 
 #pragma package(smart_init)
 /* *tors */
-TextureTile::TextureTile(int x, int y, int level, TextureTilePtr parent): Tile(x, y, level) {
+TextureTile::TextureTile(int x, int y, int level, TextureTilePtr parent, int type): Tile(x, y, level) {
 	m_Texture = 0;
 	m_Parent = parent;
 	m_Child[0] = m_Child[1] = m_Child[2] = m_Child[3] = TextureTilePtr(0);
+    m_Type = type;
 }
 
 TextureTile::~TextureTile() {
@@ -21,7 +22,7 @@ TextureTile::~TextureTile() {
 
 /* coord ops */
 int TextureTile::GetType() {
-	return TILETYPE_TEXTURE;
+	return m_Type;//TILETYPE_TEXTURE;
 }       
 
 /* quadtree ops */
@@ -57,7 +58,11 @@ void TextureTile::Load(RawBuffer *data, int keep) {
 	Texture *tex = new Texture;
 
 	try {
-		tex->LoadJPEG(TEXTURE_SOURCE_MEM, data->Data(), data->Size());
+        if (data->isJpeg()) {
+			tex->LoadJPEG(TEXTURE_SOURCE_MEM, data->Data(), data->Size());
+        } else {
+			tex->LoadPNG(TEXTURE_SOURCE_MEM, data->Data(), data->Size());
+        }
 	} catch (...) {
 		delete tex;
 		delete data;

@@ -177,6 +177,8 @@ __published:	// IDE-managed Components
 	TMenuItem *UseSBSLocal;
 	TMenuItem *UseSBSRemote;
 	TMenuItem *LoadARTCCBoundaries1;
+	TLabel *Label20;
+	TLabel *FlightDepArrLabel;
 	void __fastcall ObjectDisplayInit(TObject *Sender);
 	void __fastcall ObjectDisplayResize(TObject *Sender);
 	void __fastcall ObjectDisplayPaint(TObject *Sender);
@@ -241,7 +243,12 @@ public:		// User declarations
     void __fastcall CreateBigQueryCSV(void);
     void __fastcall CloseBigQueryCSV(void);
     bool __fastcall LoadARTCCBoundaries(AnsiString FileName);
+#ifndef YAKI_TEST_CODE
+    void __fastcall LoadAirport();
+    void __fastcall LoadRoute();
 	void __fastcall HookTrackAll();
+	void __fastcall split_and_print(const char *input);
+#endif
 
 	int                        MouseDownX,MouseDownY;
 	bool                       MouseDown;
@@ -261,6 +268,7 @@ public:		// User declarations
 	bool                       LoadMapFromInternet;
 	TList                     *Areas;
 	TArea                     *AreaTemp;
+	ght_hash_table_t          *HashTable;
 	TTCPClientRawHandleThread *TCPClientRawHandleThread;
     TTCPClientSBSHandleThread *TCPClientSBSHandleThread;
 	TStreamWriter              *RecordRawStream;
@@ -278,6 +286,10 @@ public:		// User declarations
 	int                        CurrentSpriteImage;
     AnsiString                 AircraftDBPathFileName;
     AnsiString                 ARTCCBoundaryDataPathFileName;
+#ifndef YAKI_TEST_CODE
+    AnsiString                 AirportDBPathFileName;
+    AnsiString                 RouteDBPathFileName;
+#endif
     TCPAResultCache *CpaCache;
     TCPAWorkerThread *WorkerThread;
 };

@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'ADS-B Viewer'
-  ClientHeight = 603
+  ClientHeight = 1041
   ClientWidth = 1228
   Color = clBtnFace
   Constraints.MinHeight = 740
@@ -46,14 +46,14 @@ object Form1: TForm1
     Left = 978
     Top = 0
     Width = 250
-    Height = 603
+    Height = 1041
     Align = alRight
     Color = clWindow
     Constraints.MaxWidth = 250
     TabOrder = 0
     object Panel1: TPanel
       Left = 1
-      Top = 455
+      Top = 893
       Width = 248
       Height = 147
       Align = alBottom
@@ -171,7 +171,7 @@ object Form1: TForm1
       object DrawMap: TCheckBox
         Left = 5
         Top = 278
-        Width = 96
+        Width = 98
         Height = 17
         Caption = 'Display Map'
         Checked = True
@@ -316,7 +316,7 @@ object Form1: TForm1
         Left = 5
         Top = 76
         Width = 244
-        Height = 198
+        Height = 205
         BevelInner = bvLowered
         BevelKind = bkFlat
         TabOrder = 12
@@ -568,6 +568,32 @@ object Form1: TForm1
           Font.Style = [fsBold, fsUnderline]
           ParentFont = False
         end
+        object Label20: TLabel
+          Left = 5
+          Top = 185
+          Width = 102
+          Height = 13
+          Caption = 'Departure Arrival:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object FlightDepArrLabel: TLabel
+          Left = 122
+          Top = 186
+          Width = 21
+          Height = 13
+          Caption = 'N/A'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
       end
       object Panel5: TPanel
         Left = 5
@@ -761,7 +787,7 @@ object Form1: TForm1
       Left = 1
       Top = 577
       Width = 248
-      Height = 9
+      Height = 316
       Align = alClient
       TabOrder = 2
       object MapComboBox: TComboBox
@@ -776,7 +802,8 @@ object Form1: TForm1
           'Google Maps'
           'VFR'
           'IFS Low'
-          'IFS High')
+          'IFS High'
+          'OpenStreetMap')
       end
       object BigQueryCheckBox: TCheckBox
         Left = 5
@@ -793,7 +820,7 @@ object Form1: TForm1
     Left = 0
     Top = 0
     Width = 978
-    Height = 603
+    Height = 1041
     Cursor = crCross
     Align = alClient
     TabOrder = 1

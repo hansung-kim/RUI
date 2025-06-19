@@ -36,13 +36,8 @@ typedef struct
  int                 SpriteImage;
 } TADS_B_Aircraft;
 
-struct TInsertAircraftPair {
+struct TAircraftPair {
     TADS_B_Aircraft * ADS_B_Aircraft;
-    unsigned int i_key_size;
-    const void *p_key_data;
-};
-
-struct TRemoveAircraftPair {
     unsigned int i_key_size;
     const void *p_key_data;
 };
@@ -58,8 +53,7 @@ public:
 private:
     static AircraftManager* instance;
 public:
-    TList *insertAircraftList;
-    TList *removeAircraftList;
+    TList *aircraftList;
     std::mutex Mtx;
 public:
 	ght_hash_table_t *HashTable;
@@ -76,16 +70,16 @@ public:
 };
 #endif
 
-// CPA 결과 한 쌍
+// CPA °a°u CN ½O
 struct TCpaPair {
     uint32_t ICAO1;
     uint32_t ICAO2;
-    double a_Lat, a_Lon; // 항공기1 CPA 위치
-    double b_Lat, b_Lon; // 항공기2 CPA 위치
-    double Lat1, Lon1; // 항공기1 CPA 위치
-    double Lat2, Lon2; // 항공기2 CPA 위치
-    double Tcpa;       // 시간
-    double Dist;       // CPA 3D 거리
+    double a_Lat, a_Lon; // C×°ø±a1 CPA A§A¡
+    double b_Lat, b_Lon; // C×°ø±a2 CPA A§A¡
+    double Lat1, Lon1; // C×°ø±a1 CPA A§A¡
+    double Lat2, Lon2; // C×°ø±a2 CPA A§A¡
+    double Tcpa;       // ½A°￡
+    double Dist;       // CPA 3D °A¸®
     bool Valid;
 };
 

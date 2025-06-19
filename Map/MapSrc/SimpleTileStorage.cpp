@@ -48,14 +48,15 @@ SimpleTileStorage::SimpleTileStorage() {
 
 	m_pNextLoadStorage = 0;
 	m_pSaveStorage = 0;
+    m_Terminate = false;
 }
 
 SimpleTileStorage::~SimpleTileStorage() {
 
 	/* wait for loader thread to finish */
 	SetEvent(ThreadKillEvent);
+    m_Terminate = true;
     WaitForSingleObject(m_Thread,INFINITE);
-
 
 	/* cleanup synchronisation objects */
 		CloseHandle(SemQueueCount);
@@ -75,7 +76,7 @@ DWORD WINAPI SimpleTileStorage::ThreadEntryPoint(LPVOID pthis) {
 
 void SimpleTileStorage::Enqueue(TilePtr tile) {
 	/* insert requested item in queue */
-    WaitForSingleObject(m_QueueMutex,INFINITE); 
+    WaitForSingleObject(m_QueueMutex,INFINITE);
 	m_Queue.push(tile);
 	ReleaseMutex(m_QueueMutex);
 	ReleaseSemaphore(SemQueueCount,1,NULL);
@@ -90,8 +91,13 @@ void SimpleTileStorage::ThreadRun() {
 
 	/* spin in this loop forever */
 	while(1) {
-		Result=WaitForMultipleObjects(2,Handles,false,INFINITE);   
-        if ((Result==WAIT_OBJECT_0+1) || (Result!=WAIT_OBJECT_0)) break;
+		Result=WaitForMultipleObjects(2,Handles,false,INFINITE);
+        if ((Result==WAIT_OBJECT_0+1) || (Result!=WAIT_OBJECT_0)) {
+        	break;
+        }
+        if (m_Terminate) {
+            break;
+        }
 
 		WaitForSingleObject(m_QueueMutex,INFINITE); 
 		TilePtr current = m_Queue.front();

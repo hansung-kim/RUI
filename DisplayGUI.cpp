@@ -26,12 +26,24 @@
 #include "CPA.h"
 #include "AircraftDB.h"
 #include "csv.h"
-
 #define USE_WORKER_THREAD
+#include <IdHTTP.hpp>
+#include <IdSSLOpenSSL.hpp>
+#include <fstream>
+#include "AirportDB.h"
+#include "RouteDB.h"
+#ifndef YAKI_TEST_CODE // check internet
+#include <WinInet.h>
+#endif
 
 #define AIRCRAFT_DATABASE_URL   "https://opensky-network.org/datasets/metadata/aircraftDatabase.zip"
 #define AIRCRAFT_DATABASE_FILE   "aircraftDatabase.csv"
 #define ARTCC_BOUNDARY_FILE      "Ground_Level_ARTCC_Boundary_Data_2025-05-15.csv"
+
+#define AIRPORT_DATABASE_URL   "https://vrs-standing-data.adsb.lol/airports.csv"
+#define AIRPORT_DATABASE_FILE   "airportDatabase.csv"
+#define ROUTE_DATABASE_URL   "https://vrs-standing-data.adsb.lol/routes.csv"
+#define ROUTE_DATABASE_FILE   "routeDatabase.csv"
 
 #define MAP_CENTER_LAT  40.73612;
 #define MAP_CENTER_LON -80.33158;
@@ -47,13 +59,16 @@
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma link "OpenGLPanel"
-#pragma link "Map\libgefetch\Win64\Release\libgefetch.a"
+#pragma link "Map\libgefetch\Win64\Debug\libgefetch.a"
 #pragma link "Map\zlib\Win64\Release\zlib.a"
 #pragma link "Map\jpeg\Win64\Release\jpeg.a"
 #pragma link "Map\png\Win64\Release\png.a"
 #pragma link "HashTable\Lib\Win64\Release\HashTableLib.a"
 #pragma link "cspin"
 #pragma resource "*.dfm"
+#ifndef YAKI_TEST_CODE // check internet
+//#pragma comment(lib, "Wininet.lib")
+#endif
 TForm1 *Form1;
  //---------------------------------------------------------------------------
  static void RunPythonScript(AnsiString scriptPath,AnsiString args);
@@ -188,6 +203,8 @@ __fastcall TForm1::TForm1(TComponent* Owner)
 	: TForm(Owner)
 {
   AircraftDBPathFileName=ExtractFilePath(ExtractFileDir(Application->ExeName)) +AnsiString("..\\AircraftDB\\")+AIRCRAFT_DATABASE_FILE;
+  AirportDBPathFileName=ExtractFilePath(ExtractFileDir(Application->ExeName)) +AnsiString("..\\AirportDB\\")+AIRPORT_DATABASE_FILE;
+  RouteDBPathFileName=ExtractFilePath(ExtractFileDir(Application->ExeName)) +AnsiString("..\\routeDB\\")+ROUTE_DATABASE_FILE;
   ARTCCBoundaryDataPathFileName=ExtractFilePath(ExtractFileDir(Application->ExeName)) +AnsiString("..\\ARTCC_Boundary_Data\\")+ARTCC_BOUNDARY_FILE;
   BigQueryPath=ExtractFilePath(ExtractFileDir(Application->ExeName)) +AnsiString("..\\BigQuery\\");
   BigQueryPythonScript= BigQueryPath+ AnsiString(BIG_QUERY_RUN_FILENAME);
@@ -209,13 +226,25 @@ __fastcall TForm1::TForm1(TComponent* Owner)
  MapCenterLat=MAP_CENTER_LAT;
  MapCenterLon=MAP_CENTER_LON;
 
+#ifndef YAKI_TEST_CODE
+  DWORD dwFlags;
+  if (!InternetGetConnectedState(&dwFlags, 0)) {
+    LoadMapFromInternet=false;
+  } else {
+    LoadMapFromInternet=true;
+  }
+#else
  LoadMapFromInternet=false;
+#endif
  MapComboBox->ItemIndex=GoogleMaps;
  //MapComboBox->ItemIndex=SkyVector_VFR;
  //MapComboBox->ItemIndex=SkyVector_IFR_Low;
  //MapComboBox->ItemIndex=SkyVector_IFR_High;
  LoadMap(MapComboBox->ItemIndex);
-
+#ifndef YAKI_TEST_CODE
+ LoadAirport();
+ LoadRoute();
+#endif
  g_EarthView->m_Eye.h /= pow(1.3,18);//pow(1.3,43);
  SetMapCenter(g_EarthView->m_Eye.x, g_EarthView->m_Eye.y);
  TimeToGoTrackBar->Position=120;
@@ -223,14 +252,18 @@ __fastcall TForm1::TForm1(TComponent* Owner)
  BigQueryRowCount=0;
  BigQueryFileCount=0;
  InitAircraftDB(AircraftDBPathFileName);
-  CpaCache = new TCPAResultCache();
-//
+#ifndef YAKI_TEST_CODE
+ InitAirportDB(AirportDBPathFileName);
+ InitRouteDB(RouteDBPathFileName);
+#endif
 //    // 워커 생성
 #ifdef USE_WORKER_THREAD
 // YAKI_TEST_CODE
+    CpaCache = new TCPAResultCache();
     WorkerThread = new TCPAWorkerThread(CpaCache);
     WorkerThread->Start(); // Execute() 시작
 #endif
+
  printf("init complete\n");
 }
 //---------------------------------------------------------------------------
@@ -324,6 +357,46 @@ void __fastcall TForm1::Timer1Timer(TObject *Sender)
  ObjectDisplay->Repaint();
 }
 //---------------------------------------------------------------------------
+#ifndef YAKI_TEST_CODE
+void remove_spaces(char *str) {
+    char *src = str, *dst = str;
+
+    while (*src) {
+        if (!isspace((unsigned char)*src)) {
+            *dst++ = *src;
+        }
+        src++;
+    }
+    *dst = '\0';
+}
+void __fastcall TForm1::split_and_print(const char *input) {
+    char buffer[256];
+    strncpy(buffer, input, sizeof(buffer) - 1);
+    buffer[sizeof(buffer) - 1] = '\0';
+    double xArr[3], yArr[3];
+    int arrIndex = 0;
+    char *token = strtok(buffer, "-");
+    while (token != NULL) {
+        // GetAirportDB
+        double latitude, longitude, ScrX, ScrY;
+        if (GetAirportDBInfo(token, latitude, longitude)) {
+            LatLon2XY(latitude,longitude, ScrX, ScrY);
+            xArr[arrIndex] = ScrX;
+            yArr[arrIndex++] = ScrY;
+            glLineWidth(10.0);
+            glColor4f(0.0, 0.0, 1.0, 1.0);
+            DrawPoint(ScrX,ScrY);
+        }
+        token = strtok(NULL, "-");
+    }
+    for (int i = 0; i < arrIndex - 1; i++) {
+      glBegin(GL_LINE_STRIP);
+      glVertex2f(xArr[i],yArr[i]);
+      glVertex2f(xArr[i + 1],yArr[i + 1]);
+      glEnd();
+    }
+}
+#endif
 void __fastcall TForm1::DrawObjects(void)
 {
   double ScrX, ScrY;
@@ -349,7 +422,8 @@ void __fastcall TForm1::DrawObjects(void)
   glVertex2f(ScrX,ScrY-20.0);
   glVertex2f(ScrX,ScrY+20.0);
   glEnd();
-#if 1
+
+
   uint32_t *Key;
   ght_iterator_t iterator;
   TADS_B_Aircraft* Data,*DataCPA;
@@ -429,7 +503,22 @@ void __fastcall TForm1::DrawObjects(void)
 		Tri=Tri->next;
 	  }
 	 }
-
+#ifndef YAKI_TEST_CODE
+    ght_hash_table_t* AirportDBHashTable = getAirportDBHashTable();
+    TAirportData *airportData;
+    bool firstAirportData = true;
+   	for(airportData = (TAirportData *)ght_first(AirportDBHashTable, &iterator,(const void **) &Key);
+			  airportData; airportData = (TAirportData *)ght_next(AirportDBHashTable, &iterator, (const void **)&Key))
+	{
+         if (firstAirportData) {
+             firstAirportData = false;
+             continue;
+         }
+         LatLon2XY(StrToFloat(airportData->Fields[6]),StrToFloat(airportData->Fields[7]), ScrX, ScrY);
+         glColor4f(1.0, 1.0, 0.0, 1.0);
+         DrawAirport(ScrX,ScrY, g_EarthView->GetCurrentZoom()/50 > 1.0 ? 1.0 : g_EarthView->GetCurrentZoom()/50 < 0.2 ? 0.2 : g_EarthView->GetCurrentZoom()/50);
+    }
+#endif
     AircraftCountLabel->Caption=IntToStr((int)AircraftManager::GetInstance()->GetSize());
 	for(Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetFirst(&iterator,(const void **) &Key);
 			  Data; Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iterator, (const void **)&Key))
@@ -452,6 +541,7 @@ void __fastcall TForm1::DrawObjects(void)
        if (g_EarthView->GetCurrentZoom()/100 > 0.7f) {
            glRasterPos2i(ScrX+30,ScrY-10);
            ObjectDisplay->Draw2DText(Data->HexAddr);
+
        }
 #else
 	   DrawAirplaneImage(ScrX,ScrY,1.5,Data->Heading,Data->SpriteImage);
@@ -482,8 +572,21 @@ void __fastcall TForm1::DrawObjects(void)
 		if (Data)
 		{
 		ICAOLabel->Caption=Data->HexAddr;
-        if (Data->HaveFlightNum)
+        if (Data->HaveFlightNum) {
           FlightNumLabel->Caption=Data->FlightNum;
+ #ifndef YAKI_TEST_CODE
+          remove_spaces(Data->FlightNum);
+          bool bFind;
+          const char *routeInfo = GetRouteDBInfo(Data->FlightNum, bFind);
+          if (bFind) {
+              FlightDepArrLabel->Caption = routeInfo;
+              split_and_print(routeInfo);
+          } else {
+              FlightDepArrLabel->Caption = "N/A";
+          }
+
+ #endif
+        }
         else FlightNumLabel->Caption="N/A";
         if (Data->HaveLatLon)
 		{
@@ -600,10 +703,10 @@ void __fastcall TForm1::DrawObjects(void)
         if (!pair.Valid) continue;
 
         double ScrX, ScrY;
+#ifdef YAKI_TEST_CODE
         printf("Draw CPA\n");
-
+#endif
         // 항공기1 -> CPA 위치
-#if 1
          glColor4f(0.0, 1.0, 0.0, 1.0);
          glBegin(GL_LINE_STRIP);
          LatLon2XY(pair.a_Lat,pair.a_Lon, ScrX, ScrY);
@@ -624,139 +727,10 @@ void __fastcall TForm1::DrawObjects(void)
          LatLon2XY(pair.Lat2,pair.Lon2, ScrX, ScrY);
          glVertex2f(ScrX, ScrY);
          glEnd();
-#else
-        glColor4f(0.0, 1.0, 0.0, 1.0);
-        glLineWidth(3.0f);
-        glBegin(GL_LINE_STRIP);
-        LatLon2XY(pair.Lat1, pair.Lon1, ScrX, ScrY);
-        glVertex2f(ScrX, ScrY);
-        LatLon2XY(pair.Lat2, pair.Lon2, ScrX, ScrY);
-        glVertex2f(ScrX, ScrY);
-        glEnd();
-#endif
-    }
- #endif
+   }
 #endif
 }
-#ifndef YAKI_TEST_CODE
- // deg -> radian 변환 매크로
-constexpr double DEG2RAD = M_PI / 180.0;
 
-// 결과: km 단위 거리 반환
-double Haversine(double lat1_deg, double lon1_deg, double lat2_deg, double lon2_deg)
-{
-    const double R = 6371.0; // 지구 반경 (km)
-
-    // 위도, 경도를 radian으로 변환
-    double lat1 = lat1_deg * DEG2RAD;
-    double lon1 = lon1_deg * DEG2RAD;
-    double lat2 = lat2_deg * DEG2RAD;
-    double lon2 = lon2_deg * DEG2RAD;
-
-    double dlat = lat2 - lat1;
-    double dlon = lon2 - lon1;
-
-    double a = std::sin(dlat / 2) * std::sin(dlat / 2) +
-               std::cos(lat1) * std::cos(lat2) *
-               std::sin(dlon / 2) * std::sin(dlon / 2);
-
-    double c = 2 * std::atan2(std::sqrt(a), std::sqrt(1 - a));
-
-    return R * c; // km
-}
-
-// Nautical Miles(NM)로 바로 얻고 싶으면:
-double HaversineNM(double lat1, double lon1, double lat2, double lon2)
-{
-    const double KM_TO_NM = 0.539957;
-    return Haversine(lat1, lon1, lat2, lon2) * KM_TO_NM;
-}
-#endif
- void __fastcall TForm1::HookTrackAll()
- {
-  double ScrX, ScrY;
-  uint32_t *Key;
-  ght_iterator_t iterator, iteratorCPA;
-  TADS_B_Aircraft* Data,*DataCPA;
-  for(Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetFirst(&iterator,(const void **) &Key);
-			  Data; Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iterator, (const void **)&Key))
-  {
-      if (!Data->HaveLatLon) {
-          continue;
-      }
-      iteratorCPA = iterator;
-      for(DataCPA = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iteratorCPA, (const void **)&Key);
-                  DataCPA; DataCPA = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iteratorCPA, (const void **)&Key)) {
-  #ifndef YAKI_TEST_CODE
-	  if (DataCPA->HaveLatLon)
-	  {
-          double tcpa,cpa_distance_nm, vertical_cpa;
-          double lat1, lon1,lat2, lon2, junk;
-          if (HaversineNM(Data->Latitude, Data->Longitude,DataCPA->Latitude, DataCPA->Longitude) >= 30) {
-              continue;
-          }
-          if (computeCPA(Data->Latitude, Data->Longitude, Data->Altitude,
-                         Data->Speed,Data->Heading,
-                         DataCPA->Latitude, DataCPA->Longitude, DataCPA->Altitude,
-                         DataCPA->Speed,DataCPA->Heading,
-                         tcpa,cpa_distance_nm, vertical_cpa))
-          {
-#ifndef YAKI_TEST_CODE
-            if (tcpa >= 300.0) {
-                continue;
-            }
-#endif
-#define KM_TO_NM 0.539957    // Convert km to nautical miles
-#define FEET_TO_KM 0.0003048 // Convert feet to km
-            vertical_cpa = vertical_cpa * FEET_TO_KM * KM_TO_NM;
-            double dist = std::sqrt(cpa_distance_nm * cpa_distance_nm + vertical_cpa * vertical_cpa);
-            if (!std::isnan(dist) && dist >= 1.0f) {
-               continue;
-
-            }
-            if (VDirect(Data->Latitude,Data->Longitude,
-                        Data->Heading,Data->Speed/3600.0*tcpa,&lat1,&lon1,&junk)==OKNOERROR)
-            {
-              if (VDirect(DataCPA->Latitude,DataCPA->Longitude,
-                          DataCPA->Heading,DataCPA->Speed/3600.0*tcpa,&lat2,&lon2,&junk)==OKNOERROR)
-               {
-                 glColor4f(0.0, 1.0, 0.0, 1.0);
-                 glLineWidth(4.0f); // YAKI_TEST_CODE
-                 glBegin(GL_LINE_STRIP);
-                 LatLon2XY(Data->Latitude,Data->Longitude, ScrX, ScrY);
-                 glVertex2f(ScrX, ScrY);
-                 LatLon2XY(lat1,lon1, ScrX, ScrY);
-                 glVertex2f(ScrX, ScrY);
-                 glEnd();
-                 glBegin(GL_LINE_STRIP);
-                 LatLon2XY(DataCPA->Latitude,DataCPA->Longitude, ScrX, ScrY);
-                 glVertex2f(ScrX, ScrY);
-                 LatLon2XY(lat2,lon2, ScrX, ScrY);
-                 glVertex2f(ScrX, ScrY);
-                 glEnd();
-                 glColor4f(1.0, 0.0, 0.0, 1.0);
-//                 glLineWidth(10.0f); // YAKI_TEST_CODE
-                 glBegin(GL_LINE_STRIP);
-                 LatLon2XY(lat1,lon1, ScrX, ScrY);
-                 glVertex2f(ScrX, ScrY);
-                 LatLon2XY(lat2,lon2, ScrX, ScrY);
-                 glVertex2f(ScrX, ScrY);
-                 glEnd();
-#ifdef YAKI_TEST_CODE
-                 SetMapCenter((lat1 + lat2) / 2.0, (lon1 + lon2) / 2.0);
-#endif
-               }
-            }
-#ifdef YAKI_TEST_CODE
-			ShowMessage("Warning: Possible collision within 5 minutes!\n");
-#endif
-          }
-      }
-  #endif
-      //printf("HookTrackAll\n");
-    }
-  }
- }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::ObjectDisplayMouseDown(TObject *Sender,
 	  TMouseButton Button, TShiftState Shift, int X, int Y)
@@ -868,6 +842,126 @@ void __fastcall TForm1::Exit1Click(TObject *Sender)
 	AreaTemp->NumPoints++;
 	ObjectDisplay->Repaint();
  }
+ }
+ //---------------------------------------------------------------------------
+#ifndef YAKI_TEST_CODE
+ // deg -> radian 변환 매크로
+constexpr double DEG2RAD = M_PI / 180.0;
+
+// 결과: km 단위 거리 반환
+double Haversine(double lat1_deg, double lon1_deg, double lat2_deg, double lon2_deg)
+{
+    const double R = 6371.0; // 지구 반경 (km)
+
+    // 위도, 경도를 radian으로 변환
+    double lat1 = lat1_deg * DEG2RAD;
+    double lon1 = lon1_deg * DEG2RAD;
+    double lat2 = lat2_deg * DEG2RAD;
+    double lon2 = lon2_deg * DEG2RAD;
+
+    double dlat = lat2 - lat1;
+    double dlon = lon2 - lon1;
+
+    double a = std::sin(dlat / 2) * std::sin(dlat / 2) +
+               std::cos(lat1) * std::cos(lat2) *
+               std::sin(dlon / 2) * std::sin(dlon / 2);
+
+    double c = 2 * std::atan2(std::sqrt(a), std::sqrt(1 - a));
+
+    return R * c; // km
+}
+
+// Nautical Miles(NM)로 바로 얻고 싶으면:
+double HaversineNM(double lat1, double lon1, double lat2, double lon2)
+{
+    const double KM_TO_NM = 0.539957;
+    return Haversine(lat1, lon1, lat2, lon2) * KM_TO_NM;
+}
+#endif
+ void __fastcall TForm1::HookTrackAll()
+ {
+  double ScrX, ScrY;
+  uint32_t *Key;
+  ght_iterator_t iterator, iteratorCPA;
+  TADS_B_Aircraft* Data,*DataCPA;
+  for(Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetFirst(&iterator,(const void **) &Key);
+			  Data; Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iterator, (const void **)&Key))
+  {
+      if (!Data->HaveLatLon) {
+          continue;
+      }
+      iteratorCPA = iterator;
+      for(DataCPA = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iteratorCPA, (const void **)&Key);
+                  DataCPA; DataCPA = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iteratorCPA, (const void **)&Key)) {
+  #ifndef YAKI_TEST_CODE
+	  if (DataCPA->HaveLatLon)
+	  {
+          double tcpa,cpa_distance_nm, vertical_cpa;
+          double lat1, lon1,lat2, lon2, junk;
+          if (HaversineNM(Data->Latitude, Data->Longitude,DataCPA->Latitude, DataCPA->Longitude) >= 30) {
+              continue;
+          }
+          if (computeCPA(Data->Latitude, Data->Longitude, Data->Altitude,
+                         Data->Speed,Data->Heading,
+                         DataCPA->Latitude, DataCPA->Longitude, DataCPA->Altitude,
+                         DataCPA->Speed,DataCPA->Heading,
+                         tcpa,cpa_distance_nm, vertical_cpa)) 
+          {
+#ifndef YAKI_TEST_CODE
+            if (tcpa >= 300.0) {
+                continue;
+            }
+#endif
+#define KM_TO_NM 0.539957    // Convert km to nautical miles
+#define FEET_TO_KM 0.0003048 // Convert feet to km
+            vertical_cpa = vertical_cpa * FEET_TO_KM * KM_TO_NM;
+            double dist = std::sqrt(cpa_distance_nm * cpa_distance_nm + vertical_cpa * vertical_cpa);          
+            if (!std::isnan(dist) && dist >= 1.0f) {
+               continue;
+                
+            }
+            if (VDirect(Data->Latitude,Data->Longitude,
+                        Data->Heading,Data->Speed/3600.0*tcpa,&lat1,&lon1,&junk)==OKNOERROR)
+            {
+              if (VDirect(DataCPA->Latitude,DataCPA->Longitude,
+                          DataCPA->Heading,DataCPA->Speed/3600.0*tcpa,&lat2,&lon2,&junk)==OKNOERROR)
+               {
+                 glColor4f(0.0, 1.0, 0.0, 1.0);
+                 glLineWidth(4.0f); // YAKI_TEST_CODE
+                 glBegin(GL_LINE_STRIP);
+                 LatLon2XY(Data->Latitude,Data->Longitude, ScrX, ScrY);
+                 glVertex2f(ScrX, ScrY);
+                 LatLon2XY(lat1,lon1, ScrX, ScrY);
+                 glVertex2f(ScrX, ScrY);
+                 glEnd();
+                 glBegin(GL_LINE_STRIP);
+                 LatLon2XY(DataCPA->Latitude,DataCPA->Longitude, ScrX, ScrY);
+                 glVertex2f(ScrX, ScrY);
+                 LatLon2XY(lat2,lon2, ScrX, ScrY);
+                 glVertex2f(ScrX, ScrY);
+                 glEnd();
+                 glColor4f(1.0, 0.0, 0.0, 1.0);
+//                 glLineWidth(10.0f); // YAKI_TEST_CODE
+                 glBegin(GL_LINE_STRIP);
+                 LatLon2XY(lat1,lon1, ScrX, ScrY);
+                 glVertex2f(ScrX, ScrY);
+                 LatLon2XY(lat2,lon2, ScrX, ScrY);
+                 glVertex2f(ScrX, ScrY);
+                 glEnd();
+#ifdef YAKI_TEST_CODE
+                 SetMapCenter((lat1 + lat2) / 2.0, (lon1 + lon2) / 2.0);
+#endif
+               }
+            }
+#ifdef YAKI_TEST_CODE
+			ShowMessage("Warning: Possible collision within 5 minutes!\n");
+#endif
+          }
+      }
+  #endif
+      //printf("HookTrackAll\n");
+    }
+  }
  }
 //---------------------------------------------------------------------------
  void __fastcall TForm1::HookTrack(int X, int Y,bool CPA_Hook)
@@ -1007,9 +1101,13 @@ void __fastcall TForm1::Purge(void)
 	  if ((CurrentTime-Data->LastSeen)>=StaleTimeInMs)
 	  {
 	  p = AircraftManager::GetInstance()->Remove(sizeof(*Key), Key);
-	  if (!p)
+	  if (!p) {
+#ifndef YAKI_TEST_CODE
+        printf("Removing the current iterated entry failed! This is a BUG\n");
+#else
 		ShowMessage("Removing the current iterated entry failed! This is a BUG\n");
-
+#endif
+      }
 	  delete Data;
 
 	  }
@@ -1310,7 +1408,13 @@ void __fastcall TForm1::RawConnectButtonClick(TObject *Sender)
 {
  IdTCPClientRaw->Host=RawIpAddress->Text;
  IdTCPClientRaw->Port=30002;
-
+#ifndef YAKI_TEST_CODE
+    DWORD dwFlags;
+    if (!InternetGetConnectedState(&dwFlags, 0)) {
+        ShowMessage("Check internet connection\n");
+        return;
+    }
+#endif
  if ((RawConnectButton->Caption=="Raw Connect") && (Sender!=NULL))
  {
   try
@@ -1515,6 +1619,13 @@ void __fastcall TForm1::SBSConnectButtonClick(TObject *Sender)
  IdTCPClientSBS->Host=SBSIpAddress->Text;
  IdTCPClientSBS->Port=5002;
 
+ #ifndef YAKI_TEST_CODE
+    DWORD dwFlags;
+    if (!InternetGetConnectedState(&dwFlags, 0)) {
+        ShowMessage("Check internet connection\n");
+        return;
+    }
+#endif
  if ((SBSConnectButton->Caption=="SBS Connect") && (Sender!=NULL))
  {
   try
@@ -1623,7 +1734,7 @@ void __fastcall TTCPClientSBSHandleThread::Execute(void)
 		 SleepTime=Time-LastTime;
 		 LastTime=Time;
 		 if (SleepTime>0) Sleep(SleepTime);
-         if (Form1->PlayBackSBSStream->EndOfStream)
+         if (Form1->PlayBackSBSStream && Form1->PlayBackSBSStream->EndOfStream)
            {
             printf("End SBS Playback 2\n");
             TThread::Synchronize(StopPlayback);
@@ -1752,6 +1863,67 @@ void __fastcall TForm1::TimeToGoTrackBarChange(TObject *Sender)
   TimeToGoText->Caption=TimeToChar(hmsm);
 }
 //---------------------------------------------------------------------------
+#ifndef YAKI_TEST_CODE
+void __fastcall TForm1::LoadAirport() {
+    DWORD dwFlags;
+    if (!InternetGetConnectedState(&dwFlags, 0)) {
+        printf("Check internet connection\n");
+        return;
+    }
+
+    try {
+        TIdHTTP *http = new TIdHTTP(NULL);
+        TIdSSLIOHandlerSocketOpenSSL *ssl = new TIdSSLIOHandlerSocketOpenSSL(NULL);
+        ssl->SSLOptions->Method = sslvTLSv1_2;         // TLS 1.2 사용
+        ssl->SSLOptions->Mode = sslmClient;            // 클라이언트 모드
+        http->IOHandler = ssl;
+        TFileStream *fileStream = new TFileStream(AirportDBPathFileName, fmCreate);
+
+        try {
+            http->Get(AIRPORT_DATABASE_URL, fileStream);
+            // Airport Load
+        }
+        catch (const Exception &e) {
+        }
+
+        delete fileStream;
+        delete http;
+        delete ssl;
+    }
+    catch (const Exception &e) {
+    }
+}
+void __fastcall TForm1::LoadRoute() {
+    DWORD dwFlags;
+    if (!InternetGetConnectedState(&dwFlags, 0)) {
+        printf("Check internet connection\n");
+        return;
+    }
+    try {
+        TIdHTTP *http = new TIdHTTP(NULL);
+        TIdSSLIOHandlerSocketOpenSSL *ssl = new TIdSSLIOHandlerSocketOpenSSL(NULL);
+        ssl->SSLOptions->Method = sslvTLSv1_2;         // TLS 1.2 사용
+        ssl->SSLOptions->Mode = sslmClient;            // 클라이언트 모드
+        http->IOHandler = ssl;
+        TFileStream *fileStream = new TFileStream(RouteDBPathFileName, fmCreate);
+
+        try {
+            http->Get(ROUTE_DATABASE_URL, fileStream);
+            // Airport Load
+        }
+        catch (const Exception &e) {
+        }
+
+        delete fileStream;
+        delete http;
+        delete ssl;
+    }
+    catch (const Exception &e) {
+    }
+}
+#endif
+//---------------------------------------------------------------------------
+
 void __fastcall TForm1::LoadMap(int Type)
 {
    AnsiString  HomeDir = ExtractFilePath(ExtractFileDir(Application->ExeName));
@@ -1831,7 +2003,28 @@ void __fastcall TForm1::LoadMap(int Type)
 	    g_Storage->SetNextLoadStorage(g_Keyhole);
 	   }
     }
-   g_GETileManager = new TileManager(g_Storage);
+
+   else if (Type==OpenStreetMap)
+   {
+     HomeDir+= "..\\OpenStreetMap";
+     if (LoadMapFromInternet) HomeDir+= "_Live\\";
+     else  HomeDir+= "\\";
+     std::string cachedir;
+     cachedir=HomeDir.c_str();
+
+     if (mkdir(cachedir.c_str()) != 0 && errno != EEXIST)
+	    throw Sysutils::Exception("Can not create cache directory");
+
+     g_Storage = new FilesystemStorage(cachedir,true);
+     if (LoadMapFromInternet)
+       {
+	    g_Keyhole = new KeyholeConnection(OpenStreetMap);
+        g_Keyhole->SetSaveStorage(g_Storage);
+	    g_Storage->SetNextLoadStorage(g_Keyhole);
+	   }
+    }
+
+   g_GETileManager = new TileManager(g_Storage, Type!=OpenStreetMap);
    g_MasterLayer = new GoogleLayer(g_GETileManager);
 
    g_EarthView = new FlatEarthView(g_MasterLayer);
@@ -1850,19 +2043,53 @@ void __fastcall TForm1::MapComboBoxChange(TObject *Sender)
   delete g_EarthView;
   if (g_GETileManager) delete g_GETileManager;
   delete g_MasterLayer;
+   if (g_Keyhole) {
+     g_Keyhole->SetSaveStorage(nullptr);
+   }
   delete g_Storage;
   if (LoadMapFromInternet)
   {
    if (g_Keyhole) delete g_Keyhole;
+   g_Keyhole = nullptr;
   }
-  if (MapComboBox->ItemIndex==0)   LoadMap(GoogleMaps);
+  DWORD dwFlags;
 
-  else if (MapComboBox->ItemIndex==1)  LoadMap(SkyVector_VFR);
-
-  else if (MapComboBox->ItemIndex==2)  LoadMap(SkyVector_IFR_Low);
-
-  else if (MapComboBox->ItemIndex==3)   LoadMap(SkyVector_IFR_High);
-
+  if (MapComboBox->ItemIndex==0) {
+#ifndef YAKI_TEST_CODE
+  if (!InternetGetConnectedState(&dwFlags, 0)) {
+    LoadMapFromInternet=false;
+  } else {
+    LoadMapFromInternet=true;
+  }
+#else
+    LoadMapFromInternet = true;
+#endif
+    LoadMap(GoogleMaps);
+  }
+  else if (MapComboBox->ItemIndex==1) {
+    LoadMapFromInternet = false;
+   LoadMap(SkyVector_VFR);
+  }
+  else if (MapComboBox->ItemIndex==2) {
+    LoadMapFromInternet = false;
+   LoadMap(SkyVector_IFR_Low);
+  }
+  else if (MapComboBox->ItemIndex==3) {
+    LoadMapFromInternet = false;
+    LoadMap(SkyVector_IFR_High);
+   }
+  else if (MapComboBox->ItemIndex==4) {
+#ifndef YAKI_TEST_CODE
+  if (!InternetGetConnectedState(&dwFlags, 0)) {
+    LoadMapFromInternet=false;
+  } else {
+    LoadMapFromInternet=true;
+  }
+#else
+    LoadMapFromInternet = true;
+#endif
+    LoadMap(OpenStreetMap);
+  }
    g_EarthView->m_Eye.h =m_Eyeh;
    g_EarthView->m_Eye.x=m_Eyex;
    g_EarthView->m_Eye.y=m_Eyey;
