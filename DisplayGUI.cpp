@@ -566,6 +566,8 @@ void __fastcall TForm1::DrawObjects(void)
 #ifndef YAKI_TEST_CODE
        if (aircraft_is_helicopter(Data->ICAO, NULL)) {
        		DrawAirplaneImage(ScrX,ScrY,g_EarthView->GetCurrentZoom()/50 > 1.5 ? 1.5 : g_EarthView->GetCurrentZoom()/50 < 0.5 ? 0.5 : g_EarthView->GetCurrentZoom()/50,Data->Heading,72);
+       } else if(aircraft_is_military(Data->ICAO, NULL)) {
+       		DrawAirplaneImage(ScrX,ScrY,g_EarthView->GetCurrentZoom()/50 > 1.5 ? 1.5 : g_EarthView->GetCurrentZoom()/50 < 0.5 ? 0.5 : g_EarthView->GetCurrentZoom()/50,Data->Heading,27);
        } else {
        		DrawAirplaneImage(ScrX,ScrY,g_EarthView->GetCurrentZoom()/50 > 1.5 ? 1.5 : g_EarthView->GetCurrentZoom()/50 < 0.5 ? 0.5 : g_EarthView->GetCurrentZoom()/50,Data->Heading,Data->SpriteImage);
        }
