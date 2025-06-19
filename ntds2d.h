@@ -14,8 +14,10 @@ void DrawAirTrackUnknown(float x,float y);
 void DrawPoint(float x,float y);
 #ifndef YAKI_TEST_CODE
 void DrawAirport(float x, float y, float scale);
+int MakeAirportImages(void);
 #endif
 void DrawAirplaneImage(float x, float y,float scale,float heading,int imageNum);
+void DrawAirportImage(float x, float y,float scale,int imageNum);
 void DrawTrackHook(float x, float y, float scale);
 void DrawRadarCoverage(float xc, float yc, float major, float minor);
 void DrawLeader(float x1, float y1, float x2, float y2);

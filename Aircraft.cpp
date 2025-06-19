@@ -358,7 +358,7 @@ void __fastcall TCPAWorkerThread::Execute() {
                 }
 #if 1
                 double h = HaversineNM(a1->Latitude, a1->Longitude, a2->Latitude, a2->Longitude);
-                if (h >= 30.0) {
+                if (h >= 100.0) {
                     a2 = (TADS_B_Aircraft*)mgr->GetNext(&it2, (const void**)&key2);
                 	continue;
                 }

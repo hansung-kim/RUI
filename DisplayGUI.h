@@ -292,6 +292,7 @@ public:		// User declarations
 #endif
     TCPAResultCache *CpaCache;
     TCPAWorkerThread *WorkerThread;
+    int airportSpriteNum;
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;

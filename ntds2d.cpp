@@ -105,6 +105,37 @@ int MakeAirplaneImages(void)
   glShadeModel(GL_FLAT);
   return(NumSprites);
 }
+
+int MakeAirportImages(void)
+{
+    const char filename[] = "..\\..\\Symbols\\tower-64.png";
+
+    int width, height, channels;
+    unsigned char* data = stbi_load(filename, &width, &height, &channels, STBI_rgb_alpha);
+    if (!data) {
+        printf("Failed to load PNG: %s\n", filename);
+        return 0;
+    }
+
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    // 텍스처 파라미터 설정
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // 텍스처 데이터 업로드
+    glTexImage2D(GL_TEXTURE_2D, 0,
+                 GL_RGBA, width, height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, data);
+
+    // 메모리 해제
+    stbi_image_free(data);
+
+    return textureID;
+
+}
 //---------------------------------------------------------------------------
 void MakeAirTrackFriend(void)
 {
@@ -266,6 +297,33 @@ void MakeTrackHook(void)
 
    glTexCoord2f(1.0, 0.0);
    glVertex2f(36.0*scale, -36.0*scale);    // bottom right
+
+   glEnd();
+   glBindTexture(GL_TEXTURE_2D, 0);
+   glDisable(GL_TEXTURE_2D);
+   glPopMatrix();
+ }
+ void DrawAirportImage(float x, float y,float scale,int imageNum)
+ {
+   glPushMatrix();
+   glEnable(GL_TEXTURE_2D);
+   glBindTexture(GL_TEXTURE_2D, imageNum);
+   glShadeModel(GL_FLAT);
+   glTranslated(x,y,0.0);
+   glRotatef(-180.0, 0,0,1);
+   glBegin(GL_QUADS);
+
+   glTexCoord2f(1.0, 1.0);
+   glVertex2f(32.0*scale,32.0*scale);      // top right
+
+   glTexCoord2f(0.0, 1.0);
+   glVertex2f(-32.0*scale, 32.0*scale);    // top left
+
+   glTexCoord2f(0.0, 0.0);
+   glVertex2f(-32.0*scale, -32.0*scale);  // bottom left
+
+   glTexCoord2f(1.0, 0.0);
+   glVertex2f(32.0*scale, -32.0*scale);    // bottom right
 
    glEnd();
    glBindTexture(GL_TEXTURE_2D, 0);

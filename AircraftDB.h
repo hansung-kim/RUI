@@ -41,5 +41,6 @@ typedef struct
 
 bool InitAircraftDB(AnsiString FileName);
 const char * GetAircraftDBInfo(uint32_t addr);
+bool aircraft_is_helicopter (uint32_t addr, const char **type_ptr);
 //---------------------------------------------------------------------------
 #endif

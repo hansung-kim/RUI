@@ -300,6 +300,9 @@ void __fastcall TForm1::ObjectDisplayInit(TObject *Sender)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     NumSpriteImages=MakeAirplaneImages();
+#ifndef YAKI_TEST_CODE
+    airportSpriteNum=MakeAirportImages();
+#endif    
 	MakeAirTrackFriend();
 	MakeAirTrackHostile();
 	MakeAirTrackUnknown();
@@ -533,13 +536,14 @@ void __fastcall TForm1::DrawObjects(void)
              continue;
          }
          LatLon2XY(StrToFloat(airportData->Fields[6]),StrToFloat(airportData->Fields[7]), ScrX, ScrY);
-         glColor4f(1.0, 1.0, 0.0, 1.0);
+//         glColor4f(1.0, 1.0, 0.0, 1.0);
 #ifndef YAKI_TEST_CODE
-         if (StrToFloat(airportData->Fields[6]) > 88) {
+         if (StrToFloat(airportData->Fields[6]) > 85.0 || StrToFloat(airportData->Fields[6]) < -85.0) {
          	continue;
          }
 #endif
-         DrawAirport(ScrX,ScrY, g_EarthView->GetCurrentZoom()/50 > 1.0 ? 1.0 : g_EarthView->GetCurrentZoom()/50 < 0.2 ? 0.2 : g_EarthView->GetCurrentZoom()/50);
+         DrawAirportImage(ScrX,ScrY, g_EarthView->GetCurrentZoom()/50 > 0.7 ? 0.7 : g_EarthView->GetCurrentZoom()/50 < 0.2 ? 0.2 : g_EarthView->GetCurrentZoom()/50, airportSpriteNum);
+//         DrawAirport(ScrX,ScrY, g_EarthView->GetCurrentZoom()/50 > 1.0 ? 1.0 : g_EarthView->GetCurrentZoom()/50 < 0.2 ? 0.2 : g_EarthView->GetCurrentZoom()/50);
     }
 #endif
     AircraftCountLabel->Caption=IntToStr((int)AircraftManager::GetInstance()->GetSize());
@@ -560,7 +564,11 @@ void __fastcall TForm1::DrawObjects(void)
 		 glColor4f(1.0, 0.0, 0.0, 1.0);
 		}
 #ifndef YAKI_TEST_CODE
-       DrawAirplaneImage(ScrX,ScrY,g_EarthView->GetCurrentZoom()/50 > 1.5 ? 1.5 : g_EarthView->GetCurrentZoom()/50 < 0.5 ? 0.5 : g_EarthView->GetCurrentZoom()/50,Data->Heading,Data->SpriteImage);
+       if (aircraft_is_helicopter(Data->ICAO, NULL)) {
+       		DrawAirplaneImage(ScrX,ScrY,g_EarthView->GetCurrentZoom()/50 > 1.5 ? 1.5 : g_EarthView->GetCurrentZoom()/50 < 0.5 ? 0.5 : g_EarthView->GetCurrentZoom()/50,Data->Heading,72);
+       } else {
+       		DrawAirplaneImage(ScrX,ScrY,g_EarthView->GetCurrentZoom()/50 > 1.5 ? 1.5 : g_EarthView->GetCurrentZoom()/50 < 0.5 ? 0.5 : g_EarthView->GetCurrentZoom()/50,Data->Heading,Data->SpriteImage);
+       }
        if (g_EarthView->GetCurrentZoom()/100 > 0.7f) {
            glRasterPos2i(ScrX+30,ScrY-10);
            ObjectDisplay->Draw2DText(Data->HexAddr);
@@ -654,6 +662,7 @@ void __fastcall TForm1::DrawObjects(void)
 		 AltLabel->Caption="N/A";
 		 MsgCntLabel->Caption="N/A";
          TrkLastUpdateTimeLabel->Caption="N/A";
+         FlightDepArrLabel->Caption = "N/A";
         }
  }
  if (TrackHook.Valid_CPA)
@@ -1064,6 +1073,7 @@ double HaversineNM(double lat1, double lon1, double lat2, double lon2)
 		   AltLabel->Caption="N/A";
 		   MsgCntLabel->Caption="N/A";
 		   TrkLastUpdateTimeLabel->Caption="N/A";
+           FlightDepArrLabel->Caption = "N/A";
 		  }
 		 else
 		   {
@@ -1258,6 +1268,10 @@ void __fastcall TForm1::AreaListViewSelectItem(TObject *Sender, TListItem *Item,
 	 }
 	if (HaveSelected)  Delete->Enabled=true;
 	else Delete->Enabled=false;
+#ifndef YAKI_TEST_CODE
+    // interested aircraft
+    // 
+#endif    
 	ObjectDisplay->Repaint();
 }
 //---------------------------------------------------------------------------
