@@ -376,6 +376,7 @@ void __fastcall TForm1::split_and_print(const char *input) {
     double xArr[3], yArr[3];
     int arrIndex = 0;
     char *token = strtok(buffer, "-");
+    bool origin = true;
     while (token != NULL) {
         // GetAirportDB
         double latitude, longitude, ScrX, ScrY;
@@ -383,14 +384,31 @@ void __fastcall TForm1::split_and_print(const char *input) {
             LatLon2XY(latitude,longitude, ScrX, ScrY);
             xArr[arrIndex] = ScrX;
             yArr[arrIndex++] = ScrY;
-            glLineWidth(10.0);
-            glColor4f(0.0, 0.0, 1.0, 1.0);
+            if (origin) {
+               glColor4f(0.0, 0.0, 1.0, 1.0);
+               origin = false; 
+            } else {
+            	glColor4f(0.0, 1.0, 1.0, 1.0);
+            }
             DrawPoint(ScrX,ScrY);
+            if (true || g_EarthView->GetCurrentZoom()/100 > 0.7f) {
+               glRasterPos2i(ScrX+30,ScrY-10);
+               ObjectDisplay->Draw2DText(token);
+            }
+	        glEnd();
         }
         token = strtok(NULL, "-");
     }
     for (int i = 0; i < arrIndex - 1; i++) {
       glBegin(GL_LINE_STRIP);
+      glLineWidth(5.0);
+        if (i % 3 == 0) {
+            glColor4f(0.5, 0.5, 0.0, 1.0);
+        } else if (i % 3 == 1) {
+            glColor4f(0.0, 0.5, 0.5, 1.0);
+        } else {
+            glColor4f(0.5, 0.0, 0.5, 1.0);
+        }
       glVertex2f(xArr[i],yArr[i]);
       glVertex2f(xArr[i + 1],yArr[i + 1]);
       glEnd();
@@ -516,6 +534,11 @@ void __fastcall TForm1::DrawObjects(void)
          }
          LatLon2XY(StrToFloat(airportData->Fields[6]),StrToFloat(airportData->Fields[7]), ScrX, ScrY);
          glColor4f(1.0, 1.0, 0.0, 1.0);
+#ifndef YAKI_TEST_CODE
+         if (StrToFloat(airportData->Fields[6]) > 88) {
+         	continue;
+         }
+#endif
          DrawAirport(ScrX,ScrY, g_EarthView->GetCurrentZoom()/50 > 1.0 ? 1.0 : g_EarthView->GetCurrentZoom()/50 < 0.2 ? 0.2 : g_EarthView->GetCurrentZoom()/50);
     }
 #endif
@@ -541,7 +564,6 @@ void __fastcall TForm1::DrawObjects(void)
        if (g_EarthView->GetCurrentZoom()/100 > 0.7f) {
            glRasterPos2i(ScrX+30,ScrY-10);
            ObjectDisplay->Draw2DText(Data->HexAddr);
-
        }
 #else
 	   DrawAirplaneImage(ScrX,ScrY,1.5,Data->Heading,Data->SpriteImage);
@@ -709,12 +731,14 @@ void __fastcall TForm1::DrawObjects(void)
         // 항공기1 -> CPA 위치
          glColor4f(0.0, 1.0, 0.0, 1.0);
          glBegin(GL_LINE_STRIP);
+ 		 glLineWidth(5.0);
          LatLon2XY(pair.a_Lat,pair.a_Lon, ScrX, ScrY);
          glVertex2f(ScrX, ScrY);
          LatLon2XY(pair.Lat1,pair.Lon1, ScrX, ScrY);
          glVertex2f(ScrX, ScrY);
          glEnd();
          glBegin(GL_LINE_STRIP);
+ 		 glLineWidth(5.0);
          LatLon2XY(pair.b_Lat,pair.b_Lon, ScrX, ScrY);
          glVertex2f(ScrX, ScrY);
          LatLon2XY(pair.Lat2,pair.Lon2, ScrX, ScrY);
@@ -722,6 +746,7 @@ void __fastcall TForm1::DrawObjects(void)
          glEnd();
          glColor4f(1.0, 0.0, 0.0, 1.0);
          glBegin(GL_LINE_STRIP);
+ 		 glLineWidth(5.0);
          LatLon2XY(pair.Lat1,pair.Lon1, ScrX, ScrY);
          glVertex2f(ScrX, ScrY);
          LatLon2XY(pair.Lat2,pair.Lon2, ScrX, ScrY);
@@ -984,8 +1009,11 @@ double HaversineNM(double lat1, double lon1, double lat2, double lon2)
   VLat=atan(sinh(M_PI * (2 * (Map_w[1].y-(yf*(Map_v[3].y-Y1))))))*(180.0 / M_PI);
   VLon=(Map_w[1].x-(xf*(Map_v[1].x-X1)))*360.0;
 
+#ifndef YAKI_TEST_CODE
   MinRange=16.0;
-
+#else
+  MinRange=8.0;
+#endif
   for(Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetFirst(&iterator,(const void **) &Key);
 			  Data; Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iterator, (const void **)&Key))
 	{
@@ -1743,7 +1771,9 @@ void __fastcall TTCPClientSBSHandleThread::Execute(void)
             TThread::Synchronize(StopPlayback);
             break;
            }
-		 StringMsgBuffer= Form1->PlayBackSBSStream->ReadLine();
+           if (Form1->PlayBackSBSStream) {
+			 StringMsgBuffer= Form1->PlayBackSBSStream->ReadLine();
+           }
 		}
         catch (...)
 		{

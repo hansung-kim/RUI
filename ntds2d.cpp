@@ -221,7 +221,11 @@ void MakeTrackHook(void)
  TRACKHOOK=glGenLists(1);
  glNewList(TRACKHOOK, GL_COMPILE);
  glPointSize(8.0);
+#ifndef YAKI_TEST_CODE
+ glLineWidth(5.0);
+#else
  glLineWidth(10.0);
+#endif
 #if 1
  glEnable( GL_LINE_SMOOTH );
  glEnable( GL_POINT_SMOOTH );

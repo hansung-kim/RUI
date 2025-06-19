@@ -348,7 +348,7 @@ bool SBS_Message_Decode( char *msg)
 		  char *endptr = NULL;
 
 		  double tmp=strtod(SBS_Fields[SBS_GROUND_SPEED], &endptr);
-		  if (endptr != SBS_Fields[SBS_GROUND_SPEED] && isfinite(tmp))
+		  if (endptr != SBS_Fields[SBS_GROUND_SPEED] && isfinite(tmp) && tmp < 1000.0)
 			  {
 			   ADS_B_Aircraft->Speed=tmp;
 			  }
