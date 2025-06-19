@@ -39,7 +39,11 @@ typedef struct
 struct TAircraftPair {
     TADS_B_Aircraft * ADS_B_Aircraft;
     unsigned int i_key_size;
+#ifndef YAKI_TEST_CODE
+    uint32_t key_data;
+#else
     const void *p_key_data;
+#endif
 };
 
 void RawToAircraft(modeS_message *mm,TADS_B_Aircraft *ADS_B_Aircraft);
@@ -64,7 +68,7 @@ public:
     unsigned int GetSize();
     void *GetFirst(ght_iterator_t *p_iterator, const void **pp_key);
 	void *GetNext(ght_iterator_t *p_iterator, const void **pp_key);
-	void *Remove(unsigned int i_key_size, const void *p_key_data);
+	void *Remove(unsigned int i_key_size, const void *p_key_data, bool &defer);
     void MutexLock();
     void MutexUnlock();
 };

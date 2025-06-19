@@ -237,11 +237,15 @@ TADS_B_Aircraft* AircraftManager::GetAircraft(unsigned int i_key_size, const voi
 }
 
 int AircraftManager::Insert(TADS_B_Aircraft* ADS_B_Aircraft, unsigned int i_key_size, const void *p_key_data) {
-    if (computeCPA) {
+    if (false) {
         TAircraftPair *insertAircraft = new TAircraftPair;
         insertAircraft->ADS_B_Aircraft = ADS_B_Aircraft;
         insertAircraft->i_key_size = i_key_size;
+#ifndef YAKI_TEST_CODE
+        memcpy(&insertAircraft->key_data, p_key_data, i_key_size);
+#else
         insertAircraft->p_key_data = p_key_data;
+#endif
         aircraftList->Add(insertAircraft);
         return 0;
     }
@@ -260,15 +264,21 @@ void *AircraftManager::GetNext(ght_iterator_t *p_iterator, const void **pp_key) 
     return ght_next(HashTable, p_iterator, pp_key);
 }
 
-void *AircraftManager::Remove(unsigned int i_key_size, const void *p_key_data) {
+void *AircraftManager::Remove(unsigned int i_key_size, const void *p_key_data, bool &defer) {
     if (computeCPA) {
         TAircraftPair *removeAircraft = new TAircraftPair;
         removeAircraft->ADS_B_Aircraft = NULL;
         removeAircraft->i_key_size = i_key_size;
+#ifndef YAKI_TEST_CODE
+        memcpy(&removeAircraft->key_data, p_key_data, i_key_size);
+#else
         removeAircraft->p_key_data = p_key_data;
+#endif
         aircraftList->Add(removeAircraft);
+        defer = true;
         return (void*)p_key_data; // YAKI_TEST_CODE
     }
+    defer = false;
     return ght_remove(HashTable, i_key_size, p_key_data);
 }
 
@@ -404,24 +414,45 @@ void __fastcall TCPAWorkerThread::Execute() {
             }
             a1 = (TADS_B_Aircraft*)mgr->GetNext(&it1, (const void**)&key1);
         }
-//        mgr->MutexUnlock();
         mgr->computeCPA = false;
+        //        mgr->MutexUnlock();
         // 남은 객체 출력
+        printf("TCPAWorkerThread::Execute aircraftList->Count : %d\n", mgr->aircraftList->Count);
+
         for (int i = 0; i < mgr->aircraftList->Count; i++) {
             TAircraftPair *obj = (TAircraftPair*)mgr->aircraftList->Items[i];
             if (obj->ADS_B_Aircraft) {
+#ifndef YAKI_TEST_CODE
+           if (mgr->Insert(obj->ADS_B_Aircraft, obj->i_key_size, &obj->key_data) < 0)
+              {
+                printf("ght_insert Error - Should Not Happen\n");
+              }
+#else
 	            mgr->Insert(obj->ADS_B_Aircraft, obj->i_key_size, obj->p_key_data);
+#endif
             } else {
+                bool defer;
+#ifndef YAKI_TEST_CODE
+	            mgr->Remove(obj->i_key_size, &obj->key_data, defer);
+                if (defer == false) {
+				    TADS_B_Aircraft *data = (TADS_B_Aircraft *)mgr->GetAircraft(obj->i_key_size, &obj->key_data);
+                    delete data;
+
+                }
+#else
 	            mgr->Remove(obj->i_key_size, obj->p_key_data);
+#endif
             }
         }
-
         // 메모리 해제
+
         for (int i = 0; i < mgr->aircraftList->Count; i++) {
             delete (TAircraftPair*)(mgr->aircraftList->Items[i]);
         }
         mgr->aircraftList->Clear();
+#ifdef YAKI_TEST_CODE
         printf("Update cache\n");
+#endif
         Cache->Update(NewCache);
         TThread::Sleep(500); // 0.5초마다 갱신
     }

@@ -1100,15 +1100,18 @@ void __fastcall TForm1::Purge(void)
 	{
 	  if ((CurrentTime-Data->LastSeen)>=StaleTimeInMs)
 	  {
-	  p = AircraftManager::GetInstance()->Remove(sizeof(*Key), Key);
-	  if (!p) {
+          bool defer;
+          p = AircraftManager::GetInstance()->Remove(sizeof(*Key), Key, defer);
+          if (!p) {
 #ifndef YAKI_TEST_CODE
-        printf("Removing the current iterated entry failed! This is a BUG\n");
+            printf("Removing the current iterated entry failed! This is a BUG\n");
 #else
-		ShowMessage("Removing the current iterated entry failed! This is a BUG\n");
+            ShowMessage("Removing the current iterated entry failed! This is a BUG\n");
 #endif
-      }
-	  delete Data;
+          }
+          if (defer == false) {
+			  delete Data;
+          }
 
 	  }
 	}
@@ -1125,17 +1128,17 @@ void __fastcall TForm1::PurgeButtonClick(TObject *Sender)
   ght_iterator_t iterator;
   TADS_B_Aircraft* Data;
   void *p;
-
+  bool defer;
   for(Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetFirst(&iterator,(const void **) &Key);
 			  Data; Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iterator, (const void **)&Key))
 	{
 
-	  p = AircraftManager::GetInstance()->Remove(sizeof(*Key), Key);
+	  p = AircraftManager::GetInstance()->Remove(sizeof(*Key), Key, defer);
 	  if (!p)
 		ShowMessage("Removing the current iterated entry failed! This is a BUG\n");
-
-	  delete Data;
-
+      if (defer == false) {
+	    delete Data;
+      }
 	}
 }
 //---------------------------------------------------------------------------
