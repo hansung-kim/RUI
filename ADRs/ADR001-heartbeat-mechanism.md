@@ -1,4 +1,4 @@
-# ADR: Use Heartbeat Mechanism
+# ADR 001: Use Heartbeat Mechanism
 
 ## Context
 
