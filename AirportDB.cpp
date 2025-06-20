@@ -109,7 +109,7 @@ bool InitAirportDB(AnsiString FileName)
    return(true);
 }
 //---------------------------------------------------------------------------
-bool GetAirportDBInfo(char *addr, double &latitude, double &longitude)
+TAirportData* GetAirportDBInfo(char *addr, double &latitude, double &longitude)
 {
   static char          buf [2048];
   const TAirportData *a;
@@ -120,9 +120,9 @@ bool GetAirportDBInfo(char *addr, double &latitude, double &longitude)
    {
       latitude = StrToFloat(a->Fields[6]);
       longitude = StrToFloat(a->Fields[7]);
-      return true;
+      return (TAirportData*)a;
    }
-   return false;
+   return NULL;
 }
 
 ght_hash_table_t * getAirportDBHashTable() {

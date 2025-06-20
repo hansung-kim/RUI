@@ -143,6 +143,30 @@ int FlatEarthView::SingleMovement(int flags) {
 
 /* private flat-specific functions */
 void FlatEarthView::NormalizeEye() {
+#ifndef YAKI_TEST_CODE
+    #define MIN_HEIGHT 10.0/40000000.0
+    #define MAX_HEIGHT 1.0
+    if (m_Eye.h < MIN_HEIGHT) m_Eye.h = MIN_HEIGHT;
+    if (m_Eye.h > MAX_HEIGHT) m_Eye.h = MAX_HEIGHT;
+
+    double aspect = double(m_ViewportWidth) / double(m_ViewportHeight);
+    double xspan = m_Eye.xspan(aspect);
+    double yspan = m_Eye.yspan(aspect);
+
+    double xmin = -0.5 + xspan / 2.0;
+    double xmax =  0.5 - xspan / 2.0;
+    double ymin = -0.5 + yspan / 2.0;
+    double ymax =  0.5 - yspan / 2.0;
+
+    if (xmin > xmax) { double tmp = xmin; xmin = xmax; xmax = tmp; }
+    if (ymin > ymax) { double tmp = ymin; ymin = ymax; ymax = tmp; }
+
+    if (m_Eye.x < xmin) m_Eye.x = xmin;
+    if (m_Eye.x > xmax) m_Eye.x = xmax;
+    if (m_Eye.y < ymin) m_Eye.y = ymin;
+    if (m_Eye.y > ymax) m_Eye.y = ymax;
+
+#else
 	if (m_Eye.x < -0.5)	m_Eye.x = -0.5;
 	if (m_Eye.x > 0.5)	m_Eye.x = 0.5;
 	if (m_Eye.y < -0.5)	m_Eye.y = -0.5;
@@ -152,6 +176,7 @@ void FlatEarthView::NormalizeEye() {
 #define MAX_HEIGHT 1.0
 	if (m_Eye.h < MIN_HEIGHT)	m_Eye.h = MIN_HEIGHT;
 	if (m_Eye.h > MAX_HEIGHT)	m_Eye.h = MAX_HEIGHT;
+#endif
 }
 
 double FlatEarthView::GetCurrentZoom() {

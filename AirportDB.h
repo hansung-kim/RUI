@@ -22,7 +22,7 @@ typedef struct
 } TAirportData;
 
 bool InitAirportDB(AnsiString FileName);
-bool GetAirportDBInfo(char *addr, double &latitude, double &longitude);
+TAirportData* GetAirportDBInfo(char *addr, double &latitude, double &longitude);
 ght_hash_table_t * getAirportDBHashTable();
 //---------------------------------------------------------------------------
 #endif

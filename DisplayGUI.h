@@ -25,6 +25,7 @@
 #include <IdTCPConnection.hpp>
 #include "cspin.h"
 #include "Aircraft.h"
+#include "AirportDB.h"
 
 typedef float T_GL_Color[4];
 
@@ -293,6 +294,10 @@ public:		// User declarations
     TCPAResultCache *CpaCache;
     TCPAWorkerThread *WorkerThread;
     int airportSpriteNum;
+#ifndef YAKI_TEST_CODE
+    TADS_B_Aircraft* mouseover_aircraft;
+    TAirportData *mouseover_airport;
+#endif
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TForm1 *Form1;

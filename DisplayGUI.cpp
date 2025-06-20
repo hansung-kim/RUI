@@ -263,7 +263,10 @@ __fastcall TForm1::TForm1(TComponent* Owner)
     WorkerThread = new TCPAWorkerThread(CpaCache);
     WorkerThread->Start(); // Execute() ½ÃÀÛ
 #endif
-
+#ifndef YAKI_TEST_CODE
+ mouseover_aircraft = NULL;
+ mouseover_airport = NULL;
+#endif
  printf("init complete\n");
 }
 //---------------------------------------------------------------------------
@@ -543,6 +546,10 @@ void __fastcall TForm1::DrawObjects(void)
          }
 #endif
          DrawAirportImage(ScrX,ScrY, g_EarthView->GetCurrentZoom()/50 > 0.7 ? 0.7 : g_EarthView->GetCurrentZoom()/50 < 0.2 ? 0.2 : g_EarthView->GetCurrentZoom()/50, airportSpriteNum);
+         if (airportData == mouseover_airport) {
+           glRasterPos2i(ScrX+30,ScrY-10);
+           ObjectDisplay->Draw2DText(airportData->Fields[3].c_str());
+         }
 //         DrawAirport(ScrX,ScrY, g_EarthView->GetCurrentZoom()/50 > 1.0 ? 1.0 : g_EarthView->GetCurrentZoom()/50 < 0.2 ? 0.2 : g_EarthView->GetCurrentZoom()/50);
     }
 #endif
@@ -564,6 +571,9 @@ void __fastcall TForm1::DrawObjects(void)
 		 glColor4f(1.0, 0.0, 0.0, 1.0);
 		}
 #ifndef YAKI_TEST_CODE
+       if (mouseover_aircraft == Data) {
+            glColor4f(0.7, 0.7, 0.0, 1.0);
+       }
        if (aircraft_is_helicopter(Data->ICAO, NULL)) {
        		DrawAirplaneImage(ScrX,ScrY,g_EarthView->GetCurrentZoom()/50 > 1.5 ? 1.5 : g_EarthView->GetCurrentZoom()/50 < 0.5 ? 0.5 : g_EarthView->GetCurrentZoom()/50,Data->Heading,72);
        } else if(aircraft_is_military(Data->ICAO, NULL)) {
@@ -571,10 +581,12 @@ void __fastcall TForm1::DrawObjects(void)
        } else {
        		DrawAirplaneImage(ScrX,ScrY,g_EarthView->GetCurrentZoom()/50 > 1.5 ? 1.5 : g_EarthView->GetCurrentZoom()/50 < 0.5 ? 0.5 : g_EarthView->GetCurrentZoom()/50,Data->Heading,Data->SpriteImage);
        }
-       if (g_EarthView->GetCurrentZoom()/100 > 0.7f) {
+#ifndef YAKI_TEST_CODE
+       if (mouseover_aircraft == Data || g_EarthView->GetCurrentZoom()/100 > 0.7f) {
            glRasterPos2i(ScrX+30,ScrY-10);
            ObjectDisplay->Draw2DText(Data->HexAddr);
        }
+#endif
 #else
 	   DrawAirplaneImage(ScrX,ScrY,1.5,Data->Heading,Data->SpriteImage);
 	   glRasterPos2i(ScrX+30,ScrY-10);
@@ -851,6 +863,74 @@ void __fastcall TForm1::ObjectDisplayMouseMove(TObject *Sender,
    g_EarthView->Drag(g_MouseLeftDownX, g_MouseLeftDownY, X,Y, NAV_DRAG_PAN);
    ObjectDisplay->Repaint();
   }
+#ifndef YAKI_TEST_CODE
+  double dlat,dlon,Range;
+   uint32_t *Key;
+
+   uint32_t Current_ICAO;
+   double MinRange;
+  ght_iterator_t iterator;
+  TADS_B_Aircraft* Data;
+
+#ifndef YAKI_TEST_CODE
+  MinRange=16.0;
+#else
+  MinRange=8.0;
+#endif
+#endif
+
+#ifndef YAKI_TEST_CODE
+mouseover_airport = NULL;
+mouseover_aircraft = NULL;
+    ght_hash_table_t* AirportDBHashTable = getAirportDBHashTable();
+    TAirportData *airportData;
+    bool firstAirportData = true;
+    char* Current_IATA = NULL;
+   	for(airportData = (TAirportData *)ght_first(AirportDBHashTable, &iterator,(const void **) &Key);
+			  airportData; airportData = (TAirportData *)ght_next(AirportDBHashTable, &iterator, (const void **)&Key))
+	{
+         if (firstAirportData) {
+             firstAirportData = false;
+             continue;
+         }
+         StrToFloat(airportData->Fields[6]),StrToFloat(airportData->Fields[7]);
+       dlat= VLat-StrToFloat(airportData->Fields[6]);
+       dlon= VLon-airportData->Fields[7];
+       Range=sqrt(dlat*dlat+dlon*dlon);
+       if (Range<MinRange)
+       {
+        Current_IATA=airportData->Fields[2].c_str();;
+        MinRange=Range;
+       }
+    }
+	if (MinRange< 0.2)
+	{
+	  mouseover_airport =(TAirportData *)GetAirportDBInfo(Current_IATA,dlat, dlon);
+      return;
+    }
+#endif
+#ifndef YAKI_TEST_CODE
+  for(Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetFirst(&iterator,(const void **) &Key);
+			  Data; Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iterator, (const void **)&Key))
+	{
+	  if (Data->HaveLatLon)
+	  {
+	   dlat= VLat-Data->Latitude;
+	   dlon= VLon-Data->Longitude;
+	   Range=sqrt(dlat*dlat+dlon*dlon);
+	   if (Range<MinRange)
+	   {
+		Current_ICAO=Data->ICAO;
+		MinRange=Range;
+	   }
+	  }
+	}
+	if (MinRange< 0.2)
+	{
+	  mouseover_aircraft =(TADS_B_Aircraft *)
+			AircraftManager::GetInstance()->GetAircraft(sizeof(Current_ICAO), &Current_ICAO);
+    }
+#endif
 
 }
 //---------------------------------------------------------------------------
@@ -871,8 +951,7 @@ void __fastcall TForm1::Exit1Click(TObject *Sender)
 
  if (XY2LatLon2(X,Y,Lat,Lon)==0)
  {
-
-	AreaTemp->Points[AreaTemp->NumPoints][1]=Lat;
+ 	AreaTemp->Points[AreaTemp->NumPoints][1]=Lat;
 	AreaTemp->Points[AreaTemp->NumPoints][0]=Lon;
 	AreaTemp->Points[AreaTemp->NumPoints][2]=0.0;
 	AreaTemp->NumPoints++;
@@ -1752,7 +1831,9 @@ void __fastcall TTCPClientSBSHandleThread::Execute(void)
 	 {
 	  try {
 		   if (!Form1->IdTCPClientSBS->Connected())	Terminate();
-	       StringMsgBuffer=Form1->IdTCPClientSBS->IOHandler->ReadLn();
+           if (Form1->IdTCPClientSBS) {
+		       StringMsgBuffer=Form1->IdTCPClientSBS->IOHandler->ReadLn();
+           }
 		  }
        catch (...)
 		{
