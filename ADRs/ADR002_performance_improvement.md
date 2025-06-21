@@ -13,7 +13,6 @@ However, after applying CPA, the system could only display up to around **4,000 
 To isolate the impact of CPA computation on the RUI, a **separate thread** was created to perform only the CPA operations.  
 (**Tactic:** Introduce Concurrency)
 
----
 
 ## Rationale
 
@@ -29,13 +28,11 @@ To improve throughput during CPA computations, we reviewed the logic and exclude
 2) Aircraft projected to travel more than 100 nautical miles were excluded, based on a maximum CPA evaluation range of 90 nautical miles in the same direction.
 Despite filtering out these unnecessary computation conditions and re-running the experiment, we found that this alone did not yield noticeable performance improvements. Although a complete revision of the CPA logic could potentially address the issue, this alternative was not feasible due to our current schedule constraints.
 
----
 
 ## Status
 
 **Accepted**
 
----
 
 ## Consequences
 
