@@ -1,6 +1,5 @@
 # ADR 001: Use Heartbeat Mechanism
 
-## Context
 
 We previously selected **Availability** as a key quality attribute for the Flight Tracker system. A [fault injection experiment - Experiment 2](https://docs.google.com/document/d/16N1N-vS0hyGsK_7ds6XFNXFj4Xg0ZByGWQRLtgze0B8/edit?tab=t.0#heading=h.bk02gqp2jods) revealed that when the **SDR is physically disconnected from the Raspberry Pi**, the Flight Tracker successfully logs the error condition, but the **RUI remains unaware of the fault**.
 
