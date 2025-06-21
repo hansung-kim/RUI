@@ -2,7 +2,7 @@
 
 ## Context
 
-We previously selected **Availability** as a key quality attribute for the Flight Tracker system. A fault injection experiment (to evaluate current system performance, Experiment 2) revealed that when the **SDR is physically disconnected from the Raspberry Pi**, the Flight Tracker successfully logs the error condition, but the **RUI remains unaware of the fault**.
+We previously selected **Availability** as a key quality attribute for the Flight Tracker system. A fault injection experiment (https://docs.google.com/document/d/16N1N-vS0hyGsK_7ds6XFNXFj4Xg0ZByGWQRLtgze0B8/edit?tab=t.0#heading=h.bk02gqp2jods, Experiment 2) revealed that when the **SDR is physically disconnected from the Raspberry Pi**, the Flight Tracker successfully logs the error condition, but the **RUI remains unaware of the fault**.
 
 Moreover, no interface exists to communicate fault states between the Flight Tracker and the RUI. Recovery is not automatically initiated or visible to the user. This lack of fault awareness at the RUI level can lead to incorrect assumptions about system operation (e.g., displaying aircraft on the map and CPA calculation).
 
