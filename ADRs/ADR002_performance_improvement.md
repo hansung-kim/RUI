@@ -3,8 +3,8 @@
 
 Before the application of the CPA feature, the Flight Close Control display for aircraft on the RUI met the QA-01 requirement (**response time < 1s**), with an average update time of **315.2ms over 30 attempts for 8,000 aircraft**.
 
-However, after applying CPA, the system could only display up to around **4,000 aircraft**, and performance issues arose due to latency affecting the update time of the Close Control display.  
-(Reference: *Experiment 4*)
+However, after applying CPA, the system could only display up to around **4,000 aircraft**, and performance issues arose due to latency affecting the update time of the Close Control display.
+[Reference: Experiment 4](https://docs.google.com/document/d/14iqMM11d6TfCtYCdGdRo0fHWyrxUSejTZ_Kb75wdEPE/edit?tab=t.0)
 
 
 ## Decision
@@ -21,6 +21,7 @@ We will apply "Introduce Concurrency" tactic to improve the performance because 
 - It improved both Close Control update and aircraft display performance.
 - Although more complex, it effectively addressed the issue and reduced future risk.
 
+Rejected alternatives and rationale:
 "Reduced Computational Overhead" tactic was considered as alternative but not selected because of following reason :
 To improve throughput during CPA computations, we reviewed the logic and excluded the following two cases from processing:
 1) Aircraft without location information were excluded.
