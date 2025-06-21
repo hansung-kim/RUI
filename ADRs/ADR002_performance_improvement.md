@@ -1,6 +1,5 @@
 # ADR 002: Improve Performance of Close Control Display Time (Introduce Concurrency)
 
-## Context
 
 Before the application of the CPA feature, the Flight Close Control display for aircraft on the RUI met the QA-01 requirement (**response time < 1s**), with an average update time of **315.2ms over 30 attempts for 8,000 aircraft**.
 
