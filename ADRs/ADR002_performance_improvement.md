@@ -7,7 +7,6 @@ Before the application of the CPA feature, the Flight Close Control display for 
 However, after applying CPA, the system could only display up to around **4,000 aircraft**, and performance issues arose due to latency affecting the update time of the Close Control display.  
 (Reference: *Experiment 4*)
 
----
 
 ## Decision
 
