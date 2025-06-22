@@ -9,7 +9,6 @@ The current implementation of the RUI system's display functionality is centered
 
 Such tight coupling and lack of separation of concerns make the system difficult to maintain, extend, and test.
 
----
 
 ## Decision
 
@@ -26,7 +25,6 @@ We decided to refactor the monolithic DisplayGUI module into multiple responsibi
 - `FlightMetadataProvider`  
 - `BigQueryUploader`
 
----
 
 ## Rationale
 
@@ -41,13 +39,11 @@ By isolating responsibilities, we achieve improved:
 - Extensibility
 - Testability
 
----
 
 ## Status
 
 **Accepted**
 
----
 
 ## Consequences
 
@@ -62,5 +58,3 @@ By isolating responsibilities, we achieve improved:
 - Initial **refactoring effort** and **migration cost**  
 - Temporary instability due to deep DisplayGUI logic changes  
 - Coordination overhead to establish and follow new module boundaries
-
----
