@@ -34,16 +34,15 @@ typedef struct
  double              Speed;
  double              VerticalRate;
  int                 SpriteImage;
+#ifndef YAKI_TEST_CODE
+ bool visible;
+#endif
 } TADS_B_Aircraft;
 
 struct TAircraftPair {
     TADS_B_Aircraft * ADS_B_Aircraft;
     unsigned int i_key_size;
-#ifndef YAKI_TEST_CODE
     uint32_t key_data;
-#else
-    const void *p_key_data;
-#endif
 };
 
 void RawToAircraft(modeS_message *mm,TADS_B_Aircraft *ADS_B_Aircraft);
@@ -102,6 +101,10 @@ public:
     void Get(std::vector<TCpaPair>& outData) {
 //        std::lock_guard<std::mutex> lock(mtx);
         outData = Cache;
+    }
+    void Clear() {
+//        std::lock_guard<std::mutex> lock(mtx);
+        Cache.clear();
     }
 };
 

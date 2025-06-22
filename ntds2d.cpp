@@ -312,7 +312,7 @@ void MakeTrackHook(void)
    glTranslated(x,y,0.0);
    glRotatef(-180.0, 0,0,1);
    glBegin(GL_QUADS);
-
+   glColor4f(1.0, 1.0, 1.0, 1.0);
    glTexCoord2f(1.0, 1.0);
    glVertex2f(32.0*scale,32.0*scale);      // top right
 

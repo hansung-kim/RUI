@@ -453,7 +453,10 @@ void __fastcall TForm1::DrawObjects(void)
   TADS_B_Aircraft* Data,*DataCPA;
 
   DWORD i,j,Count;
-
+#ifndef YAKI_TEST_CODE
+    TArea *selectedArea = NULL;
+    static TArea *prevSelectedArea = NULL;
+#endif
   if (AreaTemp)
   {
    glPointSize(3.0);
@@ -502,7 +505,12 @@ void __fastcall TForm1::DrawObjects(void)
 	   if (Area->Selected)
 	   {
 		glPopAttrib ();
+#ifndef YAKI_TEST_CODE
+		selectedArea = Area;
+		glLineWidth(5.0);
+#else
 		glLineWidth(2.0);
+#endif
 	   }
 
 	   glColor4f(MC.Red/255.0, MC.Green/255.0, MC.Blue/255.0, 0.4);
@@ -559,6 +567,22 @@ void __fastcall TForm1::DrawObjects(void)
 	{
 	  if (Data->HaveLatLon)
 	  {
+#ifndef YAKI_TEST_CODE
+      if(selectedArea) {
+           pfVec3 Point;
+           Point[0]=Data->Longitude;
+           Point[1]=Data->Latitude;
+           Point[2]=0.0;
+           if (!PointInPolygon(selectedArea->Points,selectedArea->NumPoints,Point)) {
+               Data->visible=false;
+               continue;
+           } else {
+               Data->visible=true;
+           }
+      } else {
+          Data->visible=true;
+      }
+#endif
 		ViewableAircraft++;
 	   glColor4f(1.0, 1.0, 1.0, 1.0);
 
@@ -1352,8 +1376,12 @@ void __fastcall TForm1::AreaListViewSelectItem(TObject *Sender, TListItem *Item,
 #ifndef YAKI_TEST_CODE
     // interested aircraft
     // 
-#endif    
+    if (CpaCache) {
+        CpaCache->Clear();
+    }
+#else
 	ObjectDisplay->Repaint();
+#endif
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::DeleteClick(TObject *Sender)
@@ -1517,6 +1545,9 @@ void __fastcall TTCPClientRawHandleThread::HandleInput(void)
 	   ADS_B_Aircraft->HaveSpeedAndHeading=false;
 	   ADS_B_Aircraft->HaveFlightNum=false;
 	   ADS_B_Aircraft->SpriteImage=Form1->CurrentSpriteImage;
+#ifndef YAKI_TEST_CODE
+	   ADS_B_Aircraft->visible=false;
+#endif
 	   if (Form1->CycleImages->Checked)
 		 Form1->CurrentSpriteImage=(Form1->CurrentSpriteImage+1)%Form1->NumSpriteImages;
 	   if (AircraftManager::GetInstance()->Insert(ADS_B_Aircraft, sizeof(addr), &addr) < 0)

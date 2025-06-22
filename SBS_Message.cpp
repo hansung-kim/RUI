@@ -301,6 +301,9 @@ bool SBS_Message_Decode( char *msg)
          ADS_B_Aircraft->HaveSpeedAndHeading=false;
          ADS_B_Aircraft->HaveFlightNum=false;
          ADS_B_Aircraft->SpriteImage=Form1->CurrentSpriteImage;
+#ifndef YAKI_TEST_CODE
+	     ADS_B_Aircraft->visible=false;
+#endif
          if (Form1->CycleImages->Checked)
               Form1->CurrentSpriteImage=(Form1->CurrentSpriteImage+1)%Form1->NumSpriteImages;
 		 if (AircraftManager::GetInstance()->Insert(ADS_B_Aircraft,sizeof(addr), &addr) < 0)
