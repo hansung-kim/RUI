@@ -1,16 +1,16 @@
 # ADR 002: Improve Performance of Close Control Display Time (Introduce Concurrency)
 
 
-Before the application of the CPA feature, the Flight Close Control display for aircraft on the RUI met the QA-01 requirement (**response time < 1s**), with an average update time of **315.2ms over 30 attempts for 8,000 aircraft**.
+Before the application of the CPA feature, the Flight Close Control display for aircraft on the RUI met the QA-01 requirement (response time < 1s), with an average update time of 315.2ms over 30 attempts for 8,000 aircraft.
 
-However, after applying CPA, the system could only display up to around **4,000 aircraft**, and performance issues arose due to latency affecting the update time of the Close Control display.
+However, after applying CPA, the system could only display up to around 4,000 aircrafts, and performance issues arose due to latency affecting the update time of the Close Control display.
 [Reference: Experiment 4](https://docs.google.com/document/d/14iqMM11d6TfCtYCdGdRo0fHWyrxUSejTZ_Kb75wdEPE/edit?tab=t.0)
 
 
 ## Decision
 
-To isolate the impact of CPA computation on the RUI, a **separate thread** was created to perform only the CPA operations.  
-(**Tactic:** Introduce Concurrency)
+To isolate the impact of CPA computation on the RUI, a separate thread was created to perform only the CPA operations.  
+(Tactic: Introduce Concurrency)
 
 
 ## Rationale
@@ -40,11 +40,11 @@ Despite filtering out these unnecessary computation conditions and re-running th
 
 - Achieved QA-01 response goal.
 - Aircraft display performed well even at 100ms RUI refresh rate (Reference: *Experiment 6*).
-- Supports QA-06 (**Extensibility**) by isolating CPA thread and minimizing impact on UI.
+- Supports QA-06 (Extensibility) by isolating CPA thread and minimizing impact on UI.
 - Easier to extend RUI functionality without disrupting CPA logic.
 
 ### ⚠️ Negative Impacts
 
-- Slight increase in **design complexity** due to threading and structural separation.
-- Minor impact on **Modifiability**, though mitigated since CPA logic is parameterized and stable.
+- Slight increase in design complexity due to threading and structural separation.
+- Minor impact on Modifiability, though mitigated since CPA logic is parameterized and stable.
 
