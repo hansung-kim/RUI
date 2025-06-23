@@ -6,6 +6,7 @@
 //---------------------------------------------------------------------------
 USEFORM("AreaDialog.cpp", AreaConfirm);
 USEFORM("DisplayGUI.cpp", Form1);
+USEFORM("Unit2.cpp", Form2);
 //---------------------------------------------------------------------------
 static FILE* pCout = NULL;
 static void SetStdOutToNewConsole(void);
@@ -28,7 +29,8 @@ int WINAPI _tWinMain(HINSTANCE, HINSTANCE, LPTSTR, int)
 		Application->MainFormOnTaskBar = true;
 		Application->CreateForm(__classid(TForm1), &Form1);
 		Application->CreateForm(__classid(TAreaConfirm), &AreaConfirm);
-		Application->Run();
+		Application->CreateForm(__classid(TForm2), &Form2);
+        Application->Run();
 	   if (pCout)
 		{
 		 fclose(pCout);
