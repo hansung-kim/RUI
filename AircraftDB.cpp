@@ -152,6 +152,17 @@ const char * GetAircraftDBInfo(uint32_t addr)
 
    return (buf);
 }
+
+const char * GetAircraftDBReg(uint32_t addr) {
+  static char buf [2048];
+  const TAircraftData *a;
+  a =(TAircraftData *) ght_get(AircraftDBHashTable,sizeof(addr),&addr);
+  if (a) {
+    sprintf(buf, "%s", a->Fields[1].c_str());
+    return buf;
+  }
+  return NULL;
+}
 //---------------------------------------------------------------------------
 /*
  * Declare ICAO registration address ranges and country.

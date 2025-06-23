@@ -417,8 +417,9 @@ void __fastcall TCPAWorkerThread::Execute() {
         mgr->computeCPA = false;
         //        mgr->MutexUnlock();
         // 남은 객체 출력
+#ifdef YAKI_TEST_CODE
         printf("TCPAWorkerThread::Execute aircraftList->Count : %d\n", mgr->aircraftList->Count);
-
+#endif
         for (int i = 0; i < mgr->aircraftList->Count; i++) {
             TAircraftPair *obj = (TAircraftPair*)mgr->aircraftList->Items[i];
             if (obj->ADS_B_Aircraft) {

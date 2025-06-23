@@ -11,6 +11,12 @@
 
 typedef struct
 {
+    double Latitude;
+    double Longitude;
+} TLatLon;
+
+typedef struct
+{
  uint32_t            ICAO;
  char                HexAddr[7];       /* Printable ICAO address */
  __int64             LastSeen;             /* Time at which the last packet was received. */
@@ -37,6 +43,7 @@ typedef struct
 #ifndef YAKI_TEST_CODE
  bool visible;
 #endif
+    TList *LatLonHistory;
 } TADS_B_Aircraft;
 
 struct TAircraftPair {

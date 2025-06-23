@@ -34,6 +34,8 @@
 #include "RouteDB.h"
 #ifndef YAKI_TEST_CODE // check internet
 #include <WinInet.h>
+#include <System.Net.HttpClient.hpp>   // TNetHTTPClient
+#include <System.Net.URLClient.hpp>    // CustomHeaders의 TNetHeaders 등
 #endif
 
 #define AIRCRAFT_DATABASE_URL   "https://opensky-network.org/datasets/metadata/aircraftDatabase.zip"
@@ -68,6 +70,9 @@
 #pragma resource "*.dfm"
 #ifndef YAKI_TEST_CODE // check internet
 //#pragma comment(lib, "Wininet.lib")
+#include <System.RegularExpressions.hpp>
+#include <Vcl.Edge.hpp>
+#include "Unit2.h"
 #endif
 TForm1 *Form1;
  //---------------------------------------------------------------------------
@@ -652,8 +657,39 @@ void __fastcall TForm1::DrawObjects(void)
           } else {
               FlightDepArrLabel->Caption = "N/A";
           }
-
  #endif
+ #ifndef YAKI_TEST_CODE
+         double prevX, prevY;
+        bool first = true;
+         for (int i = 0; i < Data->LatLonHistory->Count; i++)
+         {
+             TLatLon *obj = (TLatLon*) Data->LatLonHistory->Items[i];
+            // obj 사용
+            glColor3f(1.0f, 0.0f, 0.0f);   // 빨강
+            glPointSize(10.0f);            // 점 크기 10픽셀
+            LatLon2XY(obj->Latitude,obj->Longitude, ScrX, ScrY);
+            glBegin(GL_POINTS);
+                glVertex2f(ScrX, ScrY);
+            glEnd();
+    // 선 그리기
+            if (!first)
+            {
+                glColor3f(0.0f, 1.0f, 0.0f); // 선 색: 초록
+                glLineWidth(2.0f);
+                glBegin(GL_LINES);
+                    glVertex2f(prevX, prevY);
+                    glVertex2f(ScrX, ScrY);
+                glEnd();
+            }
+
+            prevX = ScrX;
+            prevY = ScrY;
+            first = false;
+
+         }
+
+         // draw history
+#endif
         }
         else FlightNumLabel->Caption="N/A";
         if (Data->HaveLatLon)
@@ -897,7 +933,7 @@ void __fastcall TForm1::ObjectDisplayMouseMove(TObject *Sender,
   TADS_B_Aircraft* Data;
 
 #ifndef YAKI_TEST_CODE
-  MinRange=16.0;
+  MinRange=8.0;
 #else
   MinRange=8.0;
 #endif
@@ -934,6 +970,7 @@ mouseover_aircraft = NULL;
     }
 #endif
 #ifndef YAKI_TEST_CODE
+  MinRange=8.0;
   for(Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetFirst(&iterator,(const void **) &Key);
 			  Data; Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iterator, (const void **)&Key))
 	{
@@ -1127,6 +1164,7 @@ double HaversineNM(double lat1, double lon1, double lat2, double lon2)
   MinRange=16.0;
 #else
   MinRange=8.0;
+  Form2->Hide();
 #endif
   for(Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetFirst(&iterator,(const void **) &Key);
 			  Data; Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iterator, (const void **)&Key))
@@ -1154,6 +1192,21 @@ double HaversineNM(double lat1, double lon1, double lat2, double lon2)
 		 TrackHook.Valid_CC=true;
 		 TrackHook.ICAO_CC=ADS_B_Aircraft->ICAO;
 		 printf("%s\n\n",GetAircraftDBInfo(ADS_B_Aircraft->ICAO));
+#ifndef YAKI_TEST_CODE
+// https://www.planespotters.net/search?q=VH-VKB
+            String reg = GetAircraftDBReg(ADS_B_Aircraft->ICAO);
+            if (reg == "" || reg == "?") {
+            } else {
+                String url = "https://www.flightradar24.com/data/aircraft/" + reg;
+                //String url = "https://www.planespotters.net/search?q=VH-VKB";
+                //String url = "https://www.bing.com";
+                Form2->Show();
+                Form2->WebBrowser1->Silent = true;
+                //Form2->EdgeBrowser1->AdditionalBrowserArguments = L"--user-agent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36\"";
+                Form2->WebBrowser1->Navigate(WideString(url).c_bstr());
+                //Form2->EdgeBrowser1->Navigate(WideString(url).c_bstr());
+            }
+#endif
 		}
 		else
 		{
@@ -1253,6 +1306,15 @@ void __fastcall TForm1::Purge(void)
 #endif
           }
           if (defer == false) {
+#ifndef YAKI_TEST_CODE
+             for (int i = 0; i < Data->LatLonHistory->Count; i++)
+             {
+                 TLatLon *obj = (TLatLon*) Data->LatLonHistory->Items[i];
+                 delete obj;
+             }
+             Data->LatLonHistory->Clear();
+             delete Data->LatLonHistory;
+#endif
 			  delete Data;
           }
 
@@ -1280,6 +1342,15 @@ void __fastcall TForm1::PurgeButtonClick(TObject *Sender)
 	  if (!p)
 		ShowMessage("Removing the current iterated entry failed! This is a BUG\n");
       if (defer == false) {
+#ifndef YAKI_TEST_CODE
+             for (int i = 0; i < Data->LatLonHistory->Count; i++)
+             {
+                 TLatLon *obj = (TLatLon*) Data->LatLonHistory->Items[i];
+                 delete obj;
+             }
+             Data->LatLonHistory->Clear();
+             delete Data->LatLonHistory;
+#endif
 	    delete Data;
       }
 	}

@@ -26,6 +26,9 @@
 #include "cspin.h"
 #include "Aircraft.h"
 #include "AirportDB.h"
+#include <System.Net.HttpClient.hpp>
+#include <System.Net.HttpClientComponent.hpp>
+#include <System.Net.URLClient.hpp>
 
 typedef float T_GL_Color[4];
 

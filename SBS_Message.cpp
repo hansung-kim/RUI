@@ -291,6 +291,7 @@ bool SBS_Message_Decode( char *msg)
      if (ADS_B_Aircraft==NULL)
         {
          ADS_B_Aircraft= new TADS_B_Aircraft;
+		 ADS_B_Aircraft->LatLonHistory = new TList;
          ADS_B_Aircraft->ICAO=addr;
          snprintf(ADS_B_Aircraft->HexAddr,sizeof(ADS_B_Aircraft->HexAddr),"%06X",(int)addr);
          ADS_B_Aircraft->NumMessagesSBS=0;
@@ -384,6 +385,10 @@ bool SBS_Message_Decode( char *msg)
                    ADS_B_Aircraft->Latitude=TempLat;
                    ADS_B_Aircraft->Longitude=TempLon;
                    ADS_B_Aircraft->HaveLatLon=true;
+                    TLatLon *pos = new TLatLon;
+                    pos->Latitude = TempLat;
+                    pos->Longitude = TempLon;
+                    ADS_B_Aircraft->LatLonHistory->Add(pos);
                   }
 
                 }
