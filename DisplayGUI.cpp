@@ -755,16 +755,30 @@ void __fastcall TForm1::DrawObjects(void)
          {
              TLatLon *obj = (TLatLon*) Data->LatLonHistory->Items[i];
             // obj »ç¿ë
-            glColor3f(1.0f, 0.0f, 0.0f);   // »¡°­
+            // Check altitude
+            float r, g, b;
+            if (obj->Altitude < 1000) {
+                r = 0.0f; g = 0.0f; b = 1.0f; // ÆÄ¶û
+            } else if (obj->Altitude < 5000) {
+                r = 0.0f; g = 1.0f; b = 1.0f; // Ã»·Ï
+            } else if (obj->Altitude < 10000) {
+                r = 0.0f; g = 1.0f; b = 0.0f; // ÃÊ·Ï
+            } else if (obj->Altitude < 20000) {
+                r = 1.0f; g = 1.0f; b = 0.0f; // ³ë¶û
+            } else {
+                r = 1.0f; g = 0.0f; b = 0.0f; // »¡°­
+            }
+            glColor3f(r, g, b);
+ //           glColor3f(1.0f, 0.0f, 0.0f);   // »¡°­
             glPointSize(10.0f);            // Á¡ Å©±â 10ÇÈ¼¿
             LatLon2XY(obj->Latitude,obj->Longitude, ScrX, ScrY);
             glBegin(GL_POINTS);
-                glVertex2f(ScrX, ScrY);
+            glVertex2f(ScrX, ScrY);
             glEnd();
     // ¼± ±×¸®±â
             if (!first)
             {
-                glColor3f(0.0f, 1.0f, 0.0f); // ¼± »ö: ÃÊ·Ï
+ //               glColor3f(0.0f, 1.0f, 0.0f); // ¼± »ö: ÃÊ·Ï
                 glLineWidth(2.0f);
                 glBegin(GL_LINES);
                     glVertex2f(prevX, prevY);
@@ -1252,6 +1266,7 @@ double HaversineNM(double lat1, double lon1, double lat2, double lon2)
 
 #ifndef YAKI_TEST_CODE
   MinRange=16.0;
+  Form2->Hide();
 #else
   MinRange=8.0;
   Form2->Hide();

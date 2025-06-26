@@ -388,6 +388,7 @@ bool SBS_Message_Decode( char *msg)
                     TLatLon *pos = new TLatLon;
                     pos->Latitude = TempLat;
                     pos->Longitude = TempLon;
+                    pos->Altitude = ADS_B_Aircraft->Altitude;
                     ADS_B_Aircraft->LatLonHistory->Add(pos);
                   }
 
