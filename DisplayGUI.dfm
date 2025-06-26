@@ -14,6 +14,8 @@ object Form1: TForm1
   Menu = MainMenu1
   Position = poScreenCenter
   WindowState = wsMaximized
+  OnClose = FormClose
+  OnCreate = FormCreate
   OnMouseWheel = FormMouseWheel
   TextHeight = 12
   object Label16: TLabel
@@ -843,6 +845,7 @@ object Form1: TForm1
     OnInit = ObjectDisplayInit
     OnResize = ObjectDisplayResize
     OnPaint = ObjectDisplayPaint
+    ExplicitLeft = 3
   end
   object MainMenu1: TMainMenu
     Left = 24
@@ -913,5 +916,12 @@ object Form1: TForm1
     DefaultExt = 'sbs'
     Filter = 'sbs|*.sbs'
     Left = 784
+  end
+  object IdUDPServer1: TIdUDPServer
+    Bindings = <>
+    DefaultPort = 0
+    OnUDPRead = IdUDPServer1UDPRead
+    Left = 40
+    Top = 72
   end
 end

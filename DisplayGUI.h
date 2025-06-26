@@ -29,6 +29,10 @@
 #include <System.Net.HttpClient.hpp>
 #include <System.Net.HttpClientComponent.hpp>
 #include <System.Net.URLClient.hpp>
+#include <IdUDPBase.hpp>
+#include <IdUDPServer.hpp>
+#include <IdGlobal.hpp>
+#include <IdSocketHandle.hpp>
 
 typedef float T_GL_Color[4];
 
@@ -183,6 +187,7 @@ __published:	// IDE-managed Components
 	TMenuItem *LoadARTCCBoundaries1;
 	TLabel *Label20;
 	TLabel *FlightDepArrLabel;
+	TIdUDPServer *IdUDPServer1;
 	void __fastcall ObjectDisplayInit(TObject *Sender);
 	void __fastcall ObjectDisplayResize(TObject *Sender);
 	void __fastcall ObjectDisplayPaint(TObject *Sender);
@@ -227,6 +232,10 @@ __published:	// IDE-managed Components
 	void __fastcall UseSBSRemoteClick(TObject *Sender);
 	void __fastcall UseSBSLocalClick(TObject *Sender);
 	void __fastcall LoadARTCCBoundaries1Click(TObject *Sender);
+	void __fastcall IdUDPServer1UDPRead(TIdUDPListenerThread *AThread, const TIdBytes AData,
+          TIdSocketHandle *ABinding);
+	void __fastcall FormCreate(TObject *Sender);
+	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
 
 private:	// User declarations
 
@@ -247,6 +256,7 @@ public:		// User declarations
     void __fastcall CreateBigQueryCSV(void);
     void __fastcall CloseBigQueryCSV(void);
     bool __fastcall LoadARTCCBoundaries(AnsiString FileName);
+
 #ifndef YAKI_TEST_CODE
     void __fastcall LoadAirport();
     void __fastcall LoadRoute();

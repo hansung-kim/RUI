@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+ï»¿//---------------------------------------------------------------------------
 
 #include <vcl.h>
 #include <new>
@@ -35,7 +35,7 @@
 #ifndef YAKI_TEST_CODE // check internet
 #include <WinInet.h>
 #include <System.Net.HttpClient.hpp>   // TNetHTTPClient
-#include <System.Net.URLClient.hpp>    // CustomHeadersÀÇ TNetHeaders µî
+#include <System.Net.URLClient.hpp>    // CustomHeadersï¿½ï¿½ TNetHeaders ï¿½ï¿½
 #endif
 
 #define AIRCRAFT_DATABASE_URL   "https://opensky-network.org/datasets/metadata/aircraftDatabase.zip"
@@ -272,12 +272,12 @@ __fastcall TForm1::TForm1(TComponent* Owner)
  InitAirportDB(AirportDBPathFileName);
  InitRouteDB(RouteDBPathFileName);
 #endif
-//    // ¿öÄ¿ »ý¼º
+//    // ï¿½ï¿½Ä¿ ï¿½ï¿½ï¿½ï¿½
 #ifdef USE_WORKER_THREAD
 // YAKI_TEST_CODE
     CpaCache = new TCPAResultCache();
     WorkerThread = new TCPAWorkerThread(CpaCache);
-    WorkerThread->Start(); // Execute() ½ÃÀÛ
+    WorkerThread->Start(); // Execute() ï¿½ï¿½ï¿½ï¿½
 #endif
 #ifndef YAKI_TEST_CODE
  mouseover_aircraft = NULL;
@@ -677,17 +677,17 @@ void __fastcall TForm1::DrawObjects(void)
          for (int i = 0; i < Data->LatLonHistory->Count; i++)
          {
              TLatLon *obj = (TLatLon*) Data->LatLonHistory->Items[i];
-            // obj »ç¿ë
-            glColor3f(1.0f, 0.0f, 0.0f);   // »¡°­
-            glPointSize(10.0f);            // Á¡ Å©±â 10ÇÈ¼¿
+            // obj ï¿½ï¿½ï¿½
+            glColor3f(1.0f, 0.0f, 0.0f);   // ï¿½ï¿½ï¿½ï¿½
+            glPointSize(10.0f);            // ï¿½ï¿½ Å©ï¿½ï¿½ 10ï¿½È¼ï¿½
             LatLon2XY(obj->Latitude,obj->Longitude, ScrX, ScrY);
             glBegin(GL_POINTS);
                 glVertex2f(ScrX, ScrY);
             glEnd();
-    // ¼± ±×¸®±â
+    // ï¿½ï¿½ ï¿½×¸ï¿½ï¿½ï¿½
             if (!first)
             {
-                glColor3f(0.0f, 1.0f, 0.0f); // ¼± »ö: ÃÊ·Ï
+                glColor3f(0.0f, 1.0f, 0.0f); // ï¿½ï¿½ ï¿½ï¿½: ï¿½Ê·ï¿½
                 glLineWidth(2.0f);
                 glBegin(GL_LINES);
                     glVertex2f(prevX, prevY);
@@ -824,7 +824,7 @@ void __fastcall TForm1::DrawObjects(void)
 #ifdef YAKI_TEST_CODE
         printf("Draw CPA\n");
 #endif
-        // Ç×°ø±â1 -> CPA À§Ä¡
+        // ï¿½×°ï¿½ï¿½ï¿½1 -> CPA ï¿½ï¿½Ä¡
          glColor4f(0.0, 1.0, 0.0, 1.0);
          glBegin(GL_LINE_STRIP);
  		 glLineWidth(5.0);
@@ -1034,15 +1034,15 @@ void __fastcall TForm1::Exit1Click(TObject *Sender)
  }
  //---------------------------------------------------------------------------
 #ifndef YAKI_TEST_CODE
- // deg -> radian º¯È¯ ¸ÅÅ©·Î
+ // deg -> radian ï¿½ï¿½È¯ ï¿½ï¿½Å©ï¿½ï¿½
 constexpr double DEG2RAD = M_PI / 180.0;
 
-// °á°ú: km ´ÜÀ§ °Å¸® ¹ÝÈ¯
+// ï¿½ï¿½ï¿½: km ï¿½ï¿½ï¿½ï¿½ ï¿½Å¸ï¿½ ï¿½ï¿½È¯
 double Haversine(double lat1_deg, double lon1_deg, double lat2_deg, double lon2_deg)
 {
-    const double R = 6371.0; // Áö±¸ ¹Ý°æ (km)
+    const double R = 6371.0; // ï¿½ï¿½ï¿½ï¿½ ï¿½Ý°ï¿½ (km)
 
-    // À§µµ, °æµµ¸¦ radianÀ¸·Î º¯È¯
+    // ï¿½ï¿½ï¿½ï¿½, ï¿½æµµï¿½ï¿½ radianï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯
     double lat1 = lat1_deg * DEG2RAD;
     double lon1 = lon1_deg * DEG2RAD;
     double lat2 = lat2_deg * DEG2RAD;
@@ -1060,7 +1060,7 @@ double Haversine(double lat1_deg, double lon1_deg, double lat2_deg, double lon2_
     return R * c; // km
 }
 
-// Nautical Miles(NM)·Î ¹Ù·Î ¾ò°í ½ÍÀ¸¸é:
+// Nautical Miles(NM)ï¿½ï¿½ ï¿½Ù·ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:
 double HaversineNM(double lat1, double lon1, double lat2, double lon2)
 {
     const double KM_TO_NM = 0.539957;
@@ -2119,8 +2119,8 @@ void __fastcall TForm1::LoadAirport() {
     try {
         TIdHTTP *http = new TIdHTTP(NULL);
         TIdSSLIOHandlerSocketOpenSSL *ssl = new TIdSSLIOHandlerSocketOpenSSL(NULL);
-        ssl->SSLOptions->Method = sslvTLSv1_2;         // TLS 1.2 »ç¿ë
-        ssl->SSLOptions->Mode = sslmClient;            // Å¬¶óÀÌ¾ðÆ® ¸ðµå
+        ssl->SSLOptions->Method = sslvTLSv1_2;         // TLS 1.2 ï¿½ï¿½ï¿½
+        ssl->SSLOptions->Mode = sslmClient;            // Å¬ï¿½ï¿½ï¿½Ì¾ï¿½Æ® ï¿½ï¿½ï¿½
         http->IOHandler = ssl;
         TFileStream *fileStream = new TFileStream(AirportDBPathFileName, fmCreate);
 
@@ -2147,8 +2147,8 @@ void __fastcall TForm1::LoadRoute() {
     try {
         TIdHTTP *http = new TIdHTTP(NULL);
         TIdSSLIOHandlerSocketOpenSSL *ssl = new TIdSSLIOHandlerSocketOpenSSL(NULL);
-        ssl->SSLOptions->Method = sslvTLSv1_2;         // TLS 1.2 »ç¿ë
-        ssl->SSLOptions->Mode = sslmClient;            // Å¬¶óÀÌ¾ðÆ® ¸ðµå
+        ssl->SSLOptions->Method = sslvTLSv1_2;         // TLS 1.2 ï¿½ï¿½ï¿½
+        ssl->SSLOptions->Mode = sslmClient;            // Å¬ï¿½ï¿½ï¿½Ì¾ï¿½Æ® ï¿½ï¿½ï¿½
         http->IOHandler = ssl;
         TFileStream *fileStream = new TFileStream(RouteDBPathFileName, fmCreate);
 
@@ -2572,3 +2572,46 @@ void __fastcall TForm1::RegisterMapProviders() {
     MapFactory::Instance().Register(OpenStreetMap, [](){ return new OpenStreetMapProvider(OpenStreetMap, "..\\OpenStreetMap"); });
 }
 #endif
+
+//void __fastcall TForm1::FormCreate(TObject *Sender)
+//{
+//    IdUDPServer1->DefaultPort = 55555;
+//    IdUDPServer1->Active = true;
+//}
+//
+//void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
+//{
+//    IdUDPServer1->Active = false;
+//}
+
+
+void __fastcall TForm1::IdUDPServer1UDPRead(TIdUDPListenerThread *AThread, const TIdBytes AData,
+          TIdSocketHandle *ABinding)
+{
+        int length = AData.Length;
+
+    printf("received heartbeat: %d\n", length);
+
+//    TThread::Queue(NULL, [=]() {
+//        UnicodeString hexStr;
+//        for (int i = 0; i < length; ++i)
+//            hexStr += IntToHex((int)AData[i], 2) + " ";
+//        Memo1->Lines->Add("(Hex): " + hexStr);
+//    });
+}
+
+
+
+void __fastcall TForm1::FormCreate(TObject *Sender)
+{
+    IdUDPServer1->DefaultPort = 55555;
+	IdUDPServer1->Active = true;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
+{
+	IdUDPServer1->Active = false;
+}
+//---------------------------------------------------------------------------
+
