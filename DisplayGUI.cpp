@@ -74,6 +74,13 @@
 #include <Vcl.Edge.hpp>
 #include "Unit2.h"
 #endif
+#ifndef YAKI_TEST_CODE
+#include "MapFactory.h"
+#include "GoogleMapProvider.h"
+#include "SkyVectorMapProvider.h"
+#include "OpenStreetMapProvider.h"
+#endif
+
 TForm1 *Form1;
  //---------------------------------------------------------------------------
  static void RunPythonScript(AnsiString scriptPath,AnsiString args);
@@ -231,6 +238,10 @@ __fastcall TForm1::TForm1(TComponent* Owner)
  MapCenterLat=MAP_CENTER_LAT;
  MapCenterLon=MAP_CENTER_LON;
 
+#ifndef YAKI_TEST_CODE // MAP_FACTORY_INIT
+  RegisterMapProviders();
+#endif
+
 #ifndef YAKI_TEST_CODE
   DWORD dwFlags;
   if (!InternetGetConnectedState(&dwFlags, 0)) {
@@ -319,6 +330,8 @@ void __fastcall TForm1::ObjectDisplayInit(TObject *Sender)
 	g_EarthView->Resize(ObjectDisplay->Width,ObjectDisplay->Height);
 	glPushAttrib (GL_LINE_BIT);
 	glPopAttrib ();
+
+
     printf("OpenGL Version %s\n",glGetString(GL_VERSION));
 }
 //---------------------------------------------------------------------------
@@ -2158,109 +2171,18 @@ void __fastcall TForm1::LoadRoute() {
 
 void __fastcall TForm1::LoadMap(int Type)
 {
-   AnsiString  HomeDir = ExtractFilePath(ExtractFileDir(Application->ExeName));
-    if (Type==GoogleMaps)
-   {
-     HomeDir+= "..\\GoogleMap";
-     if (LoadMapFromInternet) HomeDir+= "_Live\\";
-     else  HomeDir+= "\\";
-     std::string cachedir;
-     cachedir=HomeDir.c_str();
-
-     if (mkdir(cachedir.c_str()) != 0 && errno != EEXIST)
-	    throw Sysutils::Exception("Can not create cache directory");
-
-     g_Storage = new FilesystemStorage(cachedir,true);
-     if (LoadMapFromInternet)
-       {
-	    g_Keyhole = new KeyholeConnection(GoogleMaps);
-        g_Keyhole->SetSaveStorage(g_Storage);
-	    g_Storage->SetNextLoadStorage(g_Keyhole);
-	   }
-    }
-  else if (Type==SkyVector_VFR)
-   {
-     HomeDir+= "..\\VFR_Map";
-     if (LoadMapFromInternet) HomeDir+= "_Live\\";
-     else  HomeDir+= "\\";
-     std::string cachedir;
-     cachedir=HomeDir.c_str();
-
-     if (mkdir(cachedir.c_str()) != 0 && errno != EEXIST)
-	    throw Sysutils::Exception("Can not create cache directory");
-
-     g_Storage = new FilesystemStorage(cachedir,true);
-     if (LoadMapFromInternet)
-       {
-	    g_Keyhole = new KeyholeConnection(SkyVector_VFR);
-        g_Keyhole->SetSaveStorage(g_Storage);
-	    g_Storage->SetNextLoadStorage(g_Keyhole);
-	   }
-    }
-  else if (Type==SkyVector_IFR_Low)
-   {
-     HomeDir+= "..\\IFR_Low_Map";
-     if (LoadMapFromInternet) HomeDir+= "_Live\\";
-     else  HomeDir+= "\\";
-     std::string cachedir;
-     cachedir=HomeDir.c_str();
-
-     if (mkdir(cachedir.c_str()) != 0 && errno != EEXIST)
-	    throw Sysutils::Exception("Can not create cache directory");
-
-     g_Storage = new FilesystemStorage(cachedir,true);
-     if (LoadMapFromInternet)
-       {
-	    g_Keyhole = new KeyholeConnection(SkyVector_IFR_Low);
-        g_Keyhole->SetSaveStorage(g_Storage);
-	    g_Storage->SetNextLoadStorage(g_Keyhole);
-	   }
-    }
-  else if (Type==SkyVector_IFR_High)
-   {
-     HomeDir+= "..\\IFR_High_Map";
-     if (LoadMapFromInternet) HomeDir+= "_Live\\";
-     else  HomeDir+= "\\";
-     std::string cachedir;
-     cachedir=HomeDir.c_str();
-
-     if (mkdir(cachedir.c_str()) != 0 && errno != EEXIST)
-	    throw Sysutils::Exception("Can not create cache directory");
-
-     g_Storage = new FilesystemStorage(cachedir,true);
-     if (LoadMapFromInternet)
-       {
-	    g_Keyhole = new KeyholeConnection(SkyVector_IFR_High);
-        g_Keyhole->SetSaveStorage(g_Storage);
-	    g_Storage->SetNextLoadStorage(g_Keyhole);
-	   }
+    AnsiString baseDir = ExtractFilePath(ExtractFileDir(Application->ExeName));
+    IMapProvider* provider = MapFactory::Instance().Create(Type);
+    if (!provider) {
+        ShowMessage("Invalid map type");
+        return;
     }
 
-   else if (Type==OpenStreetMap)
-   {
-     HomeDir+= "..\\OpenStreetMap";
-     if (LoadMapFromInternet) HomeDir+= "_Live\\";
-     else  HomeDir+= "\\";
-     std::string cachedir;
-     cachedir=HomeDir.c_str();
-
-     if (mkdir(cachedir.c_str()) != 0 && errno != EEXIST)
-	    throw Sysutils::Exception("Can not create cache directory");
-
-     g_Storage = new FilesystemStorage(cachedir,true);
-     if (LoadMapFromInternet)
-       {
-	    g_Keyhole = new KeyholeConnection(OpenStreetMap);
-        g_Keyhole->SetSaveStorage(g_Storage);
-	    g_Storage->SetNextLoadStorage(g_Keyhole);
-	   }
-    }
-
-   g_GETileManager = new TileManager(g_Storage, Type!=OpenStreetMap);
-   g_MasterLayer = new GoogleLayer(g_GETileManager);
-
-   g_EarthView = new FlatEarthView(g_MasterLayer);
-   g_EarthView->Resize(ObjectDisplay->Width,ObjectDisplay->Height);
+    provider->Initialize(LoadMapFromInternet, baseDir);
+    g_GETileManager = provider->GetTileManager();
+    g_MasterLayer = provider->CreateLayer();
+    g_EarthView = new FlatEarthView(g_MasterLayer);
+    g_EarthView->Resize(ObjectDisplay->Width, ObjectDisplay->Height);
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::MapComboBoxChange(TObject *Sender)
@@ -2299,12 +2221,12 @@ void __fastcall TForm1::MapComboBoxChange(TObject *Sender)
     LoadMap(GoogleMaps);
   }
   else if (MapComboBox->ItemIndex==1) {
-    LoadMapFromInternet = false;
+   LoadMapFromInternet = false;
    LoadMap(SkyVector_VFR);
   }
   else if (MapComboBox->ItemIndex==2) {
     LoadMapFromInternet = false;
-   LoadMap(SkyVector_IFR_Low);
+    LoadMap(SkyVector_IFR_Low);
   }
   else if (MapComboBox->ItemIndex==3) {
     LoadMapFromInternet = false;
@@ -2641,4 +2563,12 @@ static int FinshARTCCBoundary(void)
  return 0 ;
 }
 //---------------------------------------------------------------------------
-
+#ifndef YAKI_TEST_CODE // MAP
+void __fastcall TForm1::RegisterMapProviders() {
+    MapFactory::Instance().Register(GoogleMaps, [](){ return new GoogleMapProvider(); });
+    MapFactory::Instance().Register(SkyVector_VFR, [](){ return new SkyVectorMapProvider(SkyVector_VFR, "..\\VFR_Map"); });
+    MapFactory::Instance().Register(SkyVector_IFR_Low, [](){ return new SkyVectorMapProvider(SkyVector_IFR_Low, "..\\IFR_Low_Map"); });
+    MapFactory::Instance().Register(SkyVector_IFR_High, [](){ return new SkyVectorMapProvider(SkyVector_IFR_High, "..\\IFR_High_Map"); });
+    MapFactory::Instance().Register(OpenStreetMap, [](){ return new OpenStreetMapProvider(OpenStreetMap, "..\\OpenStreetMap"); });
+}
+#endif

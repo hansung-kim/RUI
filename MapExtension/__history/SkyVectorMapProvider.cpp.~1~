@@ -1,0 +1,36 @@
+#include "SkyVectorMapProvider.h"
+#include "TileManager.h"
+#include "GoogleLayer.h"
+#include "KeyholeConnection.h"
+#include "FilesystemStorage.h"
+#include <System.SysUtils.hpp>
+#include <io.h>
+#include <direct.h>
+#include <errno.h>
+
+SkyVectorMapProvider::SkyVectorMapProvider(int type, const AnsiString& subDir)
+    : mapType(type), mapSubDir(subDir) {}
+
+void SkyVectorMapProvider::Initialize(const AnsiString& baseDir, bool loadFromInternet) {
+    AnsiString path = baseDir + mapSubDir + (loadFromInternet ? "_Live\\" : "\\");
+    std::string cachedir = path.c_str();
+
+    if (mkdir(cachedir.c_str()) != 0 && errno != EEXIST)
+        throw Sysutils::Exception("Can not create cache directory");
+
+    storage = new FilesystemStorage(cachedir, true);
+    if (loadFromInternet) {
+        keyhole = new KeyholeConnection(mapType);
+        keyhole->SetSaveStorage(storage);
+        storage->SetNextLoadStorage(keyhole);
+    }
+    tileManager = new TileManager(storage, mapType != OpenStreetMap);
+}
+
+TileManager* SkyVectorMapProvider::GetTileManager() {
+    return tileManager;
+}
+
+GoogleLayer* SkyVectorMapProvider::CreateLayer() {
+    return new GoogleLayer(tileManager);
+}

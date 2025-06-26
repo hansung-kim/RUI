@@ -1,0 +1,20 @@
+#pragma once
+#include "MapInterfaces.h"
+
+class FilesystemStorage;
+class KeyholeConnection;
+
+class SkyVectorMapProvider : public IMapProvider {
+private:
+    int mapType;
+    AnsiString mapSubDir;
+    FilesystemStorage* storage;
+    KeyholeConnection* keyhole;
+    TileManager* tileManager;
+
+public:
+    SkyVectorMapProvider(int type, const AnsiString& subDir);
+    virtual void Initialize(const AnsiString& baseDir, bool loadFromInternet);
+    TileManager* GetTileManager() override;
+    GoogleLayer* CreateLayer() override;
+};

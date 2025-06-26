@@ -253,7 +253,9 @@ public:		// User declarations
 	void __fastcall HookTrackAll();
 	void __fastcall split_and_print(const char *input);
 #endif
-
+#ifndef YAKI_TEST_CODE // MAP
+    void __fastcall RegisterMapProviders();
+#endif
 	int                        MouseDownX,MouseDownY;
 	bool                       MouseDown;
 	TTrackHook                 TrackHook;
