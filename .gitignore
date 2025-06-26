@@ -1,0 +1,10 @@
+_history/
+_recovery/
+GoogleMap_Live/
+
+ADS-B-Display.cbproj
+ADS-B-Display.cbproj.local
+
+**/Win64/
+**/*.d
+**/*.o
