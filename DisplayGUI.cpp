@@ -72,6 +72,7 @@
 //#pragma comment(lib, "Wininet.lib")
 #include <System.RegularExpressions.hpp>
 #include <Vcl.Edge.hpp>
+#include <vector>
 #include "Unit2.h"
 #endif
 #ifndef YAKI_TEST_CODE
@@ -393,49 +394,125 @@ void remove_spaces(char *str) {
     }
     *dst = '\0';
 }
+
+
+inline double DegToRad(double deg) { return deg * M_PI / 180.0; }
+inline double RadToDeg(double rad) { return rad * 180.0 / M_PI; }
+
+std::vector<TLatLon> GenerateGreatCirclePoints(double lat1_deg, double lon1_deg, double lat2_deg, double lon2_deg, int steps = 100) {
+    std::vector<TLatLon> points;
+
+    double lat1 = DegToRad(lat1_deg);
+    double lon1 = DegToRad(lon1_deg);
+    double lat2 = DegToRad(lat2_deg);
+    double lon2 = DegToRad(lon2_deg);
+
+    // Haversine formula to compute angular distance
+    double d = 2.0 * asin(sqrt(
+        pow(sin((lat2 - lat1) / 2.0), 2) +
+        cos(lat1) * cos(lat2) * pow(sin((lon2 - lon1) / 2.0), 2)));
+
+    if (d == 0.0) return points;
+
+    for (int i = 0; i <= steps; ++i) {
+        double f = static_cast<double>(i) / steps;
+
+        double A = sin((1 - f) * d) / sin(d);
+        double B = sin(f * d) / sin(d);
+
+        double x = A * cos(lat1) * cos(lon1) + B * cos(lat2) * cos(lon2);
+        double y = A * cos(lat1) * sin(lon1) + B * cos(lat2) * sin(lon2);
+        double z = A * sin(lat1) + B * sin(lat2);
+
+        double lat = atan2(z, sqrt(x * x + y * y));
+        double lon = atan2(y, x);
+
+        TLatLon pt;
+        pt.Latitude = RadToDeg(lat);
+        pt.Longitude = RadToDeg(lon);
+
+        // °æµµ ¹üÀ§¸¦ -180 ~ 180 À¸·Î Á¤±ÔÈ­
+        if (pt.Longitude < -180.0) pt.Longitude += 360.0;
+        if (pt.Longitude > 180.0) pt.Longitude -= 360.0;
+
+        points.push_back(pt);
+    }
+
+    return points;
+}
+
 void __fastcall TForm1::split_and_print(const char *input) {
     char buffer[256];
     strncpy(buffer, input, sizeof(buffer) - 1);
     buffer[sizeof(buffer) - 1] = '\0';
-    double xArr[3], yArr[3];
-    int arrIndex = 0;
+
+    std::vector<AnsiString> tokenArr;
+
     char *token = strtok(buffer, "-");
     bool origin = true;
-    while (token != NULL) {
-        // GetAirportDB
+
+    // ÃÖ´ë 10°³ °øÇ×±îÁö Ã³¸®
+    while (token != NULL && tokenArr.size() < 10) {
+        tokenArr.push_back(token);
+
         double latitude, longitude, ScrX, ScrY;
         if (GetAirportDBInfo(token, latitude, longitude)) {
-            LatLon2XY(latitude,longitude, ScrX, ScrY);
-            xArr[arrIndex] = ScrX;
-            yArr[arrIndex++] = ScrY;
+            LatLon2XY(latitude, longitude, ScrX, ScrY);
+
             if (origin) {
-               glColor4f(0.0, 0.0, 1.0, 1.0);
-               origin = false; 
+                glColor4f(0.0, 0.0, 1.0, 1.0); // Ãâ¹ßÁöÁ¡ ÆÄ¶õ»ö
+                origin = false;
             } else {
-            	glColor4f(0.0, 1.0, 1.0, 1.0);
+                glColor4f(0.0, 1.0, 1.0, 1.0); // ³ª¸ÓÁö ½Ã¾È»ö
             }
-            DrawPoint(ScrX,ScrY);
-            if (true || g_EarthView->GetCurrentZoom()/100 > 0.7f) {
-               glRasterPos2i(ScrX+30,ScrY-10);
-               ObjectDisplay->Draw2DText(token);
+
+            DrawPoint(ScrX, ScrY);
+            if (true || g_EarthView->GetCurrentZoom() / 100 > 0.7f) {
+                glRasterPos2i(ScrX + 30, ScrY - 10);
+                ObjectDisplay->Draw2DText(token);
             }
-	        glEnd();
+            glEnd();
         }
+
         token = strtok(NULL, "-");
     }
-    for (int i = 0; i < arrIndex - 1; i++) {
-      glBegin(GL_LINE_STRIP);
-      glLineWidth(5.0);
-        if (i % 3 == 0) {
-            glColor4f(0.5, 0.5, 0.0, 1.0);
-        } else if (i % 3 == 1) {
-            glColor4f(0.0, 0.5, 0.5, 1.0);
-        } else {
-            glColor4f(0.5, 0.0, 0.5, 1.0);
+
+    // µÎ °³ ÀÌ»óÀÌ¸é ±¸°£¸¶´Ù ´ë±ÇÇ×·Î·Î ¿¬°á
+    for (size_t i = 0; i + 1 < tokenArr.size(); ++i) {
+        double lat1, lon1, lat2, lon2;
+
+        if (GetAirportDBInfo(tokenArr[i].c_str(), lat1, lon1) &&
+            GetAirportDBInfo(tokenArr[i + 1].c_str(), lat2, lon2)) {
+
+            auto points = GenerateGreatCirclePoints(lat1, lon1, lat2, lon2, 100);
+
+            // »ö»ó ±¸°£º° º¯°æ
+            if (i % 3 == 0) glColor4f(1.0, 1.0, 0.0, 1.0);      // ³ë¶õ»ö
+            else if (i % 3 == 1) glColor4f(0.0, 1.0, 0.0, 1.0); // ³ì»ö
+            else glColor4f(1.0, 0.0, 1.0, 1.0);                 // º¸¶ó»ö
+
+            glLineWidth(2.0);
+            glBegin(GL_LINE_STRIP);
+
+            for (size_t j = 0; j < points.size(); ++j) {
+                double x, y;
+                LatLon2XY(points[j].Latitude, points[j].Longitude, x, y);
+
+                if (j > 0) {
+                    double lon1 = points[j - 1].Longitude;
+                    double lon2 = points[j].Longitude;
+                    double lonDiff = fabs(lon2 - lon1);
+                    if (lonDiff > 180.0) {
+                        glEnd();               // ÇöÀç ¼± ²÷°í
+                        glBegin(GL_LINE_STRIP); // »õ·Î¿î ¼± ½ÃÀÛ
+                    }
+                }
+
+                glVertex2f(x, y);
+            }
+
+            glEnd();
         }
-      glVertex2f(xArr[i],yArr[i]);
-      glVertex2f(xArr[i + 1],yArr[i + 1]);
-      glEnd();
     }
 }
 #endif
@@ -677,17 +754,41 @@ void __fastcall TForm1::DrawObjects(void)
          for (int i = 0; i < Data->LatLonHistory->Count; i++)
          {
              TLatLon *obj = (TLatLon*) Data->LatLonHistory->Items[i];
+<<<<<<< HEAD
             // obj ï¿½ï¿½ï¿½
             glColor3f(1.0f, 0.0f, 0.0f);   // ï¿½ï¿½ï¿½ï¿½
             glPointSize(10.0f);            // ï¿½ï¿½ Å©ï¿½ï¿½ 10ï¿½È¼ï¿½
+=======
+            // obj »ç¿ë
+            // Check altitude
+            float r, g, b;
+            if (obj->Altitude < 1000) {
+                r = 0.0f; g = 0.0f; b = 1.0f; // ÆÄ¶û
+            } else if (obj->Altitude < 5000) {
+                r = 0.0f; g = 1.0f; b = 1.0f; // Ã»·Ï
+            } else if (obj->Altitude < 10000) {
+                r = 0.0f; g = 1.0f; b = 0.0f; // ÃÊ·Ï
+            } else if (obj->Altitude < 20000) {
+                r = 1.0f; g = 1.0f; b = 0.0f; // ³ë¶û
+            } else {
+                r = 1.0f; g = 0.0f; b = 0.0f; // »¡°­
+            }
+            glColor3f(r, g, b);
+ //           glColor3f(1.0f, 0.0f, 0.0f);   // »¡°­
+            glPointSize(10.0f);            // Á¡ Å©±â 10ÇÈ¼¿
+>>>>>>> a7eb050c5bb41fe23f0f1a2a42e8914e9659cc41
             LatLon2XY(obj->Latitude,obj->Longitude, ScrX, ScrY);
             glBegin(GL_POINTS);
-                glVertex2f(ScrX, ScrY);
+            glVertex2f(ScrX, ScrY);
             glEnd();
     // ï¿½ï¿½ ï¿½×¸ï¿½ï¿½ï¿½
             if (!first)
             {
+<<<<<<< HEAD
                 glColor3f(0.0f, 1.0f, 0.0f); // ï¿½ï¿½ ï¿½ï¿½: ï¿½Ê·ï¿½
+=======
+ //               glColor3f(0.0f, 1.0f, 0.0f); // ¼± »ö: ÃÊ·Ï
+>>>>>>> a7eb050c5bb41fe23f0f1a2a42e8914e9659cc41
                 glLineWidth(2.0f);
                 glBegin(GL_LINES);
                     glVertex2f(prevX, prevY);
@@ -1175,6 +1276,7 @@ double HaversineNM(double lat1, double lon1, double lat2, double lon2)
 
 #ifndef YAKI_TEST_CODE
   MinRange=16.0;
+  Form2->Hide();
 #else
   MinRange=8.0;
   Form2->Hide();

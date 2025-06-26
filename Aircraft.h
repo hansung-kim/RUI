@@ -13,6 +13,7 @@ typedef struct
 {
     double Latitude;
     double Longitude;
+    double Altitude;
 } TLatLon;
 
 typedef struct
