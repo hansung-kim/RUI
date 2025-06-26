@@ -93,8 +93,8 @@
         <Icon_MainIcon>$(BDS)\bin\cbuilder_PROJECTICON.ico</Icon_MainIcon>
         <UWP_CppLogo44>$(BDS)\bin\Artwork\Windows\UWP\cppreg_UwpDefault_44.png</UWP_CppLogo44>
         <UWP_CppLogo150>$(BDS)\bin\Artwork\Windows\UWP\cppreg_UwpDefault_150.png</UWP_CppLogo150>
-        <IncludePath>Map\MapSrc\;..\..\..\..\..\Desktop\ADS-B-2025\ADS-B-Display\;$(IncludePath)</IncludePath>
-        <ILINK_LibraryPath>Map\MapSrc\;..\..\..\..\..\Desktop\ADS-B-2025\ADS-B-Display\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
+        <IncludePath>MapExtension\;Map\MapSrc\;..\..\..\..\..\Desktop\ADS-B-2025\ADS-B-Display\;$(IncludePath)</IncludePath>
+        <ILINK_LibraryPath>MapExtension\;Map\MapSrc\;..\..\..\..\..\Desktop\ADS-B-2025\ADS-B-Display\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
         <SanitizedProjectName>ADS-B-Display</SanitizedProjectName>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
@@ -245,6 +245,45 @@
             <DependentOn>LatLonConv.h</DependentOn>
             <BuildOrder>33</BuildOrder>
         </CppCompile>
+        <CppCompile Include="MapExtension\FlatEarthMapView.cpp">
+            <BuildOrder>42</BuildOrder>
+        </CppCompile>
+        <None Include="MapExtension\FlatEarthMapView.h">
+            <BuildOrder>43</BuildOrder>
+        </None>
+        <CppCompile Include="MapExtension\GoogleMapProvider.cpp">
+            <BuildOrder>44</BuildOrder>
+        </CppCompile>
+        <None Include="MapExtension\GoogleMapProvider.h">
+            <BuildOrder>45</BuildOrder>
+        </None>
+        <CppCompile Include="MapExtension\MapFactory.cpp">
+            <BuildOrder>46</BuildOrder>
+        </CppCompile>
+        <None Include="MapExtension\MapFactory.h">
+            <BuildOrder>47</BuildOrder>
+        </None>
+        <None Include="MapExtension\MapInterfaces.h">
+            <BuildOrder>48</BuildOrder>
+        </None>
+        <CppCompile Include="MapExtension\MapViewFactory.cpp">
+            <BuildOrder>49</BuildOrder>
+        </CppCompile>
+        <None Include="MapExtension\MapViewFactory.h">
+            <BuildOrder>50</BuildOrder>
+        </None>
+        <CppCompile Include="MapExtension\OpenStreetMapProvider.cpp">
+            <BuildOrder>51</BuildOrder>
+        </CppCompile>
+        <None Include="MapExtension\OpenStreetMapProvider.h">
+            <BuildOrder>52</BuildOrder>
+        </None>
+        <CppCompile Include="MapExtension\SkyVectorMapProvider.cpp">
+            <BuildOrder>53</BuildOrder>
+        </CppCompile>
+        <None Include="MapExtension\SkyVectorMapProvider.h">
+            <BuildOrder>54</BuildOrder>
+        </None>
         <CppCompile Include="Map\MapSrc\EarthView.cpp">
             <DependentOn>Map\MapSrc\EarthView.h</DependentOn>
             <BuildOrder>23</BuildOrder>
