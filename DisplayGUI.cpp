@@ -72,6 +72,7 @@
 //#pragma comment(lib, "Wininet.lib")
 #include <System.RegularExpressions.hpp>
 #include <Vcl.Edge.hpp>
+#include <vector>
 #include "Unit2.h"
 #endif
 #ifndef YAKI_TEST_CODE
@@ -393,49 +394,125 @@ void remove_spaces(char *str) {
     }
     *dst = '\0';
 }
+
+
+inline double DegToRad(double deg) { return deg * M_PI / 180.0; }
+inline double RadToDeg(double rad) { return rad * 180.0 / M_PI; }
+
+std::vector<TLatLon> GenerateGreatCirclePoints(double lat1_deg, double lon1_deg, double lat2_deg, double lon2_deg, int steps = 100) {
+    std::vector<TLatLon> points;
+
+    double lat1 = DegToRad(lat1_deg);
+    double lon1 = DegToRad(lon1_deg);
+    double lat2 = DegToRad(lat2_deg);
+    double lon2 = DegToRad(lon2_deg);
+
+    // Haversine formula to compute angular distance
+    double d = 2.0 * asin(sqrt(
+        pow(sin((lat2 - lat1) / 2.0), 2) +
+        cos(lat1) * cos(lat2) * pow(sin((lon2 - lon1) / 2.0), 2)));
+
+    if (d == 0.0) return points;
+
+    for (int i = 0; i <= steps; ++i) {
+        double f = static_cast<double>(i) / steps;
+
+        double A = sin((1 - f) * d) / sin(d);
+        double B = sin(f * d) / sin(d);
+
+        double x = A * cos(lat1) * cos(lon1) + B * cos(lat2) * cos(lon2);
+        double y = A * cos(lat1) * sin(lon1) + B * cos(lat2) * sin(lon2);
+        double z = A * sin(lat1) + B * sin(lat2);
+
+        double lat = atan2(z, sqrt(x * x + y * y));
+        double lon = atan2(y, x);
+
+        TLatLon pt;
+        pt.Latitude = RadToDeg(lat);
+        pt.Longitude = RadToDeg(lon);
+
+        // 경도 범위를 -180 ~ 180 으로 정규화
+        if (pt.Longitude < -180.0) pt.Longitude += 360.0;
+        if (pt.Longitude > 180.0) pt.Longitude -= 360.0;
+
+        points.push_back(pt);
+    }
+
+    return points;
+}
+
 void __fastcall TForm1::split_and_print(const char *input) {
     char buffer[256];
     strncpy(buffer, input, sizeof(buffer) - 1);
     buffer[sizeof(buffer) - 1] = '\0';
-    double xArr[3], yArr[3];
-    int arrIndex = 0;
+
+    std::vector<AnsiString> tokenArr;
+
     char *token = strtok(buffer, "-");
     bool origin = true;
-    while (token != NULL) {
-        // GetAirportDB
+
+    // 최대 10개 공항까지 처리
+    while (token != NULL && tokenArr.size() < 10) {
+        tokenArr.push_back(token);
+
         double latitude, longitude, ScrX, ScrY;
         if (GetAirportDBInfo(token, latitude, longitude)) {
-            LatLon2XY(latitude,longitude, ScrX, ScrY);
-            xArr[arrIndex] = ScrX;
-            yArr[arrIndex++] = ScrY;
+            LatLon2XY(latitude, longitude, ScrX, ScrY);
+
             if (origin) {
-               glColor4f(0.0, 0.0, 1.0, 1.0);
-               origin = false; 
+                glColor4f(0.0, 0.0, 1.0, 1.0); // 출발지점 파란색
+                origin = false;
             } else {
-            	glColor4f(0.0, 1.0, 1.0, 1.0);
+                glColor4f(0.0, 1.0, 1.0, 1.0); // 나머지 시안색
             }
-            DrawPoint(ScrX,ScrY);
-            if (true || g_EarthView->GetCurrentZoom()/100 > 0.7f) {
-               glRasterPos2i(ScrX+30,ScrY-10);
-               ObjectDisplay->Draw2DText(token);
+
+            DrawPoint(ScrX, ScrY);
+            if (true || g_EarthView->GetCurrentZoom() / 100 > 0.7f) {
+                glRasterPos2i(ScrX + 30, ScrY - 10);
+                ObjectDisplay->Draw2DText(token);
             }
-	        glEnd();
+            glEnd();
         }
+
         token = strtok(NULL, "-");
     }
-    for (int i = 0; i < arrIndex - 1; i++) {
-      glBegin(GL_LINE_STRIP);
-      glLineWidth(5.0);
-        if (i % 3 == 0) {
-            glColor4f(0.5, 0.5, 0.0, 1.0);
-        } else if (i % 3 == 1) {
-            glColor4f(0.0, 0.5, 0.5, 1.0);
-        } else {
-            glColor4f(0.5, 0.0, 0.5, 1.0);
+
+    // 두 개 이상이면 구간마다 대권항로로 연결
+    for (size_t i = 0; i + 1 < tokenArr.size(); ++i) {
+        double lat1, lon1, lat2, lon2;
+
+        if (GetAirportDBInfo(tokenArr[i].c_str(), lat1, lon1) &&
+            GetAirportDBInfo(tokenArr[i + 1].c_str(), lat2, lon2)) {
+
+            auto points = GenerateGreatCirclePoints(lat1, lon1, lat2, lon2, 100);
+
+            // 색상 구간별 변경
+            if (i % 3 == 0) glColor4f(1.0, 1.0, 0.0, 1.0);      // 노란색
+            else if (i % 3 == 1) glColor4f(0.0, 1.0, 0.0, 1.0); // 녹색
+            else glColor4f(1.0, 0.0, 1.0, 1.0);                 // 보라색
+
+            glLineWidth(2.0);
+            glBegin(GL_LINE_STRIP);
+
+            for (size_t j = 0; j < points.size(); ++j) {
+                double x, y;
+                LatLon2XY(points[j].Latitude, points[j].Longitude, x, y);
+
+                if (j > 0) {
+                    double lon1 = points[j - 1].Longitude;
+                    double lon2 = points[j].Longitude;
+                    double lonDiff = fabs(lon2 - lon1);
+                    if (lonDiff > 180.0) {
+                        glEnd();               // 현재 선 끊고
+                        glBegin(GL_LINE_STRIP); // 새로운 선 시작
+                    }
+                }
+
+                glVertex2f(x, y);
+            }
+
+            glEnd();
         }
-      glVertex2f(xArr[i],yArr[i]);
-      glVertex2f(xArr[i + 1],yArr[i + 1]);
-      glEnd();
     }
 }
 #endif
