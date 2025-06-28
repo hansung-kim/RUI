@@ -754,11 +754,6 @@ void __fastcall TForm1::DrawObjects(void)
          for (int i = 0; i < Data->LatLonHistory->Count; i++)
          {
              TLatLon *obj = (TLatLon*) Data->LatLonHistory->Items[i];
-<<<<<<< HEAD
-            // obj ï¿½ï¿½ï¿½
-            glColor3f(1.0f, 0.0f, 0.0f);   // ï¿½ï¿½ï¿½ï¿½
-            glPointSize(10.0f);            // ï¿½ï¿½ Å©ï¿½ï¿½ 10ï¿½È¼ï¿½
-=======
             // obj »ç¿ë
             // Check altitude
             float r, g, b;
@@ -776,7 +771,6 @@ void __fastcall TForm1::DrawObjects(void)
             glColor3f(r, g, b);
  //           glColor3f(1.0f, 0.0f, 0.0f);   // »¡°­
             glPointSize(10.0f);            // Á¡ Å©±â 10ÇÈ¼¿
->>>>>>> a7eb050c5bb41fe23f0f1a2a42e8914e9659cc41
             LatLon2XY(obj->Latitude,obj->Longitude, ScrX, ScrY);
             glBegin(GL_POINTS);
             glVertex2f(ScrX, ScrY);
@@ -784,11 +778,7 @@ void __fastcall TForm1::DrawObjects(void)
     // ï¿½ï¿½ ï¿½×¸ï¿½ï¿½ï¿½
             if (!first)
             {
-<<<<<<< HEAD
-                glColor3f(0.0f, 1.0f, 0.0f); // ï¿½ï¿½ ï¿½ï¿½: ï¿½Ê·ï¿½
-=======
  //               glColor3f(0.0f, 1.0f, 0.0f); // ¼± »ö: ÃÊ·Ï
->>>>>>> a7eb050c5bb41fe23f0f1a2a42e8914e9659cc41
                 glLineWidth(2.0f);
                 glBegin(GL_LINES);
                     glVertex2f(prevX, prevY);
