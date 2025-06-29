@@ -549,8 +549,7 @@ void __fastcall TForm1::DrawObjects(void)
 
   DWORD i,j,Count;
 #ifndef YAKI_TEST_CODE
-    TArea *selectedArea = NULL;
-    static TArea *prevSelectedArea = NULL;
+  bool selectedArea = false;
 #endif
   if (AreaTemp)
   {
@@ -601,7 +600,7 @@ void __fastcall TForm1::DrawObjects(void)
 	   {
 		glPopAttrib ();
 #ifndef YAKI_TEST_CODE
-		selectedArea = Area;
+		selectedArea = true;
 		glLineWidth(5.0);
 #else
 		glLineWidth(2.0);
@@ -663,22 +662,33 @@ void __fastcall TForm1::DrawObjects(void)
 	  if (Data->HaveLatLon)
 	  {
 #ifndef YAKI_TEST_CODE
-      if(selectedArea) {
-           pfVec3 Point;
-           Point[0]=Data->Longitude;
-           Point[1]=Data->Latitude;
-           Point[2]=0.0;
-           if (!PointInPolygon(selectedArea->Points,selectedArea->NumPoints,Point)) {
-               Data->visible=false;
-               continue;
-           } else {
-               Data->visible=true;
-           }
-      } else {
-          Data->visible=true;
-      }
+          Data->visible = 0;
+          if(selectedArea) {
+                Count=Areas->Count;
+                for (i = 0; i < Count; i++)
+                {
+                   TArea *Area = (TArea *)Areas->Items[i];
+                   if (Area->Selected)
+                   {
+                       pfVec3 Point;
+                       Point[0]=Data->Longitude;
+                       Point[1]=Data->Latitude;
+                       Point[2]=0.0;
+                       if (PointInPolygon(Area->Points,Area->NumPoints,Point)) {
+                           Data->visible++;
+                       }
+                   }
+                }
+          } else {
+              Data->visible++;
+          }
+          if (Data->visible == 0) {
+              continue;
+          }
+          ViewableAircraft++;
 #endif
-		ViewableAircraft++;
+
+
 	   glColor4f(1.0, 1.0, 1.0, 1.0);
 
 	   LatLon2XY(Data->Latitude,Data->Longitude, ScrX, ScrY);
@@ -1529,24 +1539,17 @@ void __fastcall TForm1::AreaListViewSelectItem(TObject *Sender, TListItem *Item,
    DWORD Count;
    TArea *AreaS=(TArea *)Item->Data;
    bool HaveSelected=false;
+    AreaS->Selected = Selected;
 	Count=Areas->Count;
 	for (unsigned int i = 0; i < Count; i++)
 	 {
 	   TArea *Area = (TArea *)Areas->Items[i];
-	   if (Area==AreaS)
-	   {
-		if (Item->Selected)
+		if (Area->Selected)
 		{
-		 Area->Selected=true;
 		 HaveSelected=true;
 		}
-		else
-		 Area->Selected=false;
-	   }
-	   else
-		 Area->Selected=false;
-
 	 }
+
 	if (HaveSelected)  Delete->Enabled=true;
 	else Delete->Enabled=false;
 #ifndef YAKI_TEST_CODE
