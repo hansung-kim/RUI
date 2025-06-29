@@ -42,7 +42,7 @@ typedef struct
  double              VerticalRate;
  int                 SpriteImage;
 #ifndef YAKI_TEST_CODE
- bool visible;
+ unsigned char visible;
 #endif
     TList *LatLonHistory;
 } TADS_B_Aircraft;
