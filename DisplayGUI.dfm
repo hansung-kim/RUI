@@ -70,6 +70,32 @@ object Form1: TForm1
     Font.Style = [fsBold]
     ParentFont = False
   end
+  object Label25: TLabel
+    Left = 74
+    Top = 70
+    Width = 21
+    Height = 13
+    Caption = 'N/A'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label26: TLabel
+    Left = 13
+    Top = 70
+    Width = 55
+    Height = 13
+    Caption = 'FLIGHT #:'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
   object RightPanel: TPanel
     Left = 978
     Top = 0
@@ -179,13 +205,16 @@ object Form1: TForm1
       Left = 1
       Top = 1
       Width = 248
-      Height = 576
-      Align = alTop
+      Height = 892
+      Align = alClient
       Constraints.MinHeight = 70
       TabOrder = 1
+      ExplicitLeft = 25
+      ExplicitTop = 67
+      ExplicitHeight = 576
       object Label15: TLabel
         Left = 72
-        Top = 422
+        Top = 469
         Width = 98
         Height = 13
         Caption = 'Areas Of Interest'
@@ -198,7 +227,7 @@ object Form1: TForm1
       end
       object DrawMap: TCheckBox
         Left = 5
-        Top = 278
+        Top = 325
         Width = 98
         Height = 17
         Caption = 'Display Map'
@@ -214,7 +243,7 @@ object Form1: TForm1
       end
       object PurgeStale: TCheckBox
         Left = 5
-        Top = 301
+        Top = 348
         Width = 96
         Height = 19
         Caption = 'Purge Stale'
@@ -230,7 +259,7 @@ object Form1: TForm1
       end
       object CSpinStaleTime: TCSpinEdit
         Left = 107
-        Top = 280
+        Top = 327
         Width = 62
         Height = 21
         Increment = 5
@@ -241,7 +270,7 @@ object Form1: TForm1
       end
       object PurgeButton: TButton
         Left = 186
-        Top = 283
+        Top = 330
         Width = 51
         Height = 16
         Caption = 'Purge'
@@ -250,7 +279,7 @@ object Form1: TForm1
       end
       object AreaListView: TListView
         Left = 5
-        Top = 441
+        Top = 488
         Width = 235
         Height = 97
         Columns = <
@@ -270,8 +299,8 @@ object Form1: TForm1
         OnSelectItem = AreaListViewSelectItem
       end
       object Insert: TButton
-        Left = 5
-        Top = 544
+        Left = 13
+        Top = 591
         Width = 36
         Height = 18
         Caption = 'Insert'
@@ -279,8 +308,8 @@ object Form1: TForm1
         OnClick = InsertClick
       end
       object Delete: TButton
-        Left = 158
-        Top = 544
+        Left = 166
+        Top = 591
         Width = 44
         Height = 18
         Caption = 'Delete'
@@ -289,8 +318,8 @@ object Form1: TForm1
         OnClick = DeleteClick
       end
       object Complete: TButton
-        Left = 45
-        Top = 544
+        Left = 53
+        Top = 591
         Width = 57
         Height = 18
         Caption = 'Complete'
@@ -299,8 +328,8 @@ object Form1: TForm1
         OnClick = CompleteClick
       end
       object Cancel: TButton
-        Left = 107
-        Top = 544
+        Left = 115
+        Top = 591
         Width = 41
         Height = 18
         Caption = 'Cancel'
@@ -310,7 +339,7 @@ object Form1: TForm1
       end
       object RawConnectButton: TButton
         Left = 5
-        Top = 326
+        Top = 373
         Width = 104
         Height = 18
         Caption = 'Raw Connect'
@@ -319,7 +348,7 @@ object Form1: TForm1
       end
       object RawIpAddress: TEdit
         Left = 115
-        Top = 326
+        Top = 373
         Width = 110
         Height = 20
         TabOrder = 10
@@ -327,7 +356,7 @@ object Form1: TForm1
       end
       object CycleImages: TCheckBox
         Left = 107
-        Top = 301
+        Top = 348
         Width = 96
         Height = 19
         Caption = 'Cycle Images'
@@ -344,13 +373,13 @@ object Form1: TForm1
         Left = 5
         Top = 76
         Width = 244
-        Height = 205
+        Height = 245
         BevelInner = bvLowered
         BevelKind = bkFlat
         TabOrder = 12
         object CLatLabel: TLabel
           Left = 66
-          Top = 57
+          Top = 60
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -363,7 +392,7 @@ object Form1: TForm1
         end
         object CLonLabel: TLabel
           Left = 66
-          Top = 76
+          Top = 79
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -377,7 +406,7 @@ object Form1: TForm1
         end
         object SpdLabel: TLabel
           Left = 66
-          Top = 92
+          Top = 95
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -390,7 +419,7 @@ object Form1: TForm1
         end
         object HdgLabel: TLabel
           Left = 66
-          Top = 111
+          Top = 114
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -403,7 +432,7 @@ object Form1: TForm1
         end
         object AltLabel: TLabel
           Left = 66
-          Top = 130
+          Top = 133
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -416,7 +445,7 @@ object Form1: TForm1
         end
         object MsgCntLabel: TLabel
           Left = 66
-          Top = 149
+          Top = 152
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -428,8 +457,8 @@ object Form1: TForm1
           ParentFont = False
         end
         object TrkLastUpdateTimeLabel: TLabel
-          Left = 120
-          Top = 168
+          Left = 121
+          Top = 210
           Width = 72
           Height = 13
           Caption = '00:00:00:000'
@@ -441,8 +470,8 @@ object Form1: TForm1
           ParentFont = False
         end
         object Label14: TLabel
-          Left = 5
-          Top = 168
+          Left = 6
+          Top = 210
           Width = 109
           Height = 13
           Caption = 'LAST UPDATE TIME:'
@@ -455,7 +484,7 @@ object Form1: TForm1
         end
         object Label13: TLabel
           Left = 5
-          Top = 150
+          Top = 153
           Width = 52
           Height = 13
           Caption = 'MSG CNT:'
@@ -468,7 +497,7 @@ object Form1: TForm1
         end
         object Label10: TLabel
           Left = 5
-          Top = 131
+          Top = 134
           Width = 24
           Height = 13
           Caption = 'ALT:'
@@ -481,7 +510,7 @@ object Form1: TForm1
         end
         object Label9: TLabel
           Left = 5
-          Top = 112
+          Top = 115
           Width = 27
           Height = 13
           Caption = 'HDG:'
@@ -494,7 +523,7 @@ object Form1: TForm1
         end
         object Label8: TLabel
           Left = 5
-          Top = 93
+          Top = 96
           Width = 25
           Height = 13
           Caption = 'SPD:'
@@ -507,7 +536,7 @@ object Form1: TForm1
         end
         object Label7: TLabel
           Left = 5
-          Top = 76
+          Top = 79
           Width = 24
           Height = 13
           Caption = 'LON:'
@@ -520,7 +549,7 @@ object Form1: TForm1
         end
         object Label6: TLabel
           Left = 5
-          Top = 57
+          Top = 60
           Width = 24
           Height = 13
           Caption = 'LAT:'
@@ -533,7 +562,7 @@ object Form1: TForm1
         end
         object Label18: TLabel
           Left = 5
-          Top = 38
+          Top = 41
           Width = 55
           Height = 13
           Caption = 'FLIGHT #:'
@@ -546,7 +575,7 @@ object Form1: TForm1
         end
         object FlightNumLabel: TLabel
           Left = 66
-          Top = 38
+          Top = 41
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -572,7 +601,7 @@ object Form1: TForm1
         end
         object Label5: TLabel
           Left = 5
-          Top = 19
+          Top = 22
           Width = 31
           Height = 13
           Caption = 'ICAO:'
@@ -598,7 +627,7 @@ object Form1: TForm1
         end
         object Label20: TLabel
           Left = 5
-          Top = 185
+          Top = 191
           Width = 102
           Height = 13
           Caption = 'Departure Arrival:'
@@ -611,7 +640,33 @@ object Form1: TForm1
         end
         object FlightDepArrLabel: TLabel
           Left = 122
-          Top = 186
+          Top = 192
+          Width = 21
+          Height = 13
+          Caption = 'N/A'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object AircraftCountry: TLabel
+          Left = 5
+          Top = 172
+          Width = 97
+          Height = 13
+          Caption = 'Aircraft Country :'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object AircraftCountryTest: TLabel
+          Left = 122
+          Top = 172
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -758,8 +813,8 @@ object Form1: TForm1
         end
       end
       object RawPlaybackButton: TButton
-        Left = 133
-        Top = 350
+        Left = 115
+        Top = 397
         Width = 96
         Height = 17
         Caption = 'Raw Playback'
@@ -768,7 +823,7 @@ object Form1: TForm1
       end
       object RawRecordButton: TButton
         Left = 5
-        Top = 350
+        Top = 397
         Width = 104
         Height = 17
         Caption = 'Raw Record'
@@ -777,7 +832,7 @@ object Form1: TForm1
       end
       object SBSConnectButton: TButton
         Left = 5
-        Top = 373
+        Top = 420
         Width = 104
         Height = 20
         Caption = 'SBS Connect'
@@ -786,7 +841,7 @@ object Form1: TForm1
       end
       object SBSIpAddress: TEdit
         Left = 115
-        Top = 373
+        Top = 420
         Width = 117
         Height = 20
         TabOrder = 17
@@ -794,7 +849,7 @@ object Form1: TForm1
       end
       object SBSRecordButton: TButton
         Left = 5
-        Top = 399
+        Top = 446
         Width = 104
         Height = 17
         Caption = 'SBS Record'
@@ -803,7 +858,7 @@ object Form1: TForm1
       end
       object SBSPlaybackButton: TButton
         Left = 115
-        Top = 399
+        Top = 446
         Width = 96
         Height = 17
         Caption = 'SBS Playback'
@@ -812,8 +867,8 @@ object Form1: TForm1
       end
     end
     object Panel2: TPanel
-      Left = 1
-      Top = 674
+      Left = 0
+      Top = 796
       Width = 248
       Height = 96
       TabOrder = 2
@@ -844,7 +899,7 @@ object Form1: TForm1
     end
     object Panel6: TPanel
       Left = 1
-      Top = 577
+      Top = 699
       Width = 248
       Height = 95
       Align = alCustom
@@ -879,7 +934,7 @@ object Form1: TForm1
         Left = 91
         Top = 41
         Width = 21
-        Height = 16
+        Height = 13
         Caption = 'N/A'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -943,6 +998,8 @@ object Form1: TForm1
     OnInit = ObjectDisplayInit
     OnResize = ObjectDisplayResize
     OnPaint = ObjectDisplayPaint
+    ExplicitLeft = 212
+    ExplicitTop = 136
   end
   object MainMenu1: TMainMenu
     Left = 24
