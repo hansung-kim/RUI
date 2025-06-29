@@ -456,7 +456,8 @@ void __fastcall TForm1::split_and_print(const char *input) {
         tokenArr.push_back(token);
 
         double latitude, longitude, ScrX, ScrY;
-        if (GetAirportDBInfo(token, latitude, longitude)) {
+        TAirportData* airportData = GetAirportDBInfo(token, latitude, longitude);
+        if (airportData) {
             LatLon2XY(latitude, longitude, ScrX, ScrY);
 
             if (origin) {
@@ -469,14 +470,32 @@ void __fastcall TForm1::split_and_print(const char *input) {
             DrawPoint(ScrX, ScrY);
             if (true || g_EarthView->GetCurrentZoom() / 100 > 0.7f) {
                 glRasterPos2i(ScrX + 30, ScrY - 10);
+#ifndef YAKI_TEST_CODE
+                ObjectDisplay->Draw2DText(airportData->Fields[3].c_str());
+#else
                 ObjectDisplay->Draw2DText(token);
+#endif
             }
             glEnd();
         }
 
         token = strtok(NULL, "-");
     }
-
+    FlightDepArrLabel->Caption = "";
+    bool first = true;
+    for (size_t i = 0; i < tokenArr.size(); i++) {
+        double lat1, lon1;
+    	TAirportData* airportData = GetAirportDBInfo(tokenArr[i].c_str(), lat1, lon1);
+        if (airportData) {
+            if (first) {
+             FlightDepArrLabel->Caption += airportData->Fields[3].c_str();
+             first = false;
+            } else {
+             FlightDepArrLabel->Caption += "-";
+             FlightDepArrLabel->Caption += airportData->Fields[3].c_str();
+            }
+        }
+	}
     // 두 개 이상이면 구간마다 대권항로로 연결
     for (size_t i = 0; i + 1 < tokenArr.size(); ++i) {
         double lat1, lon1, lat2, lon2;
@@ -752,11 +771,12 @@ void __fastcall TForm1::DrawObjects(void)
           bool bFind;
           const char *routeInfo = GetRouteDBInfo(Data->FlightNum, bFind);
           if (bFind) {
-              FlightDepArrLabel->Caption = routeInfo;
+//              FlightDepArrLabel->Caption = routeInfo;
               split_and_print(routeInfo);
           } else {
               FlightDepArrLabel->Caption = "N/A";
           }
+
  #endif
  #ifndef YAKI_TEST_CODE
          double prevX, prevY;
