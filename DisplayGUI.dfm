@@ -209,12 +209,9 @@ object Form1: TForm1
       Align = alClient
       Constraints.MinHeight = 70
       TabOrder = 1
-      ExplicitLeft = 25
-      ExplicitTop = 67
-      ExplicitHeight = 576
       object Label15: TLabel
         Left = 72
-        Top = 469
+        Top = 501
         Width = 98
         Height = 13
         Caption = 'Areas Of Interest'
@@ -227,7 +224,7 @@ object Form1: TForm1
       end
       object DrawMap: TCheckBox
         Left = 5
-        Top = 325
+        Top = 357
         Width = 98
         Height = 17
         Caption = 'Display Map'
@@ -243,7 +240,7 @@ object Form1: TForm1
       end
       object PurgeStale: TCheckBox
         Left = 5
-        Top = 348
+        Top = 380
         Width = 96
         Height = 19
         Caption = 'Purge Stale'
@@ -259,7 +256,7 @@ object Form1: TForm1
       end
       object CSpinStaleTime: TCSpinEdit
         Left = 107
-        Top = 327
+        Top = 359
         Width = 62
         Height = 21
         Increment = 5
@@ -270,7 +267,7 @@ object Form1: TForm1
       end
       object PurgeButton: TButton
         Left = 186
-        Top = 330
+        Top = 362
         Width = 51
         Height = 16
         Caption = 'Purge'
@@ -279,7 +276,7 @@ object Form1: TForm1
       end
       object AreaListView: TListView
         Left = 5
-        Top = 488
+        Top = 520
         Width = 235
         Height = 97
         Columns = <
@@ -291,6 +288,7 @@ object Form1: TForm1
             Caption = 'Color'
             Width = 40
           end>
+        MultiSelect = True
         ReadOnly = True
         RowSelect = True
         TabOrder = 4
@@ -300,7 +298,7 @@ object Form1: TForm1
       end
       object Insert: TButton
         Left = 13
-        Top = 591
+        Top = 623
         Width = 36
         Height = 18
         Caption = 'Insert'
@@ -309,7 +307,7 @@ object Form1: TForm1
       end
       object Delete: TButton
         Left = 166
-        Top = 591
+        Top = 623
         Width = 44
         Height = 18
         Caption = 'Delete'
@@ -319,7 +317,7 @@ object Form1: TForm1
       end
       object Complete: TButton
         Left = 53
-        Top = 591
+        Top = 623
         Width = 57
         Height = 18
         Caption = 'Complete'
@@ -329,7 +327,7 @@ object Form1: TForm1
       end
       object Cancel: TButton
         Left = 115
-        Top = 591
+        Top = 623
         Width = 41
         Height = 18
         Caption = 'Cancel'
@@ -339,7 +337,7 @@ object Form1: TForm1
       end
       object RawConnectButton: TButton
         Left = 5
-        Top = 373
+        Top = 405
         Width = 104
         Height = 18
         Caption = 'Raw Connect'
@@ -348,7 +346,7 @@ object Form1: TForm1
       end
       object RawIpAddress: TEdit
         Left = 115
-        Top = 373
+        Top = 405
         Width = 110
         Height = 20
         TabOrder = 10
@@ -356,7 +354,7 @@ object Form1: TForm1
       end
       object CycleImages: TCheckBox
         Left = 107
-        Top = 348
+        Top = 380
         Width = 96
         Height = 19
         Caption = 'Cycle Images'
@@ -373,7 +371,7 @@ object Form1: TForm1
         Left = 5
         Top = 76
         Width = 244
-        Height = 245
+        Height = 261
         BevelInner = bvLowered
         BevelKind = bkFlat
         TabOrder = 12
@@ -457,8 +455,8 @@ object Form1: TForm1
           ParentFont = False
         end
         object TrkLastUpdateTimeLabel: TLabel
-          Left = 121
-          Top = 210
+          Left = 120
+          Top = 234
           Width = 72
           Height = 13
           Caption = '00:00:00:000'
@@ -470,8 +468,8 @@ object Form1: TForm1
           ParentFont = False
         end
         object Label14: TLabel
-          Left = 6
-          Top = 210
+          Left = 5
+          Top = 234
           Width = 109
           Height = 13
           Caption = 'LAST UPDATE TIME:'
@@ -639,8 +637,8 @@ object Form1: TForm1
           ParentFont = False
         end
         object FlightDepArrLabel: TLabel
-          Left = 122
-          Top = 192
+          Left = 22
+          Top = 212
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -814,7 +812,7 @@ object Form1: TForm1
       end
       object RawPlaybackButton: TButton
         Left = 115
-        Top = 397
+        Top = 429
         Width = 96
         Height = 17
         Caption = 'Raw Playback'
@@ -823,7 +821,7 @@ object Form1: TForm1
       end
       object RawRecordButton: TButton
         Left = 5
-        Top = 397
+        Top = 429
         Width = 104
         Height = 17
         Caption = 'Raw Record'
@@ -832,7 +830,7 @@ object Form1: TForm1
       end
       object SBSConnectButton: TButton
         Left = 5
-        Top = 420
+        Top = 452
         Width = 104
         Height = 20
         Caption = 'SBS Connect'
@@ -841,7 +839,7 @@ object Form1: TForm1
       end
       object SBSIpAddress: TEdit
         Left = 115
-        Top = 420
+        Top = 452
         Width = 117
         Height = 20
         TabOrder = 17
@@ -849,7 +847,7 @@ object Form1: TForm1
       end
       object SBSRecordButton: TButton
         Left = 5
-        Top = 446
+        Top = 478
         Width = 104
         Height = 17
         Caption = 'SBS Record'
@@ -858,7 +856,7 @@ object Form1: TForm1
       end
       object SBSPlaybackButton: TButton
         Left = 115
-        Top = 446
+        Top = 478
         Width = 96
         Height = 17
         Caption = 'SBS Playback'
@@ -998,8 +996,6 @@ object Form1: TForm1
     OnInit = ObjectDisplayInit
     OnResize = ObjectDisplayResize
     OnPaint = ObjectDisplayPaint
-    ExplicitLeft = 212
-    ExplicitTop = 136
   end
   object MainMenu1: TMainMenu
     Left = 24
