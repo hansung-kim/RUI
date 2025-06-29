@@ -196,6 +196,10 @@ __published:	// IDE-managed Components
 	TLabel *Label24;
 	TLabel *SDRStatus;
 	TLabel *SDRStatusText;
+	TLabel *AircraftCountry;
+	TLabel *AircraftCountryTest;
+	TLabel *Label25;
+	TLabel *Label26;
 	void __fastcall ObjectDisplayInit(TObject *Sender);
 	void __fastcall ObjectDisplayResize(TObject *Sender);
 	void __fastcall ObjectDisplayPaint(TObject *Sender);
