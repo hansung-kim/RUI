@@ -188,6 +188,14 @@ __published:	// IDE-managed Components
 	TLabel *Label20;
 	TLabel *FlightDepArrLabel;
 	TIdUDPServer *IdUDPServer1;
+	TPanel *Panel6;
+	TLabel *Label21;
+	TLabel *WiFiStatus;
+	TLabel *WiFiStatusText;
+	TLabel *Label23;
+	TLabel *Label24;
+	TLabel *SDRStatus;
+	TLabel *SDRStatusText;
 	void __fastcall ObjectDisplayInit(TObject *Sender);
 	void __fastcall ObjectDisplayResize(TObject *Sender);
 	void __fastcall ObjectDisplayPaint(TObject *Sender);

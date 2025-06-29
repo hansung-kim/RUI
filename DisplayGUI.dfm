@@ -44,6 +44,32 @@ object Form1: TForm1
     Font.Style = [fsBold]
     ParentFont = False
   end
+  object Label23: TLabel
+    Left = 13
+    Top = 51
+    Width = 80
+    Height = 13
+    Caption = 'Wi-Fi Status :  '
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Label24: TLabel
+    Left = 92
+    Top = 51
+    Width = 21
+    Height = 13
+    Caption = 'N/A'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
   object RightPanel: TPanel
     Left = 978
     Top = 0
@@ -787,10 +813,9 @@ object Form1: TForm1
     end
     object Panel2: TPanel
       Left = 1
-      Top = 577
+      Top = 674
       Width = 248
-      Height = 316
-      Align = alClient
+      Height = 96
       TabOrder = 2
       object MapComboBox: TComboBox
         Left = 5
@@ -815,6 +840,79 @@ object Form1: TForm1
         Caption = 'BigQuery Upload'
         TabOrder = 1
         OnClick = BigQueryCheckBoxClick
+      end
+    end
+    object Panel6: TPanel
+      Left = 1
+      Top = 577
+      Width = 248
+      Height = 95
+      Align = alCustom
+      TabOrder = 3
+      object Label21: TLabel
+        Left = 83
+        Top = 6
+        Width = 87
+        Height = 16
+        Caption = 'Flight Tracker'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold, fsUnderline]
+        ParentFont = False
+      end
+      object WiFiStatus: TLabel
+        Left = 5
+        Top = 41
+        Width = 80
+        Height = 13
+        Caption = 'Wi-Fi Status :  '
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object WiFiStatusText: TLabel
+        Left = 91
+        Top = 41
+        Width = 21
+        Height = 16
+        Caption = 'N/A'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object SDRStatus: TLabel
+        Left = 5
+        Top = 60
+        Width = 75
+        Height = 13
+        Caption = 'SDR Status :  '
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object SDRStatusText: TLabel
+        Left = 91
+        Top = 60
+        Width = 21
+        Height = 13
+        Caption = 'N/A'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentFont = False
       end
     end
   end
@@ -845,7 +943,6 @@ object Form1: TForm1
     OnInit = ObjectDisplayInit
     OnResize = ObjectDisplayResize
     OnPaint = ObjectDisplayPaint
-    ExplicitLeft = 3
   end
   object MainMenu1: TMainMenu
     Left = 24
