@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <filesystem>
 #include <fileapi.h>
-
+#include <cstring>
 #pragma hdrstop
 
 #include "DisplayGUI.h"
@@ -2699,20 +2699,34 @@ void __fastcall TForm1::RegisterMapProviders() {
 //    IdUDPServer1->Active = false;
 //}
 
+typedef struct {
+    uint8_t sdrConnected; // 0 or 1
+    uint8_t wifiEnabled;  // 0 or 1
+    uint8_t reserved[62];  // Padding to make the size 64 bytes
+} HeartbeatMsg_t;
 
 void __fastcall TForm1::IdUDPServer1UDPRead(TIdUDPListenerThread *AThread, const TIdBytes AData,
           TIdSocketHandle *ABinding)
 {
-        int length = AData.Length;
-
+    int length = AData.Length;
     printf("received heartbeat: %d\n", length);
 
-//    TThread::Queue(NULL, [=]() {
-//        UnicodeString hexStr;
-//        for (int i = 0; i < length; ++i)
-//            hexStr += IntToHex((int)AData[i], 2) + " ";
-//        Memo1->Lines->Add("(Hex): " + hexStr);
-//    });
+    uint8_t buf[64];
+    memcpy(buf, &AData[0], 64);
+
+    HeartbeatMsg_t *msg = (HeartbeatMsg_t *)buf;
+
+    if(msg->wifiEnabled) {
+        WiFiStatusText->Caption = "Connected";
+    } else {
+        WiFiStatusText->Caption = "Disconnected";
+    }
+
+    if(msg->sdrConnected) {
+        SDRStatusText->Caption = "Connected";
+    } else {
+        SDRStatusText->Caption = "Disconnected";
+    }
 }
 
 

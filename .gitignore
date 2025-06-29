@@ -1,9 +1,9 @@
-_history/
-_recovery/
+__history/
+__recovery/
 GoogleMap_Live/
 
-ADS-B-Display.cbproj
-ADS-B-Display.cbproj.local
+**/*.cbproj
+**/*.cbproj.local
 
 **/Win64/
 **/*.d
