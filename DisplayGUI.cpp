@@ -9,6 +9,11 @@
 #include <stdlib.h>
 #include <filesystem>
 #include <fileapi.h>
+#include <chrono>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
 #include <cstring>
 #pragma hdrstop
 
@@ -81,6 +86,17 @@
 #include "SkyVectorMapProvider.h"
 #include "OpenStreetMapProvider.h"
 #endif
+
+int log_time_cnt = 1;
+int log_time_cnt_cpa = 1;
+int log_time_cnt_raw = 1;
+int log_time_cnt_sbs = 1;
+int log_time_cnt_polygon = 1;
+std::chrono::high_resolution_clock::time_point g_start_time_raw_connect;
+std::chrono::high_resolution_clock::time_point g_start_time_sbs_connect;
+std::chrono::high_resolution_clock::time_point g_start_time;
+std::chrono::high_resolution_clock::time_point g_start_time_cpa;
+std::chrono::high_resolution_clock::time_point g_start_time_polygon;
 
 TForm1 *Form1;
  //---------------------------------------------------------------------------
@@ -393,6 +409,38 @@ void __fastcall TForm1::ObjectDisplayPaint(TObject *Sender)
  yf=Mh1/Mh2;
 
  DrawObjects();
+ if(log_time_cnt == 2){
+	 auto end_time = std::chrono::high_resolution_clock::now();
+	 auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - g_start_time).count();
+	 printf("aircraft data End: %lld ms, Aircraft info panel updated, elapsed: %lld ms\n",
+		std::chrono::duration_cast<std::chrono::milliseconds>(end_time.time_since_epoch()).count(),
+		elapsed);
+	 log_time_cnt += 1;
+ }
+ if(log_time_cnt_raw == 2){
+	  auto end_time = std::chrono::high_resolution_clock::now();
+	  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - g_start_time_raw_connect).count();
+	  printf("Raw Loading Track End: %lld ms, elapsed: %lld ms\n",
+		std::chrono::duration_cast<std::chrono::milliseconds>(end_time.time_since_epoch()).count(),
+		elapsed);
+	  log_time_cnt_raw += 1;
+ }
+ if(log_time_cnt_sbs == 2){
+	  auto end_time = std::chrono::high_resolution_clock::now();
+	  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - g_start_time_sbs_connect).count();
+	  printf("SBS Loading Track End: %lld ms, elapsed: %lld ms\n",
+		std::chrono::duration_cast<std::chrono::milliseconds>(end_time.time_since_epoch()).count(),
+		elapsed);
+	  log_time_cnt_sbs += 1;
+ }
+ if(log_time_cnt_polygon == 2){
+	  auto end_time = std::chrono::high_resolution_clock::now();
+	  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - g_start_time_polygon).count();
+	  printf("Polygon Track End: %lld ms, elapsed: %lld ms\n",
+		std::chrono::duration_cast<std::chrono::milliseconds>(end_time.time_since_epoch()).count(),
+		elapsed);
+	  log_time_cnt_polygon += 1;
+ }
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::Timer1Timer(TObject *Sender)
@@ -905,6 +953,12 @@ void __fastcall TForm1::DrawObjects(void)
 
 	  double tcpa,cpa_distance_nm, vertical_cpa;
 	  double lat1, lon1,lat2, lon2, junk;
+	  if(log_time_cnt_cpa == 1){
+		  g_start_time_cpa = std::chrono::high_resolution_clock::now();
+		  printf("Start: CPA Calculate [%lld ms]\n",
+			std::chrono::duration_cast<std::chrono::milliseconds>(g_start_time_cpa.time_since_epoch()).count());
+	  }
+
 	  if (computeCPA(Data->Latitude, Data->Longitude, Data->Altitude,
 					 Data->Speed,Data->Heading,
 					 DataCPA->Latitude, DataCPA->Longitude, DataCPA->Altitude,
@@ -943,6 +997,15 @@ void __fastcall TForm1::DrawObjects(void)
 		   }
 		}
 	  }
+	  if(log_time_cnt_cpa == 1){
+		  auto end_time = std::chrono::high_resolution_clock::now();
+		  auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - g_start_time_cpa).count();
+		  printf("CPA data End: %lld ms, elapsed: %lld ms\n",
+			std::chrono::duration_cast<std::chrono::milliseconds>(end_time.time_since_epoch()).count(),
+			elapsed);
+		  log_time_cnt_cpa += 1;
+	  }
+
 	}
    if (!CpaDataIsValid)
    {
@@ -1027,6 +1090,12 @@ void __fastcall TForm1::ObjectDisplayMouseDown(TObject *Sender,
    }
   else
    {
+   if(log_time_cnt == 1){
+	   g_start_time = std::chrono::high_resolution_clock::now();
+	   printf("Start: Right-click detected on aircraft [%lld ms]\n",
+		std::chrono::duration_cast<std::chrono::milliseconds>(g_start_time.time_since_epoch()).count());
+	   log_time_cnt += 1;
+   }
    if (Shift.Contains(ssCtrl))   HookTrack(X,Y,true);
    else  HookTrack(X,Y,false);
    }
@@ -1355,14 +1424,14 @@ double HaversineNM(double lat1, double lon1, double lat2, double lon2)
             String reg = GetAircraftDBReg(ADS_B_Aircraft->ICAO);
             if (reg == "" || reg == "?") {
             } else {
-				//String url = "https://www.flightradar24.com/data/aircraft/" + reg;
+				String url = "https://www.flightradar24.com/data/aircraft/" + reg;
 				//String url = "https://www.planespotters.net/search?q=VH-VKB";
 				//String url = "https://www.bing.com";
-				String url = "https://globe.adsbexchange.com/?icao" + reg;
+				//String url = "https://globe.adsbexchange.com/?icao=" + reg;
 				Form2->Show();
                 Form2->WebBrowser1->Silent = true;
-                //Form2->EdgeBrowser1->AdditionalBrowserArguments = L"--user-agent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36\"";
-                Form2->WebBrowser1->Navigate(WideString(url).c_bstr());
+				//Form2->EdgeBrowser1->AdditionalBrowserArguments = L"--user-agent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36\"";
+				Form2->WebBrowser1->Navigate(WideString(url).c_bstr());
                 //Form2->EdgeBrowser1->Navigate(WideString(url).c_bstr());
             }
 #endif
@@ -1594,7 +1663,15 @@ void __fastcall TForm1::AreaListViewSelectItem(TObject *Sender, TListItem *Item,
 		}
 	 }
 
-	if (HaveSelected)  Delete->Enabled=true;
+	if (HaveSelected)  {
+		Delete->Enabled=true;
+		if(log_time_cnt_polygon == 1){
+			g_start_time_polygon = std::chrono::high_resolution_clock::now();
+			printf("Start: Polygon Show [%lld ms]\n",
+			  std::chrono::duration_cast<std::chrono::milliseconds>(g_start_time_polygon.time_since_epoch()).count());
+            log_time_cnt_polygon += 1;
+		}
+	}
 	else Delete->Enabled=false;
 #ifndef YAKI_TEST_CODE
     // interested aircraft
@@ -1925,6 +2002,13 @@ void __fastcall TTCPClientRawHandleThread::Execute(void)
 		   Form1->IdTCPClientRaw->IOHandler->ReadTimeout = 5000;  // 5초
 		   if (!Form1->IdTCPClientRaw->Connected()) Terminate();
 		   StringMsgBuffer=Form1->IdTCPClientRaw->IOHandler->ReadLn();
+		   if(log_time_cnt_raw == 1){
+			   g_start_time_raw_connect = std::chrono::high_resolution_clock::now();
+			   printf("Start: RawConnect [%lld ms]\n",
+			   std::chrono::duration_cast<std::chrono::milliseconds>(g_start_time_raw_connect.time_since_epoch()).count());
+			   log_time_cnt_raw += 1;
+		   }
+
 			DWORD dwFlags;
 			if (!InternetGetConnectedState(&dwFlags, 0)) {
 				ShowMessage("Check internet connection\n");
@@ -2096,6 +2180,13 @@ void __fastcall TTCPClientSBSHandleThread::Execute(void)
 		   if (!Form1->IdTCPClientSBS->Connected())	Terminate();
 		   if (Form1->IdTCPClientSBS) {
 			   StringMsgBuffer=Form1->IdTCPClientSBS->IOHandler->ReadLn();
+			   if(log_time_cnt_sbs == 1){
+			       g_start_time_sbs_connect = std::chrono::high_resolution_clock::now();
+				   printf("Start: SBS Connect [%lld ms]\n",
+					std::chrono::duration_cast<std::chrono::milliseconds>(g_start_time_sbs_connect.time_since_epoch()).count());
+                   log_time_cnt_sbs += 1;
+			   }
+
 		   }
 			DWORD dwFlags;
 			if (!InternetGetConnectedState(&dwFlags, 0)) {
