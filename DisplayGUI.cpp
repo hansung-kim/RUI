@@ -1835,6 +1835,7 @@ void __fastcall TTCPClientRawHandleThread::HandleInput(void)
     else
 	  {
   	   ADS_B_Aircraft= new TADS_B_Aircraft;
+       ADS_B_Aircraft->LatLonHistory = new TList;
 	   ADS_B_Aircraft->ICAO=addr;
 	   snprintf(ADS_B_Aircraft->HexAddr,sizeof(ADS_B_Aircraft->HexAddr),"%06X",(int)addr);
 	   ADS_B_Aircraft->NumMessagesSBS=0;
