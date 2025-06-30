@@ -866,10 +866,36 @@ object Form1: TForm1
     end
     object Panel2: TPanel
       Left = 1
-      Top = 756
+      Top = 731
       Width = 248
       Height = 101
       TabOrder = 2
+      object BigFromTimeLabel: TLabel
+        Left = 5
+        Top = 55
+        Width = 69
+        Height = 13
+        Caption = 'From Time:  '
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
+      object BigToTimeLabel: TLabel
+        Left = 5
+        Top = 79
+        Width = 54
+        Height = 13
+        Caption = 'To Time:  '
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentFont = False
+      end
       object MapComboBox: TComboBox
         Left = 5
         Top = 6
@@ -886,20 +912,45 @@ object Form1: TForm1
           'OpenStreetMap')
       end
       object BigQueryCheckBox: TCheckBox
-        Left = 5
-        Top = 32
+        Left = 121
+        Top = 7
         Width = 124
         Height = 17
         Caption = 'BigQuery Upload'
         TabOrder = 1
         OnClick = BigQueryCheckBoxClick
       end
+      object BigQueryPlayback: TButton
+        Left = 5
+        Top = 32
+        Width = 196
+        Height = 17
+        Caption = 'BigQuery Playback'
+        TabOrder = 2
+        OnClick = BigQueryPlaybackClick
+      end
+      object BigFromTimeText: TEdit
+        Left = 73
+        Top = 53
+        Width = 128
+        Height = 20
+        TabOrder = 3
+        Text = '2025-06-26 12:48:00'
+      end
+      object BigToTimeText: TEdit
+        Left = 73
+        Top = 77
+        Width = 128
+        Height = 20
+        TabOrder = 4
+        Text = '2025-06-26 12:50:00'
+      end
     end
     object Panel6: TPanel
       Left = 1
       Top = 659
       Width = 248
-      Height = 95
+      Height = 70
       Align = alCustom
       TabOrder = 3
       object Label21: TLabel
@@ -917,7 +968,7 @@ object Form1: TForm1
       end
       object WiFiStatus: TLabel
         Left = 5
-        Top = 41
+        Top = 28
         Width = 115
         Height = 13
         Caption = 'Connection Status :  '
@@ -930,7 +981,7 @@ object Form1: TForm1
       end
       object WiFiStatusText: TLabel
         Left = 126
-        Top = 41
+        Top = 28
         Width = 21
         Height = 13
         Caption = 'N/A'
@@ -943,7 +994,7 @@ object Form1: TForm1
       end
       object SDRStatus: TLabel
         Left = 5
-        Top = 60
+        Top = 47
         Width = 75
         Height = 13
         Caption = 'SDR Status :  '
@@ -956,7 +1007,7 @@ object Form1: TForm1
       end
       object SDRStatusText: TLabel
         Left = 91
-        Top = 60
+        Top = 47
         Width = 21
         Height = 13
         Caption = 'N/A'

@@ -1893,7 +1893,14 @@ void __fastcall TForm1::RawConnectButtonClick(TObject *Sender)
 	IdTCPClientRaw->Disconnect();
 	IdTCPClientRaw->IOHandler->InputBuffer->Clear();
 	RawConnectButton->Caption="Raw Connect";
+
+	SBSConnectButton->Enabled=true;
+	SBSPlaybackButton->Enabled=true;
+	SBSRecordButton->Enabled=true;
+	RawConnectButton->Enabled=true;
 	RawPlaybackButton->Enabled=true;
+	RawRecordButton->Enabled=true;
+	BigQueryPlayback->Enabled=true;
   }
  }
 //---------------------------------------------------------------------------
@@ -1902,7 +1909,14 @@ void __fastcall TForm1::IdTCPClientRawConnected(TObject *Sender)
    //SetKeepAliveValues(const AEnabled: Boolean; const ATimeMS, AInterval: Integer);
    IdTCPClientRaw->Socket->Binding->SetKeepAliveValues(true,60*1000,15*1000);
    RawConnectButton->Caption="Raw Disconnect";
-   RawPlaybackButton->Enabled=false;
+
+	SBSConnectButton->Enabled=false;
+	SBSPlaybackButton->Enabled=false;
+	SBSRecordButton->Enabled=false;
+
+	RawPlaybackButton->Enabled=false;
+
+	BigQueryPlayback->Enabled=false;
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::IdTCPClientRawDisconnected(TObject *Sender)
@@ -1963,18 +1977,34 @@ void __fastcall TForm1::RawPlaybackButtonClick(TObject *Sender)
 		   TCPClientRawHandleThread->FreeOnTerminate=TRUE;
 		   TCPClientRawHandleThread->Resume();
 		   RawPlaybackButton->Caption="Stop Raw Playback";
-           RawConnectButton->Enabled=false;
+         
+		   
+			SBSConnectButton->Enabled=false;
+			SBSPlaybackButton->Enabled=false;
+			SBSRecordButton->Enabled=false;
+			RawConnectButton->Enabled=false;
+
+			RawRecordButton->Enabled=false;
+			BigQueryPlayback->Enabled=false;
+		   
 		  }
 	}
   }
  }
  else
  {
-   TCPClientRawHandleThread->Terminate();
-   delete PlayBackRawStream;
-   PlayBackRawStream=NULL;
-   RawPlaybackButton->Caption="Raw Playback";
-   RawConnectButton->Enabled=true;
+	TCPClientRawHandleThread->Terminate();
+	delete PlayBackRawStream;
+	PlayBackRawStream=NULL;
+	RawPlaybackButton->Caption="Raw Playback";
+
+	SBSConnectButton->Enabled=true;
+	SBSPlaybackButton->Enabled=true;
+	SBSRecordButton->Enabled=true;
+	RawConnectButton->Enabled=true;
+	RawPlaybackButton->Enabled=true;
+	RawRecordButton->Enabled=true;
+	BigQueryPlayback->Enabled=true;
  }
 }
 //---------------------------------------------------------------------------
@@ -2119,7 +2149,15 @@ void __fastcall TForm1::SBSConnectButtonClick(TObject *Sender)
 	IdTCPClientSBS->Disconnect();
     IdTCPClientSBS->IOHandler->InputBuffer->Clear();
 	SBSConnectButton->Caption="SBS Connect";
+
+	SBSConnectButton->Enabled=true;
 	SBSPlaybackButton->Enabled=true;
+	SBSRecordButton->Enabled=true;
+	RawConnectButton->Enabled=true;
+	RawPlaybackButton->Enabled=true;
+	RawRecordButton->Enabled=true;
+	BigQueryPlayback->Enabled=true;
+
   }
 
 }
@@ -2348,7 +2386,13 @@ void __fastcall TForm1::SBSPlaybackButtonClick(TObject *Sender)
 		   TCPClientSBSHandleThread->FreeOnTerminate=TRUE;
 		   TCPClientSBSHandleThread->Resume();
 		   SBSPlaybackButton->Caption="Stop SBS Playback";
-           SBSConnectButton->Enabled=false;
+		   SBSConnectButton->Enabled=false;
+		   SBSRecordButton->Enabled=false;
+		   RawConnectButton->Enabled=false;
+		   RawPlaybackButton->Enabled=false;
+		   RawRecordButton->Enabled=false;
+		   BigQueryPlayback->Enabled=false;
+
 		  }
 	}
   }
@@ -2359,7 +2403,15 @@ void __fastcall TForm1::SBSPlaybackButtonClick(TObject *Sender)
    delete PlayBackSBSStream;
    PlayBackSBSStream=NULL;
    SBSPlaybackButton->Caption="SBS Playback";
+
    SBSConnectButton->Enabled=true;
+   SBSPlaybackButton->Enabled=true;
+   SBSRecordButton->Enabled=true;
+   RawConnectButton->Enabled=true;
+   RawPlaybackButton->Enabled=true;
+   RawRecordButton->Enabled=true;
+   BigQueryPlayback->Enabled=true;
+
  }
 }
 //---------------------------------------------------------------------------
@@ -2369,7 +2421,14 @@ void __fastcall TForm1::IdTCPClientSBSConnected(TObject *Sender)
    //SetKeepAliveValues(const AEnabled: Boolean; const ATimeMS, AInterval: Integer);
    IdTCPClientSBS->Socket->Binding->SetKeepAliveValues(true,60*1000,15*1000);
    SBSConnectButton->Caption="SBS Disconnect";
+   
    SBSPlaybackButton->Enabled=false;
+   
+   RawConnectButton->Enabled=false;
+   RawPlaybackButton->Enabled=false;
+   RawRecordButton->Enabled=false;
+
+   BigQueryPlayback->Enabled=false;
 }
 //---------------------------------------------------------------------------
 void __fastcall TForm1::IdTCPClientSBSDisconnected(TObject *Sender)
@@ -2903,6 +2962,56 @@ void __fastcall TForm1::FormCreate(TObject *Sender)
 void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
 {
 	IdUDPServer1->Active = false;
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall TForm1::BigQueryPlaybackClick(TObject *Sender)
+{
+
+  if ((BigQueryPlayback->Caption=="BigQuery Playback") && (Sender!=NULL))
+ {
+
+	// First, check if the file exists.
+
+	{
+		// Open a file for writing. Creates the file if it doesn't exist, or overwrites it if it does.
+
+//	if (PlayBackSBSStream==NULL)
+//	  {
+//		ShowMessage("Cannot Open File "+PlaybackSBSDialog->FileName);
+//	  }
+//	 else {
+//		   TCPClientSBSHandleThread = new TTCPClientSBSHandleThread(true);
+//		   TCPClientSBSHandleThread->UseFileInsteadOfNetwork=true;
+//		   TCPClientSBSHandleThread->First=true;
+//		   TCPClientSBSHandleThread->FreeOnTerminate=TRUE;
+//		   TCPClientSBSHandleThread->Resume();
+		   BigQueryPlayback->Caption="Stop BigQuery Playback";
+		   SBSConnectButton->Enabled=false;
+		   SBSPlaybackButton->Enabled=false;
+		   SBSRecordButton->Enabled=false;
+		   RawConnectButton->Enabled=false;
+		   RawPlaybackButton->Enabled=false;
+		   RawRecordButton->Enabled=false;
+		   
+		  }
+	}
+
+ }
+ else
+ {
+//   TCPClientSBSHandleThread->Terminate();
+//   delete PlayBackSBSStream;
+//   PlayBackSBSStream=NULL;
+   BigQueryPlayback->Caption="BigQuery Playback";
+   SBSConnectButton->Enabled=true;
+   SBSPlaybackButton->Enabled=true;
+   SBSRecordButton->Enabled=true;
+   RawConnectButton->Enabled=true;
+   RawPlaybackButton->Enabled=true;
+   RawRecordButton->Enabled=true;
+ }
 }
 //---------------------------------------------------------------------------
 

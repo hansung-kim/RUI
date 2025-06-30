@@ -200,6 +200,11 @@ __published:	// IDE-managed Components
 	TLabel *AircraftCountryTest;
 	TLabel *Label25;
 	TLabel *Label26;
+	TButton *BigQueryPlayback;
+	TLabel *BigFromTimeLabel;
+	TLabel *BigToTimeLabel;
+	TEdit *BigFromTimeText;
+	TEdit *BigToTimeText;
 	void __fastcall ObjectDisplayInit(TObject *Sender);
 	void __fastcall ObjectDisplayResize(TObject *Sender);
 	void __fastcall ObjectDisplayPaint(TObject *Sender);
@@ -248,6 +253,7 @@ __published:	// IDE-managed Components
           TIdSocketHandle *ABinding);
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall FormClose(TObject *Sender, TCloseAction &Action);
+	void __fastcall BigQueryPlaybackClick(TObject *Sender);
 
 private:	// User declarations
 
