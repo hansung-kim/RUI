@@ -48,7 +48,9 @@ client = bigquery.Client()
 
 
 # Set table_id to the ID of the table.
-table_id = "scs-lg-solvit.SBS_Data.FirstRun"
+# table_id = "scs-lg-solvit.SBS_Data.FirstRun"
+# table_id = "scs-lg-arch-3.SBS_Data.BATMAN_BigQuery"
+table_id = "scs-lg-arch-3.SBS_Data.BATMAN_SBS_Data"
 
 
 job_config = bigquery.LoadJobConfig(

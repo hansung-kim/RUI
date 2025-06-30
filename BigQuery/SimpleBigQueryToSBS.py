@@ -50,97 +50,67 @@ def make_time_ranges(start_str, end_str, step_seconds=10):
     
     return ranges
 
-def query_to_sbs_chunk_to_dataframe(start_time, end_time):
-    time.sleep(0.5)  # 쿼리 실행 간의 짧은 지연 시간 추가
-    query = f"""
-    SELECT *
-    FROM `scs-lg-arch-3.SBS_Data.BATMAN_SBS_Data`
-    WHERE DATETIME(Date_MSG_Generated, Time_MSG_Generated) >= '{start_time}'
-      AND DATETIME(Date_MSG_Generated, Time_MSG_Generated) < '{end_time}'
-    """
-    df = client.query(query).to_dataframe(use_bqstorage_api=True)
-
-    print("query_to_sbs_chunk:", start_time, end_time)
-
-    # SBS 문자열로 변환 (메모리 상에서 처리)
-    sbs_lines = []
-    for _, row in df.iterrows():
-        sbs_lines.append(str(row["TimeStamp"]))
-        other_fields = row.drop(labels="TimeStamp")
-        cleaned_fields = ["" if pd.isna(val) else str(val) for val in other_fields.tolist()]
-        sbs_lines.append(",".join(cleaned_fields))
-    return "\n".join(sbs_lines)
-
 def query_to_sbs_chunk(start_time, end_time):
     from google.cloud import bigquery
     import time
 
-    time.sleep(0.5)  # 쿼리 실행 간의 짧은 지연 시간 추가
-
-    ## 2025-06-26 12:48:00    2025-06-26 12:50:00
-
-    
+    client = bigquery.Client()
+    time.sleep(0.5)
 
     query = f"""
     SELECT *
     FROM `scs-lg-arch-3.SBS_Data.BATMAN_SBS_Data`
     WHERE 
-        # DATETIME(Date_MSG_Generated, Time_MSG_Generated) >= '{start_time}'
-        # AND DATETIME(Date_MSG_Generated, Time_MSG_Generated) < '{end_time}'
-
         Date_MSG_Generated BETWEEN DATE '{str(start_time).split(" ")[0]}' AND DATE '{str(end_time).split(" ")[0]}'
         AND Time_MSG_Generated BETWEEN TIME '{str(start_time).split(" ")[1]}' AND TIME '{str(end_time).split(" ")[1]}'
-
     """
     query_job = client.query(query)
-    results = query_job.result()  # row iterator
+    results = query_job.result()
 
-    print("query_to_sbs_chunk:", start_time, end_time)
-
-    # SBS 문자열로 변환
-    sbs_lines = []
     field_names = [field.name for field in results.schema]
+    chunk_rows = []
+
     for row in results:
         row_dict = dict(zip(field_names, row))
-        timestamp = str(row_dict.get("TimeStamp", ""))
-        sbs_lines.append(timestamp)
+        chunk_rows.append(row_dict)
 
-        other_fields = [row_dict.get(f, "") for f in field_names if f != "TimeStamp"]
-        cleaned_fields = ["" if pd.isna(val) else str(val) for val in other_fields]
-        sbs_lines.append(",".join(cleaned_fields))
-
-    return "\n".join(sbs_lines)
-
+    return chunk_rows
 # 구간 설정
 time_ranges = make_time_ranges(start_time_arg, end_time_arg, step_seconds=10)
 print("Time taken make_time_ranges:", len(time_ranges), time.time() - stime)
 
 # 병렬 실행
 max_workers = min(len(time_ranges), 10)
-#with ThreadPoolExecutor(max_workers=max_workers) as executor:
-#    futures = [executor.submit(query_to_sbs_chunk, start, end) for start, end in time_ranges]
 
-#print("Time taken query_to_sbs_chunk:", time.time() - stime)
-## 모든 결과 받아와서 하나의 문자열로 병합
-#all_sbs_content = "\n".join(f.result() for f in futures)
+all_rows = []
 
-results = []
 with ThreadPoolExecutor(max_workers=max_workers) as executor:
     futures = {executor.submit(query_to_sbs_chunk, start, end): (start, end) for start, end in time_ranges}
     for future in as_completed(futures):
         try:
-            results.append(future.result())
+            all_rows.extend(future.result())  # 모든 row 통합
         except Exception as e:
             start, end = futures[future]
             print(f"Error in time range {start} to {end}: {e}")
 
 print("Time taken query_to_sbs_chunk:", time.time() - stime)
-all_sbs_content = "\n".join(results)
+
+# ⏳ TimeStamp 기준 정렬
+sorted_rows = sorted(all_rows, key=lambda x: x.get("TimeStamp", ""))
+
+# SBS 문자열 생성
+sbs_lines = []
+for row_dict in sorted_rows:
+    timestamp = str(row_dict.get("TimeStamp", ""))
+    sbs_lines.append(timestamp)
+    cleaned_fields = ["" if pd.isna(val) else str(val) for key, val in row_dict.items() if key != "TimeStamp"]
+    sbs_lines.append(",".join(cleaned_fields))
+
+all_sbs_content = "\n".join(sbs_lines)
 
 print("Time taken all_sbs_content:", time.time() - stime)
 
 # SBS 파일로 저장
-#timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
 sbs_file = global_filepath + f"..\\Recorded\\bigquery_datas.sbs"
 last_sbs_file = global_filepath + f"..\\Recorded\\bigquery_data.sbs"
 with open(sbs_file, 'w', encoding='utf-8') as f:

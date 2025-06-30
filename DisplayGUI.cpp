@@ -138,6 +138,29 @@ uint32_t PopularColors[] = {
 }TMultiColor;
 
 
+//-----------------------for BigQuery
+
+void RunBigQueryScript(std::string& start_time, std::string& end_time) {
+	printf("RunBigQueryScript!");
+	printf("start_time: %s\n\n",start_time.c_str());
+	printf("end_time: %s\n\n",end_time.c_str());
+	AnsiString  BigQueryPythonPath = ExtractFilePath(ExtractFileDir(Application->ExeName))+"..\\BigQuery\\SimpleBigQueryToSBS.py";
+	AnsiString  BigQueryPythonLogPath = ExtractFilePath(ExtractFileDir(Application->ExeName))+"..\\BigQuery\\bigquery.log";
+	std::string std_path = BigQueryPythonPath.c_str();
+    printf("std_path: %s\n\n",std_path.c_str());
+
+	std::string cmd = "python " + std_path + " " + std::string(Form1->BigQueryPath.c_str()) + " \"" + std::string(start_time.c_str()) + "\" \"" + std::string(end_time.c_str()) + "\" > " + std::string(BigQueryPythonLogPath.c_str());
+	printf("cmd: %s\n\n",cmd.c_str());
+	int ret = system(cmd.c_str());
+
+    if (ret == 0) {
+        std::cout << "Get BigQuery Success\n";
+    } else {
+        std::cout << "Get BigQuery Fail\n";
+    }
+}
+//-----------------------for BigQuery
+
 //---------------------------------------------------------------------------
 static const char * strnistr(const char * pszSource, DWORD dwLength, const char * pszFind)
 {
@@ -431,7 +454,7 @@ std::vector<TLatLon> GenerateGreatCirclePoints(double lat1_deg, double lon1_deg,
         pt.Latitude = RadToDeg(lat);
         pt.Longitude = RadToDeg(lon);
 
-        // °æµµ ¹üÀ§¸¦ -180 ~ 180 À¸·Î Á¤±ÔÈ­
+        // ï¿½æµµ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ -180 ~ 180 ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½È­
         if (pt.Longitude < -180.0) pt.Longitude += 360.0;
         if (pt.Longitude > 180.0) pt.Longitude -= 360.0;
 
@@ -451,7 +474,7 @@ void __fastcall TForm1::split_and_print(const char *input) {
     char *token = strtok(buffer, "-");
     bool origin = true;
 
-    // ÃÖ´ë 10°³ °øÇ×±îÁö Ã³¸®
+    // ï¿½Ö´ï¿½ 10ï¿½ï¿½ ï¿½ï¿½ï¿½×±ï¿½ï¿½ï¿½ Ã³ï¿½ï¿½
     while (token != NULL && tokenArr.size() < 10) {
         tokenArr.push_back(token);
 
@@ -461,10 +484,10 @@ void __fastcall TForm1::split_and_print(const char *input) {
             LatLon2XY(latitude, longitude, ScrX, ScrY);
 
             if (origin) {
-                glColor4f(0.0, 0.0, 1.0, 1.0); // Ãâ¹ßÁöÁ¡ ÆÄ¶õ»ö
+                glColor4f(0.0, 0.0, 1.0, 1.0); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ä¶ï¿½ï¿½ï¿½
                 origin = false;
             } else {
-                glColor4f(0.0, 1.0, 1.0, 1.0); // ³ª¸ÓÁö ½Ã¾È»ö
+                glColor4f(0.0, 1.0, 1.0, 1.0); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ã¾È»ï¿½
             }
 
             DrawPoint(ScrX, ScrY);
@@ -496,7 +519,7 @@ void __fastcall TForm1::split_and_print(const char *input) {
             }
         }
 	}
-    // µÎ °³ ÀÌ»óÀÌ¸é ±¸°£¸¶´Ù ´ë±ÇÇ×·Î·Î ¿¬°á
+    // ï¿½ï¿½ ï¿½ï¿½ ï¿½Ì»ï¿½ï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½×·Î·ï¿½ ï¿½ï¿½ï¿½ï¿½
     for (size_t i = 0; i + 1 < tokenArr.size(); ++i) {
         double lat1, lon1, lat2, lon2;
 
@@ -505,10 +528,10 @@ void __fastcall TForm1::split_and_print(const char *input) {
 
             auto points = GenerateGreatCirclePoints(lat1, lon1, lat2, lon2, 100);
 
-            // »ö»ó ±¸°£º° º¯°æ
-            if (i % 3 == 0) glColor4f(1.0, 1.0, 0.0, 1.0);      // ³ë¶õ»ö
-            else if (i % 3 == 1) glColor4f(0.0, 1.0, 0.0, 1.0); // ³ì»ö
-            else glColor4f(1.0, 0.0, 1.0, 1.0);                 // º¸¶ó»ö
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+            if (i % 3 == 0) glColor4f(1.0, 1.0, 0.0, 1.0);      // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            else if (i % 3 == 1) glColor4f(0.0, 1.0, 0.0, 1.0); // ï¿½ï¿½ï¿½ï¿½
+            else glColor4f(1.0, 0.0, 1.0, 1.0);                 // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
             glLineWidth(2.0);
             glBegin(GL_LINE_STRIP);
@@ -522,8 +545,8 @@ void __fastcall TForm1::split_and_print(const char *input) {
                     double lon2 = points[j].Longitude;
                     double lonDiff = fabs(lon2 - lon1);
                     if (lonDiff > 180.0) {
-                        glEnd();               // ÇöÀç ¼± ²÷°í
-                        glBegin(GL_LINE_STRIP); // »õ·Î¿î ¼± ½ÃÀÛ
+                        glEnd();               // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+                        glBegin(GL_LINE_STRIP); // ï¿½ï¿½ï¿½Î¿ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
                     }
                 }
 
@@ -784,23 +807,23 @@ void __fastcall TForm1::DrawObjects(void)
          for (int i = 0; i < Data->LatLonHistory->Count; i++)
          {
              TLatLon *obj = (TLatLon*) Data->LatLonHistory->Items[i];
-            // obj »ç¿ë
+            // obj ï¿½ï¿½ï¿½ï¿½
             // Check altitude
             float r, g, b;
             if (obj->Altitude < 1000) {
-                r = 0.0f; g = 0.0f; b = 1.0f; // ÆÄ¶û
+                r = 0.0f; g = 0.0f; b = 1.0f; // ï¿½Ä¶ï¿½
             } else if (obj->Altitude < 5000) {
-                r = 0.0f; g = 1.0f; b = 1.0f; // Ã»·Ï
+                r = 0.0f; g = 1.0f; b = 1.0f; // Ã»ï¿½ï¿½
             } else if (obj->Altitude < 10000) {
-                r = 0.0f; g = 1.0f; b = 0.0f; // ÃÊ·Ï
+                r = 0.0f; g = 1.0f; b = 0.0f; // ï¿½Ê·ï¿½
             } else if (obj->Altitude < 20000) {
-                r = 1.0f; g = 1.0f; b = 0.0f; // ³ë¶û
+                r = 1.0f; g = 1.0f; b = 0.0f; // ï¿½ï¿½ï¿½ï¿½
             } else {
-                r = 1.0f; g = 0.0f; b = 0.0f; // »¡°­
+                r = 1.0f; g = 0.0f; b = 0.0f; // ï¿½ï¿½ï¿½ï¿½
             }
             glColor3f(r, g, b);
- //           glColor3f(1.0f, 0.0f, 0.0f);   // »¡°­
-            glPointSize(10.0f);            // Á¡ Å©±â 10ÇÈ¼¿
+ //           glColor3f(1.0f, 0.0f, 0.0f);   // ï¿½ï¿½ï¿½ï¿½
+            glPointSize(10.0f);            // ï¿½ï¿½ Å©ï¿½ï¿½ 10ï¿½È¼ï¿½
             LatLon2XY(obj->Latitude,obj->Longitude, ScrX, ScrY);
             glBegin(GL_POINTS);
             glVertex2f(ScrX, ScrY);
@@ -808,7 +831,7 @@ void __fastcall TForm1::DrawObjects(void)
     // ï¿½ï¿½ ï¿½×¸ï¿½ï¿½ï¿½
             if (!first)
             {
- //               glColor3f(0.0f, 1.0f, 0.0f); // ¼± »ö: ÃÊ·Ï
+ //               glColor3f(0.0f, 1.0f, 0.0f); // ï¿½ï¿½ ï¿½ï¿½: ï¿½Ê·ï¿½
                 glLineWidth(2.0f);
                 glBegin(GL_LINES);
                     glVertex2f(prevX, prevY);
@@ -1332,10 +1355,11 @@ double HaversineNM(double lat1, double lon1, double lat2, double lon2)
             String reg = GetAircraftDBReg(ADS_B_Aircraft->ICAO);
             if (reg == "" || reg == "?") {
             } else {
-                String url = "https://www.flightradar24.com/data/aircraft/" + reg;
-                //String url = "https://www.planespotters.net/search?q=VH-VKB";
-                //String url = "https://www.bing.com";
-                Form2->Show();
+				//String url = "https://www.flightradar24.com/data/aircraft/" + reg;
+				//String url = "https://www.planespotters.net/search?q=VH-VKB";
+				//String url = "https://www.bing.com";
+				String url = "https://globe.adsbexchange.com/?icao" + reg;
+				Form2->Show();
                 Form2->WebBrowser1->Silent = true;
                 //Form2->EdgeBrowser1->AdditionalBrowserArguments = L"--user-agent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36\"";
                 Form2->WebBrowser1->Navigate(WideString(url).c_bstr());
@@ -1766,7 +1790,7 @@ void __fastcall TForm1::RawConnectButtonClick(TObject *Sender)
  IdTCPClientRaw->Port=30002;
 #ifndef YAKI_TEST_CODE
     DWORD dwFlags;
-    if (!InternetGetConnectedState(&dwFlags, 0)) {
+    if (Sender != NULL && !InternetGetConnectedState(&dwFlags, 0)) {
         ShowMessage("Check internet connection\n");
         return;
     }
@@ -1898,10 +1922,18 @@ void __fastcall TTCPClientRawHandleThread::Execute(void)
 	if (!UseFileInsteadOfNetwork)
 	 {
 	  try {
+		   Form1->IdTCPClientRaw->IOHandler->ReadTimeout = 5000;  // 5ì´ˆ
 		   if (!Form1->IdTCPClientRaw->Connected()) Terminate();
-	       StringMsgBuffer=Form1->IdTCPClientRaw->IOHandler->ReadLn();
+		   StringMsgBuffer=Form1->IdTCPClientRaw->IOHandler->ReadLn();
+			DWORD dwFlags;
+			if (!InternetGetConnectedState(&dwFlags, 0)) {
+				ShowMessage("Check internet connection\n");
+				 Form1->PurgeButtonClick(NULL);
+				 TThread::Synchronize(StopTCPClient);
+				 break;
+			}
 		  }
-       catch (...)
+	   catch (...)
 		{
 		 TThread::Synchronize(StopTCPClient);
 		 break;
@@ -1975,9 +2007,9 @@ void __fastcall TForm1::SBSConnectButtonClick(TObject *Sender)
  IdTCPClientSBS->Host=SBSIpAddress->Text;
  IdTCPClientSBS->Port=5002;
 
- #ifndef YAKI_TEST_CODE
-    DWORD dwFlags;
-    if (!InternetGetConnectedState(&dwFlags, 0)) {
+#ifndef YAKI_TEST_CODE
+	DWORD dwFlags;
+	if (Sender != NULL && !InternetGetConnectedState(&dwFlags, 0)) {
         ShowMessage("Check internet connection\n");
         return;
     }
@@ -2060,12 +2092,20 @@ void __fastcall TTCPClientSBSHandleThread::Execute(void)
 	if (!UseFileInsteadOfNetwork)
 	 {
 	  try {
+           Form1->IdTCPClientSBS->IOHandler->ReadTimeout = 5000;  // 5ì´ˆ
 		   if (!Form1->IdTCPClientSBS->Connected())	Terminate();
-           if (Form1->IdTCPClientSBS) {
-		       StringMsgBuffer=Form1->IdTCPClientSBS->IOHandler->ReadLn();
-           }
+		   if (Form1->IdTCPClientSBS) {
+			   StringMsgBuffer=Form1->IdTCPClientSBS->IOHandler->ReadLn();
+		   }
+			DWORD dwFlags;
+			if (!InternetGetConnectedState(&dwFlags, 0)) {
+				ShowMessage("Check internet connection\n");
+				 Form1->PurgeButtonClick(NULL);
+				 TThread::Synchronize(StopTCPClient);
+				 break;
+			}
 		  }
-       catch (...)
+	   catch (...)
 		{
 		 TThread::Synchronize(StopTCPClient);
 		 break;
@@ -2163,6 +2203,38 @@ void __fastcall TForm1::SBSRecordButtonClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TForm1::SBSPlaybackButtonClick(TObject *Sender)
 {
+/*
+  if ((SBSPlaybackButton->Caption=="SBS Playback") && (Sender!=NULL))
+  {
+
+	std::string stime = "2025-06-26 12:48:00";
+	std::string etime = "2025-06-26 12:50:00";
+	RunBigQueryScript(stime, etime);
+
+	PlayBackSBSStream= new TStreamReader("D:\\bbh\\2025\\Architect\\CMU_Lecture\\new_git\\RUI\\Recorded\\bigquery_data.sbs");
+	if (PlayBackSBSStream==NULL)
+	  {
+		ShowMessage("Cannot Open File bigquery_data.sbs");
+	  }
+	 else {
+		   TCPClientSBSHandleThread = new TTCPClientSBSHandleThread(true);
+		   TCPClientSBSHandleThread->UseFileInsteadOfNetwork=true;
+		   TCPClientSBSHandleThread->First=true;
+		   TCPClientSBSHandleThread->FreeOnTerminate=TRUE;
+		   TCPClientSBSHandleThread->Resume();
+		   SBSPlaybackButton->Caption="Stop SBS Playback";
+           SBSConnectButton->Enabled=false;
+		  }
+	}
+  else
+  {
+   TCPClientSBSHandleThread->Terminate();
+   delete PlayBackSBSStream;
+   PlayBackSBSStream=NULL;
+   SBSPlaybackButton->Caption="SBS Playback";
+   SBSConnectButton->Enabled=true;
+  }
+*/
   if ((SBSPlaybackButton->Caption=="SBS Playback") && (Sender!=NULL))
  {
   if (PlaybackSBSDialog->Execute())
@@ -2198,7 +2270,6 @@ void __fastcall TForm1::SBSPlaybackButtonClick(TObject *Sender)
    SBSPlaybackButton->Caption="SBS Playback";
    SBSConnectButton->Enabled=true;
  }
-
 }
 //---------------------------------------------------------------------------
 
@@ -2716,11 +2787,11 @@ void __fastcall TForm1::IdUDPServer1UDPRead(TIdUDPListenerThread *AThread, const
 
     HeartbeatMsg_t *msg = (HeartbeatMsg_t *)buf;
 
-    if(msg->wifiEnabled) {
-        WiFiStatusText->Caption = "Connected";
-    } else {
-        WiFiStatusText->Caption = "Disconnected";
-    }
+//    if(msg->wifiEnabled) {
+//        WiFiStatusText->Caption = "Connected";
+//    } else {
+//        WiFiStatusText->Caption = "Disconnected";
+//    }
 
     if(msg->sdrConnected) {
         SDRStatusText->Caption = "Connected";
