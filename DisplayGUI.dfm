@@ -456,7 +456,7 @@ object Form1: TForm1
         end
         object TrkLastUpdateTimeLabel: TLabel
           Left = 120
-          Top = 234
+          Top = 210
           Width = 72
           Height = 13
           Caption = '00:00:00:000'
@@ -469,7 +469,7 @@ object Form1: TForm1
         end
         object Label14: TLabel
           Left = 5
-          Top = 234
+          Top = 210
           Width = 109
           Height = 13
           Caption = 'LAST UPDATE TIME:'
@@ -626,9 +626,9 @@ object Form1: TForm1
         object Label20: TLabel
           Left = 5
           Top = 191
-          Width = 102
+          Width = 53
           Height = 13
-          Caption = 'Departure Arrival:'
+          Caption = 'DEP-ARR:'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -637,8 +637,8 @@ object Form1: TForm1
           ParentFont = False
         end
         object FlightDepArrLabel: TLabel
-          Left = 22
-          Top = 212
+          Left = 66
+          Top = 191
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -652,9 +652,9 @@ object Form1: TForm1
         object AircraftCountry: TLabel
           Left = 5
           Top = 172
-          Width = 97
+          Width = 51
           Height = 13
-          Caption = 'Aircraft Country :'
+          Caption = 'Country :'
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11
@@ -663,7 +663,7 @@ object Form1: TForm1
           ParentFont = False
         end
         object AircraftCountryTest: TLabel
-          Left = 122
+          Left = 66
           Top = 172
           Width = 21
           Height = 13
@@ -865,10 +865,10 @@ object Form1: TForm1
       end
     end
     object Panel2: TPanel
-      Left = 0
-      Top = 796
+      Left = 1
+      Top = 756
       Width = 248
-      Height = 96
+      Height = 101
       TabOrder = 2
       object MapComboBox: TComboBox
         Left = 5
@@ -897,7 +897,7 @@ object Form1: TForm1
     end
     object Panel6: TPanel
       Left = 1
-      Top = 699
+      Top = 659
       Width = 248
       Height = 95
       Align = alCustom
@@ -918,9 +918,9 @@ object Form1: TForm1
       object WiFiStatus: TLabel
         Left = 5
         Top = 41
-        Width = 80
+        Width = 115
         Height = 13
-        Caption = 'Wi-Fi Status :  '
+        Caption = 'Connection Status :  '
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
@@ -929,7 +929,7 @@ object Form1: TForm1
         ParentFont = False
       end
       object WiFiStatusText: TLabel
-        Left = 91
+        Left = 126
         Top = 41
         Width = 21
         Height = 13
