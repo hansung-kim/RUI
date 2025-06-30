@@ -1396,7 +1396,7 @@ double HaversineNM(double lat1, double lon1, double lat2, double lon2)
   for(Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetFirst(&iterator,(const void **) &Key);
 			  Data; Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iterator, (const void **)&Key))
 	{
-	  if (Data->HaveLatLon)
+	  if (Data->HaveLatLon && Data->visible)
 	  {
 	   dlat= VLat-Data->Latitude;
 	   dlon= VLon-Data->Longitude;
