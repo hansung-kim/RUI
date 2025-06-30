@@ -2974,7 +2974,7 @@ void __fastcall TForm1::BigQueryPlaybackClick(TObject *Sender)
 
 	// First, check if the file exists.
 
-	{
+
 		// Open a file for writing. Creates the file if it doesn't exist, or overwrites it if it does.
 
 //	if (PlayBackSBSStream==NULL)
@@ -2995,8 +2995,8 @@ void __fastcall TForm1::BigQueryPlaybackClick(TObject *Sender)
 		   RawPlaybackButton->Enabled=false;
 		   RawRecordButton->Enabled=false;
 		   
-		  }
-	}
+//		  }
+
 
  }
  else
