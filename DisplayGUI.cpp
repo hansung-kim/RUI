@@ -156,7 +156,7 @@ uint32_t PopularColors[] = {
 
 //-----------------------for BigQuery
 
-void RunBigQueryScript(std::string& start_time, std::string& end_time) {
+void RunBigQueryScript(const std::string& start_time, const std::string& end_time) {
 	printf("RunBigQueryScript!");
 	printf("start_time: %s\n\n",start_time.c_str());
 	printf("end_time: %s\n\n",end_time.c_str());
@@ -168,7 +168,7 @@ void RunBigQueryScript(std::string& start_time, std::string& end_time) {
 	std::string cmd = "python " + std_path + " " + std::string(Form1->BigQueryPath.c_str()) + " \"" + std::string(start_time.c_str()) + "\" \"" + std::string(end_time.c_str()) + "\" > " + std::string(BigQueryPythonLogPath.c_str());
 	printf("cmd: %s\n\n",cmd.c_str());
 	int ret = system(cmd.c_str());
-
+	
     if (ret == 0) {
         std::cout << "Get BigQuery Success\n";
     } else {
@@ -2931,7 +2931,7 @@ void __fastcall TForm1::IdUDPServer1UDPRead(TIdUDPListenerThread *AThread, const
           TIdSocketHandle *ABinding)
 {
     int length = AData.Length;
-    printf("received heartbeat: %d\n", length);
+	printf("received heartbeat: %d\n", length);
 
     uint8_t buf[64];
     memcpy(buf, &AData[0], 64);
@@ -2969,50 +2969,63 @@ void __fastcall TForm1::FormClose(TObject *Sender, TCloseAction &Action)
 
 void __fastcall TForm1::BigQueryPlaybackClick(TObject *Sender)
 {
-
+  
   if ((BigQueryPlayback->Caption=="BigQuery Playback") && (Sender!=NULL))
  {
+	std::string stime = "2025-06-26 12:48:00";
+	std::string etime = "2025-06-26 12:50:00";
+	BigQueryPlayback->Caption="BigQuery Loading ...";
+	BigQueryPlayback->Font->Color = clRed;
+	BigQueryPlayback->Update();
 
-	// First, check if the file exists.
+	TThread::CreateAnonymousThread([this, stime, etime]() {
+		RunBigQueryScript(stime, etime);  // 실제 작업
 
+		// 작업 완료 후 UI 업데이트
+		TThread::Synchronize(nullptr, [this]() {
+			BigQueryPlayback->Caption = "BigQuery Complete!";
+			BigQueryPlayback->Font->Color = clGreen;
 
-		// Open a file for writing. Creates the file if it doesn't exist, or overwrites it if it does.
+			PlayBackSBSStream= new TStreamReader("D:\\bbh\\2025\\Architect\\CMU_Lecture\\new_git\\RUI\\Recorded\\bigquery_data.sbs");
+			if (PlayBackSBSStream==NULL)
+			{
+				ShowMessage("Cannot Open File bigquery_data.sbs");
+			}
+			else
+			{
+			   TCPClientSBSHandleThread = new TTCPClientSBSHandleThread(true);
+			   TCPClientSBSHandleThread->UseFileInsteadOfNetwork=true;
+			   TCPClientSBSHandleThread->First=true;
+			   TCPClientSBSHandleThread->FreeOnTerminate=TRUE;
+			   TCPClientSBSHandleThread->Resume();
+			   BigQueryPlayback->Caption="Stop BigQuery Playback";
+			   SBSConnectButton->Enabled=false;
+			   SBSPlaybackButton->Enabled=false;
+			   SBSRecordButton->Enabled=false;
+			   RawConnectButton->Enabled=false;
+			   RawPlaybackButton->Enabled=false;
+			   RawRecordButton->Enabled=false;
 
-//	if (PlayBackSBSStream==NULL)
-//	  {
-//		ShowMessage("Cannot Open File "+PlaybackSBSDialog->FileName);
-//	  }
-//	 else {
-//		   TCPClientSBSHandleThread = new TTCPClientSBSHandleThread(true);
-//		   TCPClientSBSHandleThread->UseFileInsteadOfNetwork=true;
-//		   TCPClientSBSHandleThread->First=true;
-//		   TCPClientSBSHandleThread->FreeOnTerminate=TRUE;
-//		   TCPClientSBSHandleThread->Resume();
-		   BigQueryPlayback->Caption="Stop BigQuery Playback";
-		   SBSConnectButton->Enabled=false;
-		   SBSPlaybackButton->Enabled=false;
-		   SBSRecordButton->Enabled=false;
-		   RawConnectButton->Enabled=false;
-		   RawPlaybackButton->Enabled=false;
-		   RawRecordButton->Enabled=false;
-		   
-//		  }
+			}
 
+		});
+	})->Start();
 
  }
  else
  {
-//   TCPClientSBSHandleThread->Terminate();
-//   delete PlayBackSBSStream;
-//   PlayBackSBSStream=NULL;
-   BigQueryPlayback->Caption="BigQuery Playback";
-   SBSConnectButton->Enabled=true;
-   SBSPlaybackButton->Enabled=true;
-   SBSRecordButton->Enabled=true;
-   RawConnectButton->Enabled=true;
-   RawPlaybackButton->Enabled=true;
-   RawRecordButton->Enabled=true;
+	TCPClientSBSHandleThread->Terminate();
+	delete PlayBackSBSStream;
+	PlayBackSBSStream=NULL;
+	BigQueryPlayback->Caption="BigQuery Playback";
+	SBSConnectButton->Enabled=true;
+	SBSPlaybackButton->Enabled=true;
+	SBSRecordButton->Enabled=true;
+	RawConnectButton->Enabled=true;
+	RawPlaybackButton->Enabled=true;
+    RawRecordButton->Enabled=true;
  }
+
 }
 //---------------------------------------------------------------------------
 
