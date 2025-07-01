@@ -929,21 +929,29 @@ object Form1: TForm1
         TabOrder = 2
         OnClick = BigQueryPlaybackClick
       end
-      object BigFromTimeText: TEdit
+      object BigFromDateTimePicker: TDateTimePicker
         Left = 73
-        Top = 53
-        Width = 128
-        Height = 20
+        Top = 54
+        Width = 167
+        Height = 19
+        Date = 45839.000000000000000000
+        Time = 45839.000000000000000000
+        Kind = dtkDateTime
+        MaxDate = 45869.999988425920000000
+        MinDate = 45809.000000000000000000
         TabOrder = 3
-        Text = '2025-06-26 12:48:00'
       end
-      object BigToTimeText: TEdit
+      object BigToDateTimePicker: TDateTimePicker
         Left = 73
-        Top = 77
-        Width = 128
+        Top = 76
+        Width = 167
         Height = 20
+        Date = 45839.000000000000000000
+        Time = 45839.000000000000000000
+        Kind = dtkDateTime
+        MaxDate = 45869.999988425920000000
+        MinDate = 45809.000000000000000000
         TabOrder = 4
-        Text = '2025-06-26 12:50:00'
       end
     end
     object Panel6: TPanel

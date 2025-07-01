@@ -390,6 +390,102 @@ void __fastcall TForm1::ObjectDisplayResize(TObject *Sender)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	g_EarthView->Resize(ObjectDisplay->Width,ObjectDisplay->Height);
 }
+
+#ifndef YAKI_TEST_CODE
+void __fastcall TForm1::GetAltitudeColor(float altitude, float &r, float &g, float &b)
+{
+    float t = altitude / 45000.0f;
+
+    if (t < 0.25f)       r = 1.0f, g = 4*t, b = 0.0f;                    // 빨강 → 노랑
+    else if (t < 0.5f)   r = 1.0f - 4*(t-0.25f), g = 1.0f, b = 0.0f;      // 노랑 → 초록
+    else if (t < 0.75f)  r = 0.0f, g = 1.0f - 4*(t-0.5f), b = 4*(t-0.5f); // 초록 → 파랑
+    else                 r = 4*(t-0.75f), g = 0.0f, b = 1.0f;             // 파랑 → 보라
+
+    r = std::clamp(r, 0.0f, 1.0f);
+    g = std::clamp(g, 0.0f, 1.0f);
+    b = std::clamp(b, 0.0f, 1.0f);
+}
+
+
+
+
+void __fastcall TForm1::DrawText(int x, int y, const char* text)
+{
+   glRasterPos2i(x, y);
+   ObjectDisplay->Draw2DText(text);
+}
+
+void __fastcall TForm1::DrawAltitudeTicks(int barX, int barY, int barWidth, int barHeight)
+{
+    const int step = 5000; // 고도 눈금 간격
+    for (int i = 0; i <= 45000; i += step)
+    {
+        float t = (float)i / 45000.0f;
+        float x = barX + t * barWidth;
+
+        // 눈금선
+        glColor3f(1.0f, 1.0f, 1.0f);  // 흰색
+        glBegin(GL_LINES);
+        glVertex2f(x, barY + barHeight);
+        glVertex2f(x, barY + barHeight + 5);
+        glEnd();
+
+        // 텍스트
+        char label[16];
+        if (i < 45000)
+            sprintf(label, "%d", i);
+        else
+            strcpy(label, "45000+");
+
+        DrawText(i == 0 ? (int)x - 10 : i != 5000 ? (int)x - 40 : (int)x - 30, barY + barHeight + 10, label);
+    }
+}
+
+void __fastcall TForm1::DrawAltitudeGradientBar(int windowWidth, int windowHeight)
+{
+    const int barHeight = 10;
+    const int barX = 50;
+    const int barY = 40;  // 하단에서 40px 위
+    const int barWidth = windowWidth - 2 * barX;
+    const int segments = 200;
+
+    glBegin(GL_QUADS);
+    for (int i = 0; i < segments; ++i)
+    {
+        float t0 = (float)i / segments;
+        float t1 = (float)(i + 1) / segments;
+
+        float altitude0 = t0 * 45000.0f;
+        float altitude1 = t1 * 45000.0f;
+
+        float x0 = barX + t0 * barWidth;
+        float x1 = barX + t1 * barWidth;
+
+        float r, g, b;
+
+        GetAltitudeColor(altitude0, r, g, b);
+        glColor3f(r, g, b);
+        glVertex2f(x0, barY);
+        glVertex2f(x1, barY);
+        glVertex2f(x1, barY + barHeight);
+        glVertex2f(x0, barY + barHeight);
+    }
+    glEnd();
+
+    DrawAltitudeTicks(barX, barY, barWidth, barHeight);
+}
+void __fastcall TForm1::InitOrtho2D(int width, int height)
+{
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(0, width, 0, height);  // 왼쪽 아래 (0,0) 기준
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+}
+
+
+#endif
+
 //---------------------------------------------------------------------------
 void __fastcall TForm1::ObjectDisplayPaint(TObject *Sender)
 {
@@ -411,6 +507,10 @@ void __fastcall TForm1::ObjectDisplayPaint(TObject *Sender)
  yf=Mh1/Mh2;
 
  DrawObjects();
+int windowWidth = ObjectDisplay->ClientWidth;
+int windowHeight = ObjectDisplay->ClientHeight;
+InitOrtho2D(windowWidth, windowHeight);
+DrawAltitudeGradientBar(windowWidth, windowHeight);
  if(log_time_cnt == 2){
 	 auto end_time = std::chrono::high_resolution_clock::now();
 	 auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - g_start_time).count();
@@ -819,6 +919,11 @@ if (Data->HaveLatLon)
 #ifndef YAKI_TEST_CODE
        if (mouseover_aircraft == Data) {
             glColor4f(0.7, 0.7, 0.0, 1.0);
+       } else {
+           float r, g, b;
+           GetAltitudeColor(Data->Altitude, r, g, b);
+           glColor4f(r, g, b, 1.0);
+
        }
        if (aircraft_is_helicopter(Data->ICAO, NULL)) {
        		DrawAirplaneImage(ScrX,ScrY,g_EarthView->GetCurrentZoom()/50 > 1.5 ? 1.5 : g_EarthView->GetCurrentZoom()/50 < 0.5 ? 0.5 : g_EarthView->GetCurrentZoom()/50,Data->Heading,72);
@@ -3003,8 +3108,23 @@ void __fastcall TForm1::BigQueryPlaybackClick(TObject *Sender)
   
   if ((BigQueryPlayback->Caption=="BigQuery Playback") && (Sender!=NULL))
  {
-	std::string stime = "2025-06-26 12:48:00";
-	std::string etime = "2025-06-26 12:50:00";
+#ifndef YAKI_TEST_CODE
+    DWORD dwFlags;
+    if (Sender != NULL && !InternetGetConnectedState(&dwFlags, 0)) {
+        ShowMessage("Check internet connection\n");
+        return;
+    }
+#endif
+    //std::string stime = BigFromTimeText->Text;
+    //std::string etime = BigToTimeText->Text;
+    TDateTime FromDateTime = BigFromDateTimePicker->DateTime;
+    TDateTime ToDateTime = BigFromDateTimePicker->DateTime;
+    AnsiString fromstr = FromDateTime.FormatString("yyyy-mm-dd hh:nn:ss");
+	std::string stime = fromstr.c_str();
+    AnsiString tostr = ToDateTime.FormatString("yyyy-mm-dd hh:nn:ss");
+	std::string etime = tostr.c_str();
+//	std::string stime = "2025-06-26 12:48:00";
+//	std::string etime = "2025-06-26 12:50:00";
 	BigQueryPlayback->Caption="BigQuery Loading ...";
 	BigQueryPlayback->Font->Color = clRed;
 	BigQueryPlayback->Update();

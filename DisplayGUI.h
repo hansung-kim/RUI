@@ -203,8 +203,8 @@ __published:	// IDE-managed Components
 	TButton *BigQueryPlayback;
 	TLabel *BigFromTimeLabel;
 	TLabel *BigToTimeLabel;
-	TEdit *BigFromTimeText;
-	TEdit *BigToTimeText;
+	TDateTimePicker *BigFromDateTimePicker;
+	TDateTimePicker *BigToDateTimePicker;
 	void __fastcall ObjectDisplayInit(TObject *Sender);
 	void __fastcall ObjectDisplayResize(TObject *Sender);
 	void __fastcall ObjectDisplayPaint(TObject *Sender);
@@ -284,6 +284,14 @@ public:		// User declarations
 #ifndef YAKI_TEST_CODE // MAP
     void __fastcall RegisterMapProviders();
 #endif
+#ifndef YAKI_TEST_CODE
+void __fastcall GetAltitudeColor(float altitude, float &r, float &g, float &b);
+void __fastcall DrawText(int x, int y, const char* text);
+void __fastcall DrawAltitudeTicks(int barX, int barY, int barWidth, int barHeight);
+void __fastcall DrawAltitudeGradientBar(int windowWidth, int windowHeight);
+void __fastcall InitOrtho2D(int width, int height);
+#endif
+
 	int                        MouseDownX,MouseDownY;
 	bool                       MouseDown;
 	TTrackHook                 TrackHook;

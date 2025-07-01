@@ -147,6 +147,11 @@ static void decodeCPR(TADS_B_Aircraft *a)
         a->Latitude = rlat1;
     }
     if (a->Longitude > 180) a->Longitude -= 360;
+    TLatLon *pos = new TLatLon;
+    pos->Latitude = a->Latitude;
+    pos->Longitude = a->Longitude;
+    pos->Altitude = a->Altitude;
+    a->LatLonHistory->Add(pos);
 }
 
  //---------------------------------------------------------------------------
