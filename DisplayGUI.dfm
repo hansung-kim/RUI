@@ -107,9 +107,9 @@ object Form1: TForm1
     TabOrder = 0
     object Panel1: TPanel
       Left = 1
-      Top = 893
+      Top = 872
       Width = 248
-      Height = 147
+      Height = 168
       Align = alBottom
       TabOrder = 0
       object Label12: TLabel
@@ -205,10 +205,11 @@ object Form1: TForm1
       Left = 1
       Top = 1
       Width = 248
-      Height = 892
+      Height = 871
       Align = alClient
       Constraints.MinHeight = 70
       TabOrder = 1
+      ExplicitHeight = 892
       object Label15: TLabel
         Left = 72
         Top = 501
@@ -224,7 +225,7 @@ object Form1: TForm1
       end
       object DrawMap: TCheckBox
         Left = 5
-        Top = 357
+        Top = 311
         Width = 98
         Height = 17
         Caption = 'Display Map'
@@ -240,7 +241,7 @@ object Form1: TForm1
       end
       object PurgeStale: TCheckBox
         Left = 5
-        Top = 380
+        Top = 334
         Width = 96
         Height = 19
         Caption = 'Purge Stale'
@@ -256,7 +257,7 @@ object Form1: TForm1
       end
       object CSpinStaleTime: TCSpinEdit
         Left = 107
-        Top = 359
+        Top = 313
         Width = 62
         Height = 21
         Increment = 5
@@ -267,7 +268,7 @@ object Form1: TForm1
       end
       object PurgeButton: TButton
         Left = 186
-        Top = 362
+        Top = 316
         Width = 51
         Height = 16
         Caption = 'Purge'
@@ -354,7 +355,7 @@ object Form1: TForm1
       end
       object CycleImages: TCheckBox
         Left = 107
-        Top = 380
+        Top = 334
         Width = 96
         Height = 19
         Caption = 'Cycle Images'
@@ -371,7 +372,7 @@ object Form1: TForm1
         Left = 5
         Top = 76
         Width = 244
-        Height = 261
+        Height = 229
         BevelInner = bvLowered
         BevelKind = bkFlat
         TabOrder = 12
@@ -456,7 +457,7 @@ object Form1: TForm1
         end
         object TrkLastUpdateTimeLabel: TLabel
           Left = 120
-          Top = 210
+          Top = 206
           Width = 72
           Height = 13
           Caption = '00:00:00:000'
@@ -469,7 +470,7 @@ object Form1: TForm1
         end
         object Label14: TLabel
           Left = 5
-          Top = 210
+          Top = 206
           Width = 109
           Height = 13
           Caption = 'LAST UPDATE TIME:'
@@ -625,7 +626,7 @@ object Form1: TForm1
         end
         object Label20: TLabel
           Left = 5
-          Top = 191
+          Top = 172
           Width = 53
           Height = 13
           Caption = 'DEP-ARR:'
@@ -637,34 +638,8 @@ object Form1: TForm1
           ParentFont = False
         end
         object FlightDepArrLabel: TLabel
-          Left = 66
-          Top = 191
-          Width = 21
-          Height = 13
-          Caption = 'N/A'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Tahoma'
-          Font.Style = [fsBold]
-          ParentFont = False
-        end
-        object AircraftCountry: TLabel
-          Left = 5
-          Top = 172
-          Width = 51
-          Height = 13
-          Caption = 'Country :'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Tahoma'
-          Font.Style = [fsBold]
-          ParentFont = False
-        end
-        object AircraftCountryTest: TLabel
-          Left = 66
-          Top = 172
+          Left = 17
+          Top = 189
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -862,6 +837,46 @@ object Form1: TForm1
         Caption = 'SBS Playback'
         TabOrder = 19
         OnClick = SBSPlaybackButtonClick
+      end
+      object DeadReckonLabel: TCheckBox
+        Left = 5
+        Top = 359
+        Width = 121
+        Height = 19
+        Caption = 'Dead Reckoning'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 20
+        OnClick = CycleImagesClick
+      end
+      object CReckoningTime: TCSpinEdit
+        Left = 132
+        Top = 357
+        Width = 62
+        Height = 21
+        MaxValue = 60
+        MinValue = 1
+        TabOrder = 21
+        Value = 10
+      end
+      object ColorAltitudeLabel: TCheckBox
+        Left = 5
+        Top = 380
+        Width = 140
+        Height = 19
+        Caption = 'Color-code Altitude'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 22
+        OnClick = CycleImagesClick
       end
     end
     object Panel2: TPanel
