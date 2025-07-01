@@ -1033,7 +1033,13 @@ if (Data->HaveLatLon)
             // obj ����
             // Check altitude
             float r, g, b;
-            GetAltitudeColor(obj->Altitude, r, g, b);
+            if (ColorAltitudeLabel->Checked) {
+	            GetAltitudeColor(obj->Altitude, r, g, b);
+            } else {
+                r = 1.0f;
+                g = 0.0f;
+                b = 1.0f;
+            }
             glColor4f(r, g, b, 0.8);
  //           glColor3f(1.0f, 0.0f, 0.0f);   // ����
             glPointSize(7.0f);            // �� ũ�� 10�ȼ�
