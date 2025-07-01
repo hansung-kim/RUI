@@ -3118,7 +3118,7 @@ void __fastcall TForm1::BigQueryPlaybackClick(TObject *Sender)
     //std::string stime = BigFromTimeText->Text;
     //std::string etime = BigToTimeText->Text;
     TDateTime FromDateTime = BigFromDateTimePicker->DateTime;
-    TDateTime ToDateTime = BigFromDateTimePicker->DateTime;
+    TDateTime ToDateTime = BigToDateTimePicker->DateTime;
     AnsiString fromstr = FromDateTime.FormatString("yyyy-mm-dd hh:nn:ss");
 	std::string stime = fromstr.c_str();
     AnsiString tostr = ToDateTime.FormatString("yyyy-mm-dd hh:nn:ss");
