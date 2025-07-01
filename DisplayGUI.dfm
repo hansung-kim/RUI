@@ -107,35 +107,35 @@ object Form1: TForm1
     TabOrder = 0
     object Panel1: TPanel
       Left = 1
-      Top = 833
+      Top = 856
       Width = 248
-      Height = 207
+      Height = 184
       Align = alBottom
       TabOrder = 0
       object Label12: TLabel
-        Left = 8
-        Top = 8
+        Left = 5
+        Top = 16
         Width = 55
         Height = 12
         Caption = 'CPA TIME:'
       end
       object Label19: TLabel
-        Left = 8
-        Top = 26
+        Left = 5
+        Top = 31
         Width = 82
         Height = 12
         Caption = 'CPA DISTANCE:'
       end
       object CpaTimeValue: TLabel
-        Left = 69
-        Top = 8
+        Left = 66
+        Top = 16
         Width = 28
         Height = 12
         Caption = 'NONE'
       end
       object CpaDistanceValue: TLabel
-        Left = 96
-        Top = 26
+        Left = 93
+        Top = 31
         Width = 25
         Height = 12
         Caption = 'None'
@@ -190,8 +190,8 @@ object Form1: TForm1
         OnChange = TimeToGoTrackBarChange
       end
       object TimeToGoCheckBox: TCheckBox
-        Left = 8
-        Top = 38
+        Left = 5
+        Top = 44
         Width = 105
         Height = 27
         Caption = 'Time-To-Go'
@@ -200,8 +200,8 @@ object Form1: TForm1
         TabOrder = 4
       end
       object TimeToGoText: TStaticText
-        Left = 119
-        Top = 43
+        Left = 114
+        Top = 51
         Width = 76
         Height = 16
         Caption = '00:00:00:000'
@@ -232,10 +232,11 @@ object Form1: TForm1
       Left = 1
       Top = 1
       Width = 248
-      Height = 832
+      Height = 855
       Align = alClient
       Constraints.MinHeight = 70
       TabOrder = 1
+      ExplicitHeight = 822
       object Label15: TLabel
         Left = 72
         Top = 501
@@ -909,13 +910,13 @@ object Form1: TForm1
     end
     object Panel2: TPanel
       Left = 1
-      Top = 731
+      Top = 720
       Width = 248
-      Height = 101
+      Height = 107
       TabOrder = 2
       object BigFromTimeLabel: TLabel
         Left = 5
-        Top = 55
+        Top = 63
         Width = 69
         Height = 13
         Caption = 'From Time:  '
@@ -928,7 +929,7 @@ object Form1: TForm1
       end
       object BigToTimeLabel: TLabel
         Left = 5
-        Top = 79
+        Top = 87
         Width = 54
         Height = 13
         Caption = 'To Time:  '
@@ -965,16 +966,16 @@ object Form1: TForm1
       end
       object BigQueryPlayback: TButton
         Left = 5
-        Top = 32
+        Top = 30
         Width = 196
-        Height = 17
+        Height = 25
         Caption = 'BigQuery Playback'
         TabOrder = 2
         OnClick = BigQueryPlaybackClick
       end
       object BigFromDateTimePicker: TDateTimePicker
         Left = 73
-        Top = 54
+        Top = 62
         Width = 167
         Height = 19
         Date = 45834.000000000000000000
@@ -986,7 +987,7 @@ object Form1: TForm1
       end
       object BigToDateTimePicker: TDateTimePicker
         Left = 73
-        Top = 76
+        Top = 84
         Width = 167
         Height = 20
         Date = 45834.000000000000000000
@@ -1001,12 +1002,12 @@ object Form1: TForm1
       Left = 1
       Top = 659
       Width = 248
-      Height = 70
+      Height = 60
       Align = alCustom
       TabOrder = 3
       object Label21: TLabel
         Left = 83
-        Top = 6
+        Top = 2
         Width = 87
         Height = 16
         Caption = 'Flight Tracker'
@@ -1019,7 +1020,7 @@ object Form1: TForm1
       end
       object WiFiStatus: TLabel
         Left = 5
-        Top = 28
+        Top = 24
         Width = 115
         Height = 13
         Caption = 'Connection Status :  '
@@ -1032,7 +1033,7 @@ object Form1: TForm1
       end
       object WiFiStatusText: TLabel
         Left = 126
-        Top = 28
+        Top = 24
         Width = 21
         Height = 13
         Caption = 'N/A'
@@ -1045,7 +1046,7 @@ object Form1: TForm1
       end
       object SDRStatus: TLabel
         Left = 5
-        Top = 47
+        Top = 40
         Width = 75
         Height = 13
         Caption = 'SDR Status :  '
@@ -1058,7 +1059,7 @@ object Form1: TForm1
       end
       object SDRStatusText: TLabel
         Left = 91
-        Top = 47
+        Top = 40
         Width = 21
         Height = 13
         Caption = 'N/A'
