@@ -206,6 +206,9 @@ __published:	// IDE-managed Components
 	TCheckBox *DeadReckonLabel;
 	TCSpinEdit *CReckoningTime;
 	TCheckBox *ColorAltitudeLabel;
+	TLabel *Label22;
+	TTrackBar *TrackBarPlaybackSpeed;
+	TStaticText *PlaybackSpeedText;
 	void __fastcall ObjectDisplayInit(TObject *Sender);
 	void __fastcall ObjectDisplayResize(TObject *Sender);
 	void __fastcall ObjectDisplayPaint(TObject *Sender);
@@ -245,6 +248,7 @@ __published:	// IDE-managed Components
 	void __fastcall IdTCPClientSBSConnected(TObject *Sender);
 	void __fastcall IdTCPClientSBSDisconnected(TObject *Sender);
 	void __fastcall TimeToGoTrackBarChange(TObject *Sender);
+	void __fastcall PlaybackSpeedTrackBarChange(TObject *Sender);
 	void __fastcall MapComboBoxChange(TObject *Sender);
 	void __fastcall BigQueryCheckBoxClick(TObject *Sender);
 	void __fastcall UseSBSRemoteClick(TObject *Sender);

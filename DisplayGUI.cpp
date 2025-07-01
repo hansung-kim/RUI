@@ -2243,7 +2243,7 @@ void __fastcall TTCPClientRawHandleThread::Execute(void)
 		   First=false;
 		   LastTime=Time;
 		  }
-		 SleepTime=Time-LastTime;
+		 SleepTime=(Time-LastTime) / std::atoi(AnsiString(Form1->PlaybackSpeedText->Caption).c_str());
 		 LastTime=Time;
 		 if (SleepTime>0) Sleep(SleepTime);
          if (Form1->PlayBackRawStream->EndOfStream)
@@ -2430,7 +2430,7 @@ void __fastcall TTCPClientSBSHandleThread::Execute(void)
 		   First=false;
 		   LastTime=Time;
 		  }
-		 SleepTime=Time-LastTime;
+		 SleepTime=(Time-LastTime)  / std::atoi(AnsiString(Form1->PlaybackSpeedText->Caption).c_str());
 		 LastTime=Time;
 		 if (SleepTime>0) Sleep(SleepTime);
          if (Form1->PlayBackSBSStream && Form1->PlayBackSBSStream->EndOfStream)
@@ -2615,6 +2615,14 @@ void __fastcall TForm1::TimeToGoTrackBarChange(TObject *Sender)
   hmsm=TimeToGoTrackBar->Position*1000;
   TimeToGoText->Caption=TimeToChar(hmsm);
 }
+
+void __fastcall TForm1::PlaybackSpeedTrackBarChange(TObject *Sender)
+{
+  _int64 hmsm;
+  hmsm=TrackBarPlaybackSpeed->Position;
+  PlaybackSpeedText->Caption=hmsm;
+}
+
 //---------------------------------------------------------------------------
 #ifndef YAKI_TEST_CODE
 void __fastcall TForm1::LoadAirport() {

@@ -107,11 +107,12 @@ object Form1: TForm1
     TabOrder = 0
     object Panel1: TPanel
       Left = 1
-      Top = 872
+      Top = 833
       Width = 248
-      Height = 168
+      Height = 207
       Align = alBottom
       TabOrder = 0
+      ExplicitLeft = 6
       object Label12: TLabel
         Left = 8
         Top = 8
@@ -140,6 +141,13 @@ object Form1: TForm1
         Height = 12
         Caption = 'None'
       end
+      object Label22: TLabel
+        Left = 8
+        Top = 136
+        Width = 103
+        Height = 12
+        Caption = ' Playback Speed:    x'
+      end
       object ZoomIn: TButton
         Left = 5
         Top = 110
@@ -167,7 +175,7 @@ object Form1: TForm1
         Font.Name = 'Tahoma'
         Font.Style = [fsBold]
         ParentFont = False
-        TabOrder = 1
+        TabOrder = 2
         OnClick = ZoomOutClick
       end
       object TimeToGoTrackBar: TTrackBar
@@ -179,7 +187,7 @@ object Form1: TForm1
         Min = 1
         Frequency = 100
         Position = 1
-        TabOrder = 2
+        TabOrder = 3
         OnChange = TimeToGoTrackBarChange
       end
       object TimeToGoCheckBox: TCheckBox
@@ -190,7 +198,7 @@ object Form1: TForm1
         Caption = 'Time-To-Go'
         Checked = True
         State = cbChecked
-        TabOrder = 3
+        TabOrder = 4
       end
       object TimeToGoText: TStaticText
         Left = 119
@@ -198,18 +206,37 @@ object Form1: TForm1
         Width = 76
         Height = 16
         Caption = '00:00:00:000'
-        TabOrder = 4
+        TabOrder = 5
+      end
+      object TrackBarPlaybackSpeed: TTrackBar
+        Left = 5
+        Top = 154
+        Width = 228
+        Height = 33
+        Max = 100
+        Min = 1
+        Frequency = 10
+        Position = 1
+        TabOrder = 1
+        OnChange = PlaybackSpeedTrackBarChange
+      end
+      object PlaybackSpeedText: TStaticText
+        Left = 114
+        Top = 136
+        Width = 11
+        Height = 16
+        Caption = '1'
+        TabOrder = 6
       end
     end
     object Panel3: TPanel
       Left = 1
       Top = 1
       Width = 248
-      Height = 871
+      Height = 832
       Align = alClient
       Constraints.MinHeight = 70
       TabOrder = 1
-      ExplicitHeight = 892
       object Label15: TLabel
         Left = 72
         Top = 501
@@ -949,8 +976,8 @@ object Form1: TForm1
         Top = 54
         Width = 167
         Height = 19
-        Date = 45839.000000000000000000
-        Time = 45839.000000000000000000
+        Date = 45834.000000000000000000
+        Time = 45834.000000000000000000
         Kind = dtkDateTime
         MaxDate = 45869.999988425920000000
         MinDate = 45809.000000000000000000
@@ -961,8 +988,8 @@ object Form1: TForm1
         Top = 76
         Width = 167
         Height = 20
-        Date = 45839.000000000000000000
-        Time = 45839.000000000000000000
+        Date = 45834.000000000000000000
+        Time = 45834.000000000000000000
         Kind = dtkDateTime
         MaxDate = 45869.999988425920000000
         MinDate = 45809.000000000000000000
