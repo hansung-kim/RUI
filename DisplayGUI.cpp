@@ -893,7 +893,7 @@ void __fastcall TForm1::DrawObjects(void)
 	{
     // hansungkim DeadReckoning
     int64_t currTimeInMsec = GetCurrentTimeInMsec();
-	  if(Data->LastSeen < (currTimeInMsec - 3000)) {
+	  if( DeadReckonLabel->Checked && (Data->LastSeen < (currTimeInMsec - CReckoningTime->Value*1000)) ) {
       int64_t deltaTimeInMsec;
       if(Data->isEnabledDeadReckoning) {
          deltaTimeInMsec = currTimeInMsec - Data->updatedTimeInMsec;
