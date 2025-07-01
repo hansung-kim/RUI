@@ -953,7 +953,7 @@ if (Data->HaveLatLon)
 
 	   LatLon2XY(Data->Latitude,Data->Longitude, ScrX, ScrY);
 	   //DrawPoint(ScrX,ScrY);
-	   if (Data->HaveSpeedAndHeading)   glColor4f(1.0, 0.0, 1.0, 1.0);
+	   if (Data->HaveSpeedAndHeading)   glColor4f(1.0, 0.0, 1.0, Data->isEnabledDeadReckoning ? 0.5 : 1.0);
 	   else
 		{
 		 Data->Heading=0.0;
