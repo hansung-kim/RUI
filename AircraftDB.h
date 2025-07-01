@@ -44,5 +44,8 @@ const char * GetAircraftDBInfo(uint32_t addr);
 const char * GetAircraftDBReg(uint32_t addr);
 bool aircraft_is_helicopter (uint32_t addr, const char **type_ptr);
 bool aircraft_is_military (uint32_t addr, const char **country);
+const char *aircraft_get_country (uint32_t addr, bool get_short);
+const char *aircraft_get_operator (uint32_t addr);
+
 //---------------------------------------------------------------------------
 #endif

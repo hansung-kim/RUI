@@ -1012,6 +1012,10 @@ if (Data->HaveLatLon)
 		ICAOLabel->Caption=Data->HexAddr;
         if (Data->HaveFlightNum) {
           FlightNumLabel->Caption=Data->FlightNum;
+          const char *country = aircraft_get_country(TrackHook.ICAO_CC, false);
+         CountryText->Caption = country ? strcmp(country, "?") == 0 ? "N/A" : country : "N/A";
+         const char *opertor = aircraft_get_operator(TrackHook.ICAO_CC);
+         AirlineText->Caption = opertor ? strcmp(opertor, "?") == 0 ? "N/A" : opertor : "N/A";          
  #ifndef YAKI_TEST_CODE
           remove_spaces(Data->FlightNum);
           bool bFind;
@@ -1113,6 +1117,8 @@ if (Data->HaveLatLon)
 		 MsgCntLabel->Caption="N/A";
          TrkLastUpdateTimeLabel->Caption="N/A";
          FlightDepArrLabel->Caption = "N/A";
+         CountryText->Caption ="N/A";
+         AirlineText->Caption ="N/A";
         }
  }
  if (TrackHook.Valid_CPA)
