@@ -238,7 +238,7 @@ object Form1: TForm1
       TabOrder = 1
       object Label15: TLabel
         Left = 72
-        Top = 549
+        Top = 573
         Width = 98
         Height = 13
         Caption = 'Areas Of Interest'
@@ -303,7 +303,7 @@ object Form1: TForm1
       end
       object AreaListView: TListView
         Left = 5
-        Top = 568
+        Top = 592
         Width = 235
         Height = 97
         Columns = <
@@ -325,7 +325,7 @@ object Form1: TForm1
       end
       object Insert: TButton
         Left = 13
-        Top = 671
+        Top = 695
         Width = 36
         Height = 18
         Caption = 'Insert'
@@ -334,7 +334,7 @@ object Form1: TForm1
       end
       object Delete: TButton
         Left = 166
-        Top = 671
+        Top = 695
         Width = 44
         Height = 18
         Caption = 'Delete'
@@ -344,7 +344,7 @@ object Form1: TForm1
       end
       object Complete: TButton
         Left = 53
-        Top = 671
+        Top = 695
         Width = 57
         Height = 18
         Caption = 'Complete'
@@ -354,7 +354,7 @@ object Form1: TForm1
       end
       object Cancel: TButton
         Left = 115
-        Top = 671
+        Top = 695
         Width = 41
         Height = 18
         Caption = 'Cancel'
@@ -1051,14 +1051,14 @@ object Form1: TForm1
     end
     object Panel6: TPanel
       Left = 1
-      Top = 696
+      Top = 549
       Width = 248
       Height = 23
       Align = alCustom
       TabOrder = 3
       object SDRStatus: TLabel
-        Left = 5
-        Top = 5
+        Left = 11
+        Top = 4
         Width = 107
         Height = 13
         Caption = 'Flight Tracker SDR:'
@@ -1070,8 +1070,8 @@ object Form1: TForm1
         ParentFont = False
       end
       object SDRStatusText: TLabel
-        Left = 118
-        Top = 5
+        Left = 124
+        Top = 4
         Width = 21
         Height = 13
         Caption = 'N/A'
