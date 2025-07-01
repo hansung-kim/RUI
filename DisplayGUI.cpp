@@ -534,10 +534,13 @@ void __fastcall TForm1::ObjectDisplayPaint(TObject *Sender)
  yf=Mh1/Mh2;
 
  DrawObjects();
-int windowWidth = ObjectDisplay->ClientWidth;
-int windowHeight = ObjectDisplay->ClientHeight;
-InitOrtho2D(windowWidth, windowHeight);
-DrawAltitudeGradientBar(windowWidth, windowHeight);
+ if (ColorAltitudeLabel->Checked) {
+    int windowWidth = ObjectDisplay->ClientWidth;
+    int windowHeight = ObjectDisplay->ClientHeight;
+    InitOrtho2D(windowWidth, windowHeight);
+    DrawAltitudeGradientBar(windowWidth, windowHeight);
+     
+ }
  if(log_time_cnt == 2){
 	 auto end_time = std::chrono::high_resolution_clock::now();
 	 auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - g_start_time).count();
@@ -959,7 +962,7 @@ if (Data->HaveLatLon)
 #ifndef YAKI_TEST_CODE
        if (mouseover_aircraft == Data) {
             glColor4f(0.7, 0.7, 0.0, 1.0);
-       } else {
+       } else if (ColorAltitudeLabel->Checked) {
            float r, g, b;
            GetAltitudeColor(Data->Altitude, r, g, b);
            glColor4f(r, g, b, Data->isEnabledDeadReckoning ? 0.5 : 1.0);

@@ -112,7 +112,6 @@ object Form1: TForm1
       Height = 207
       Align = alBottom
       TabOrder = 0
-      ExplicitLeft = 6
       object Label12: TLabel
         Left = 8
         Top = 8
@@ -896,12 +895,14 @@ object Form1: TForm1
         Width = 140
         Height = 19
         Caption = 'Color-code Altitude'
+        Checked = True
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
         Font.Name = 'Tahoma'
         Font.Style = [fsBold]
         ParentFont = False
+        State = cbChecked
         TabOrder = 22
         OnClick = CycleImagesClick
       end
@@ -977,7 +978,7 @@ object Form1: TForm1
         Width = 167
         Height = 19
         Date = 45834.000000000000000000
-        Time = 45834.000000000000000000
+        Time = 0.533333333332848300
         Kind = dtkDateTime
         MaxDate = 45869.999988425920000000
         MinDate = 45809.000000000000000000
@@ -989,7 +990,7 @@ object Form1: TForm1
         Width = 167
         Height = 20
         Date = 45834.000000000000000000
-        Time = 45834.000000000000000000
+        Time = 0.534722222218988500
         Kind = dtkDateTime
         MaxDate = 45869.999988425920000000
         MinDate = 45809.000000000000000000
