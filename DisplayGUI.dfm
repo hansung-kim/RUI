@@ -236,10 +236,9 @@ object Form1: TForm1
       Align = alClient
       Constraints.MinHeight = 70
       TabOrder = 1
-      ExplicitHeight = 822
       object Label15: TLabel
         Left = 72
-        Top = 501
+        Top = 549
         Width = 98
         Height = 13
         Caption = 'Areas Of Interest'
@@ -252,7 +251,7 @@ object Form1: TForm1
       end
       object DrawMap: TCheckBox
         Left = 5
-        Top = 311
+        Top = 359
         Width = 98
         Height = 17
         Caption = 'Display Map'
@@ -268,7 +267,7 @@ object Form1: TForm1
       end
       object PurgeStale: TCheckBox
         Left = 5
-        Top = 334
+        Top = 382
         Width = 96
         Height = 19
         Caption = 'Purge Stale'
@@ -284,7 +283,7 @@ object Form1: TForm1
       end
       object CSpinStaleTime: TCSpinEdit
         Left = 107
-        Top = 313
+        Top = 361
         Width = 62
         Height = 21
         Increment = 5
@@ -295,7 +294,7 @@ object Form1: TForm1
       end
       object PurgeButton: TButton
         Left = 186
-        Top = 316
+        Top = 364
         Width = 51
         Height = 16
         Caption = 'Purge'
@@ -304,7 +303,7 @@ object Form1: TForm1
       end
       object AreaListView: TListView
         Left = 5
-        Top = 520
+        Top = 568
         Width = 235
         Height = 97
         Columns = <
@@ -326,7 +325,7 @@ object Form1: TForm1
       end
       object Insert: TButton
         Left = 13
-        Top = 623
+        Top = 671
         Width = 36
         Height = 18
         Caption = 'Insert'
@@ -335,7 +334,7 @@ object Form1: TForm1
       end
       object Delete: TButton
         Left = 166
-        Top = 623
+        Top = 671
         Width = 44
         Height = 18
         Caption = 'Delete'
@@ -345,7 +344,7 @@ object Form1: TForm1
       end
       object Complete: TButton
         Left = 53
-        Top = 623
+        Top = 671
         Width = 57
         Height = 18
         Caption = 'Complete'
@@ -355,7 +354,7 @@ object Form1: TForm1
       end
       object Cancel: TButton
         Left = 115
-        Top = 623
+        Top = 671
         Width = 41
         Height = 18
         Caption = 'Cancel'
@@ -365,7 +364,7 @@ object Form1: TForm1
       end
       object RawConnectButton: TButton
         Left = 5
-        Top = 405
+        Top = 453
         Width = 104
         Height = 18
         Caption = 'Raw Connect'
@@ -374,7 +373,7 @@ object Form1: TForm1
       end
       object RawIpAddress: TEdit
         Left = 115
-        Top = 405
+        Top = 453
         Width = 110
         Height = 20
         TabOrder = 10
@@ -382,7 +381,7 @@ object Form1: TForm1
       end
       object CycleImages: TCheckBox
         Left = 107
-        Top = 334
+        Top = 382
         Width = 96
         Height = 19
         Caption = 'Cycle Images'
@@ -399,13 +398,13 @@ object Form1: TForm1
         Left = 5
         Top = 76
         Width = 244
-        Height = 229
+        Height = 269
         BevelInner = bvLowered
         BevelKind = bkFlat
         TabOrder = 12
         object CLatLabel: TLabel
           Left = 66
-          Top = 60
+          Top = 100
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -418,7 +417,7 @@ object Form1: TForm1
         end
         object CLonLabel: TLabel
           Left = 66
-          Top = 79
+          Top = 119
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -432,7 +431,7 @@ object Form1: TForm1
         end
         object SpdLabel: TLabel
           Left = 66
-          Top = 95
+          Top = 135
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -445,7 +444,7 @@ object Form1: TForm1
         end
         object HdgLabel: TLabel
           Left = 66
-          Top = 114
+          Top = 154
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -458,7 +457,7 @@ object Form1: TForm1
         end
         object AltLabel: TLabel
           Left = 66
-          Top = 133
+          Top = 173
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -471,7 +470,7 @@ object Form1: TForm1
         end
         object MsgCntLabel: TLabel
           Left = 66
-          Top = 152
+          Top = 192
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -484,7 +483,7 @@ object Form1: TForm1
         end
         object TrkLastUpdateTimeLabel: TLabel
           Left = 120
-          Top = 206
+          Top = 246
           Width = 72
           Height = 13
           Caption = '00:00:00:000'
@@ -497,7 +496,7 @@ object Form1: TForm1
         end
         object Label14: TLabel
           Left = 5
-          Top = 206
+          Top = 246
           Width = 109
           Height = 13
           Caption = 'LAST UPDATE TIME:'
@@ -510,7 +509,7 @@ object Form1: TForm1
         end
         object Label13: TLabel
           Left = 5
-          Top = 153
+          Top = 193
           Width = 52
           Height = 13
           Caption = 'MSG CNT:'
@@ -523,7 +522,7 @@ object Form1: TForm1
         end
         object Label10: TLabel
           Left = 5
-          Top = 134
+          Top = 174
           Width = 24
           Height = 13
           Caption = 'ALT:'
@@ -536,7 +535,7 @@ object Form1: TForm1
         end
         object Label9: TLabel
           Left = 5
-          Top = 115
+          Top = 155
           Width = 27
           Height = 13
           Caption = 'HDG:'
@@ -549,7 +548,7 @@ object Form1: TForm1
         end
         object Label8: TLabel
           Left = 5
-          Top = 96
+          Top = 136
           Width = 25
           Height = 13
           Caption = 'SPD:'
@@ -562,7 +561,7 @@ object Form1: TForm1
         end
         object Label7: TLabel
           Left = 5
-          Top = 79
+          Top = 119
           Width = 24
           Height = 13
           Caption = 'LON:'
@@ -575,7 +574,7 @@ object Form1: TForm1
         end
         object Label6: TLabel
           Left = 5
-          Top = 60
+          Top = 100
           Width = 24
           Height = 13
           Caption = 'LAT:'
@@ -653,7 +652,7 @@ object Form1: TForm1
         end
         object Label20: TLabel
           Left = 5
-          Top = 172
+          Top = 212
           Width = 53
           Height = 13
           Caption = 'DEP-ARR:'
@@ -666,7 +665,59 @@ object Form1: TForm1
         end
         object FlightDepArrLabel: TLabel
           Left = 17
-          Top = 189
+          Top = 229
+          Width = 21
+          Height = 13
+          Caption = 'N/A'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object Label21: TLabel
+          Left = 5
+          Top = 60
+          Width = 48
+          Height = 13
+          Caption = 'Country:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object CountryText: TLabel
+          Left = 66
+          Top = 60
+          Width = 21
+          Height = 13
+          Caption = 'N/A'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object Label27: TLabel
+          Left = 5
+          Top = 79
+          Width = 45
+          Height = 13
+          Caption = 'Air Line:'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentFont = False
+        end
+        object AirlineText: TLabel
+          Left = 66
+          Top = 79
           Width = 21
           Height = 13
           Caption = 'N/A'
@@ -814,7 +865,7 @@ object Form1: TForm1
       end
       object RawPlaybackButton: TButton
         Left = 115
-        Top = 429
+        Top = 477
         Width = 96
         Height = 17
         Caption = 'Raw Playback'
@@ -823,7 +874,7 @@ object Form1: TForm1
       end
       object RawRecordButton: TButton
         Left = 5
-        Top = 429
+        Top = 477
         Width = 104
         Height = 17
         Caption = 'Raw Record'
@@ -832,7 +883,7 @@ object Form1: TForm1
       end
       object SBSConnectButton: TButton
         Left = 5
-        Top = 452
+        Top = 500
         Width = 104
         Height = 20
         Caption = 'SBS Connect'
@@ -841,7 +892,7 @@ object Form1: TForm1
       end
       object SBSIpAddress: TEdit
         Left = 115
-        Top = 452
+        Top = 500
         Width = 117
         Height = 20
         TabOrder = 17
@@ -849,7 +900,7 @@ object Form1: TForm1
       end
       object SBSRecordButton: TButton
         Left = 5
-        Top = 478
+        Top = 526
         Width = 104
         Height = 17
         Caption = 'SBS Record'
@@ -858,7 +909,7 @@ object Form1: TForm1
       end
       object SBSPlaybackButton: TButton
         Left = 115
-        Top = 478
+        Top = 526
         Width = 96
         Height = 17
         Caption = 'SBS Playback'
@@ -867,7 +918,7 @@ object Form1: TForm1
       end
       object DeadReckonLabel: TCheckBox
         Left = 5
-        Top = 359
+        Top = 407
         Width = 121
         Height = 19
         Caption = 'Dead Reckoning'
@@ -882,7 +933,7 @@ object Form1: TForm1
       end
       object CReckoningTime: TCSpinEdit
         Left = 132
-        Top = 357
+        Top = 405
         Width = 62
         Height = 21
         MaxValue = 60
@@ -892,7 +943,7 @@ object Form1: TForm1
       end
       object ColorAltitudeLabel: TCheckBox
         Left = 5
-        Top = 380
+        Top = 428
         Width = 140
         Height = 19
         Caption = 'Color-code Altitude'
@@ -979,7 +1030,7 @@ object Form1: TForm1
         Width = 167
         Height = 19
         Date = 45834.000000000000000000
-        Time = 0.533333333332848300
+        Time = 45834.000000000000000000
         Kind = dtkDateTime
         MaxDate = 45869.999988425920000000
         MinDate = 45809.000000000000000000
@@ -991,7 +1042,7 @@ object Form1: TForm1
         Width = 167
         Height = 20
         Date = 45834.000000000000000000
-        Time = 0.534722222218988500
+        Time = 45834.000000000000000000
         Kind = dtkDateTime
         MaxDate = 45869.999988425920000000
         MinDate = 45809.000000000000000000
@@ -1000,56 +1051,17 @@ object Form1: TForm1
     end
     object Panel6: TPanel
       Left = 1
-      Top = 659
+      Top = 696
       Width = 248
-      Height = 60
+      Height = 23
       Align = alCustom
       TabOrder = 3
-      object Label21: TLabel
-        Left = 83
-        Top = 2
-        Width = 87
-        Height = 16
-        Caption = 'Flight Tracker'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -13
-        Font.Name = 'Tahoma'
-        Font.Style = [fsBold, fsUnderline]
-        ParentFont = False
-      end
-      object WiFiStatus: TLabel
-        Left = 5
-        Top = 24
-        Width = 115
-        Height = 13
-        Caption = 'Connection Status :  '
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Style = [fsBold]
-        ParentFont = False
-      end
-      object WiFiStatusText: TLabel
-        Left = 126
-        Top = 24
-        Width = 21
-        Height = 13
-        Caption = 'N/A'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Style = [fsBold]
-        ParentFont = False
-      end
       object SDRStatus: TLabel
         Left = 5
-        Top = 40
-        Width = 75
+        Top = 5
+        Width = 107
         Height = 13
-        Caption = 'SDR Status :  '
+        Caption = 'Flight Tracker SDR:'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
@@ -1058,8 +1070,8 @@ object Form1: TForm1
         ParentFont = False
       end
       object SDRStatusText: TLabel
-        Left = 91
-        Top = 40
+        Left = 118
+        Top = 5
         Width = 21
         Height = 13
         Caption = 'N/A'
