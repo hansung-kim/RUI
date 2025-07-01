@@ -394,16 +394,43 @@ void __fastcall TForm1::ObjectDisplayResize(TObject *Sender)
 #ifndef YAKI_TEST_CODE
 void __fastcall TForm1::GetAltitudeColor(float altitude, float &r, float &g, float &b)
 {
-    float t = altitude / 45000.0f;
+#ifdef YAKI_TEST_CODE
+    altitude = std::max(0, std::min(45000, static_cast<int>(altitude))); // Clamp to range
 
+    if (altitude <= 15000) {
+        // 초록(0,255,0) → 파랑(0,0,255)
+        float ratio = altitude / 15000.0f;
+        r = 0;
+        g = static_cast<int>((1.0f - ratio) * 255);
+        b = static_cast<int>(ratio * 255);
+    } else if (altitude <= 30000) {
+        // 파랑(0,0,255) → 빨강(255,0,0)
+        float ratio = (altitude - 15000) / 15000.0f;
+        r = static_cast<int>(ratio * 255);
+        g = 0;
+        b = static_cast<int>((1.0f - ratio) * 255);
+    } else {
+        // 빨강(255,0,0) → 보라(128,0,128)
+        float ratio = (altitude - 30000) / 15000.0f;
+        r = static_cast<int>((1.0f - ratio) * 255 + ratio * 128); // 255→128
+        g = 0;
+        b = static_cast<int>(ratio * 128); // 0→128
+    }
+#else    
+    float t = altitude / 45000.0f;
+#ifndef YAKI_TEST_CODE
+    if (t < 0.5f)       r = 0.0f, g = 1.0f - 4*(t), b = 4*(t); // 초록 → 파랑
+    else                 r = 4*(t-0.5f), g = 0.0f, b = 1.0f;             // 파랑 → 보라
+#else
     if (t < 0.25f)       r = 1.0f, g = 4*t, b = 0.0f;                    // 빨강 → 노랑
     else if (t < 0.5f)   r = 1.0f - 4*(t-0.25f), g = 1.0f, b = 0.0f;      // 노랑 → 초록
     else if (t < 0.75f)  r = 0.0f, g = 1.0f - 4*(t-0.5f), b = 4*(t-0.5f); // 초록 → 파랑
     else                 r = 4*(t-0.75f), g = 0.0f, b = 1.0f;             // 파랑 → 보라
-
+#endif
     r = std::clamp(r, 0.0f, 1.0f);
     g = std::clamp(g, 0.0f, 1.0f);
     b = std::clamp(b, 0.0f, 1.0f);
+#endif
 }
 
 
@@ -621,8 +648,16 @@ void __fastcall TForm1::split_and_print(const char *input) {
 
     std::vector<AnsiString> tokenArr;
 
-    char *token = strtok(buffer, "-");
-    bool origin = true;
+    char *token2 = strtok(buffer, "-");
+    unsigned char tokenCount = 0;
+    while (token2 != NULL) {
+        token2 = strtok(NULL, "-");
+        tokenCount++;
+    }
+    
+    strncpy(buffer, input, sizeof(buffer) - 1);
+    char* token = strtok(buffer, "-");
+    unsigned char origin = 0;
 
     // �ִ� 10�� ���ױ��� ó��
     while (token != NULL && tokenArr.size() < 10) {
@@ -633,12 +668,14 @@ void __fastcall TForm1::split_and_print(const char *input) {
         if (airportData) {
             LatLon2XY(latitude, longitude, ScrX, ScrY);
 
-            if (origin) {
-                glColor4f(0.0, 0.0, 1.0, 1.0); // �������� �Ķ���
-                origin = false;
+            if (origin == 0) {
+                glColor4f(1.0, 1.0, 1.0, 1.0); // �������� �Ķ���
+            } else if (origin == tokenCount - 1) {
+                glColor4f(1.0, 0.0, 0.0, 1.0); // ������ �þȻ�
             } else {
-                glColor4f(0.0, 1.0, 1.0, 1.0); // ������ �þȻ�
-            }
+                glColor4f(0.0, 1.0, 0.0, 1.0); // ������ �þȻ�
+            } 
+            origin++;
 
             DrawPoint(ScrX, ScrY);
             if (true || g_EarthView->GetCurrentZoom() / 100 > 0.7f) {
@@ -679,10 +716,13 @@ void __fastcall TForm1::split_and_print(const char *input) {
             auto points = GenerateGreatCirclePoints(lat1, lon1, lat2, lon2, 100);
 
             // ���� ������ ����
+#ifndef YAKI_TEST_CODE
+            glColor4f(1.0, 1.0, 0.0, 1.0);      // ������
+#else
             if (i % 3 == 0) glColor4f(1.0, 1.0, 0.0, 1.0);      // ������
             else if (i % 3 == 1) glColor4f(0.0, 1.0, 0.0, 1.0); // ����
             else glColor4f(1.0, 0.0, 1.0, 1.0);                 // ������
-
+#endif
             glLineWidth(2.0);
             glBegin(GL_LINE_STRIP);
 
@@ -990,20 +1030,10 @@ if (Data->HaveLatLon)
             // obj ����
             // Check altitude
             float r, g, b;
-            if (obj->Altitude < 1000) {
-                r = 0.0f; g = 0.0f; b = 1.0f; // �Ķ�
-            } else if (obj->Altitude < 5000) {
-                r = 0.0f; g = 1.0f; b = 1.0f; // û��
-            } else if (obj->Altitude < 10000) {
-                r = 0.0f; g = 1.0f; b = 0.0f; // �ʷ�
-            } else if (obj->Altitude < 20000) {
-                r = 1.0f; g = 1.0f; b = 0.0f; // ����
-            } else {
-                r = 1.0f; g = 0.0f; b = 0.0f; // ����
-            }
-            glColor3f(r, g, b);
+            GetAltitudeColor(obj->Altitude, r, g, b);
+            glColor4f(r, g, b, 0.8);
  //           glColor3f(1.0f, 0.0f, 0.0f);   // ����
-            glPointSize(10.0f);            // �� ũ�� 10�ȼ�
+            glPointSize(7.0f);            // �� ũ�� 10�ȼ�
             LatLon2XY(obj->Latitude,obj->Longitude, ScrX, ScrY);
             glBegin(GL_POINTS);
             glVertex2f(ScrX, ScrY);
@@ -1080,7 +1110,7 @@ if (Data->HaveLatLon)
  {
   bool CpaDataIsValid=false;
   DataCPA= (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetAircraft(sizeof(TrackHook.ICAO_CPA), (void *)&TrackHook.ICAO_CPA);
-  if ((DataCPA) && (TrackHook.Valid_CC))
+  if ((DataCPA) && (TrackHook.Valid_CC) && DataCPA->visible && Data->visible)
 	{
 
 	  double tcpa,cpa_distance_nm, vertical_cpa;
@@ -1164,7 +1194,11 @@ if (Data->HaveLatLon)
         printf("Draw CPA\n");
 #endif
         // �װ���1 -> CPA ��ġ
+#ifndef YAKI_TEST_CODE
+         glColor4f(1.0, 0.3, 0.0, 0.8);
+#else
          glColor4f(0.0, 1.0, 0.0, 1.0);
+#endif
          glBegin(GL_LINE_STRIP);
  		 glLineWidth(5.0);
          LatLon2XY(pair.a_Lat,pair.a_Lon, ScrX, ScrY);
@@ -1810,7 +1844,8 @@ void __fastcall TForm1::AreaListViewSelectItem(TObject *Sender, TListItem *Item,
     // 
     if (CpaCache) {
         CpaCache->Clear();
-    }
+	}
+	TrackHook.Valid_CC = false;
 #else
 	ObjectDisplay->Repaint();
 #endif

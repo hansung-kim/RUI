@@ -1,4 +1,4 @@
-//---------------------------------------------------------------------------
+﻿//---------------------------------------------------------------------------
 
 #pragma hdrstop
 
@@ -349,7 +349,7 @@ void __fastcall TCPAWorkerThread::Execute() {
         TADS_B_Aircraft* a1 = (TADS_B_Aircraft*)mgr->GetFirst(&it1, (const void**)&key1);
         while (a1) {
 
-            if (!a1->HaveLatLon || !a1->visible) {
+            if (!a1->HaveLatLon || !a1->visible || a1->Altitude < 100) {
             	a1 = (TADS_B_Aircraft*)mgr->GetNext(&it1, (const void**)&key1);
             	continue;
             }
@@ -357,7 +357,7 @@ void __fastcall TCPAWorkerThread::Execute() {
             it2 = it1;
             TADS_B_Aircraft* a2 = (TADS_B_Aircraft*)mgr->GetNext(&it2, (const void**)&key2);
             while (a2) {
-                if (!a2->HaveLatLon || !a2->visible) {
+                if (!a2->HaveLatLon || !a2->visible || a2->Altitude < 100) {
                     a2 = (TADS_B_Aircraft*)mgr->GetNext(&it2, (const void**)&key2);
                 	continue;
                 }
