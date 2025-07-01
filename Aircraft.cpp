@@ -298,15 +298,15 @@ __fastcall TCPAWorkerThread::TCPAWorkerThread(TCPAResultCache* cache)
     FreeOnTerminate = false;
 }
 #ifndef YAKI_TEST_CODE
- // deg -> radian º¯È¯ ¸ÅÅ©·Î
+ // deg -> radian ï¿½ï¿½È¯ ï¿½ï¿½Å©ï¿½ï¿½
 constexpr double DEG2RAD = M_PI / 180.0;
 
-// °á°ú: km ´ÜÀ§ °Å¸® ¹ÝÈ¯
+// ï¿½ï¿½ï¿½: km ï¿½ï¿½ï¿½ï¿½ ï¿½Å¸ï¿½ ï¿½ï¿½È¯
 static double Haversine(double lat1_deg, double lon1_deg, double lat2_deg, double lon2_deg)
 {
-    const double R = 6371.0; // Áö±¸ ¹Ý°æ (km)
+    const double R = 6371.0; // ï¿½ï¿½ï¿½ï¿½ ï¿½Ý°ï¿½ (km)
 
-    // À§µµ, °æµµ¸¦ radianÀ¸·Î º¯È¯
+    // ï¿½ï¿½ï¿½ï¿½, ï¿½æµµï¿½ï¿½ radianï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯
     double lat1 = lat1_deg * DEG2RAD;
     double lon1 = lon1_deg * DEG2RAD;
     double lat2 = lat2_deg * DEG2RAD;
@@ -324,7 +324,7 @@ static double Haversine(double lat1_deg, double lon1_deg, double lat2_deg, doubl
     return R * c; // km
 }
 
-// Nautical Miles(NM)·Î ¹Ù·Î ¾ò°í ½ÍÀ¸¸é:
+// Nautical Miles(NM)ï¿½ï¿½ ï¿½Ù·ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:
 static double HaversineNM(double lat1, double lon1, double lat2, double lon2)
 {
     const double KM_TO_NM = 0.539957;
@@ -416,7 +416,7 @@ void __fastcall TCPAWorkerThread::Execute() {
         }
         mgr->computeCPA = false;
         //        mgr->MutexUnlock();
-        // ³²Àº °´Ã¼ Ãâ·Â
+        // ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½
 #ifdef YAKI_TEST_CODE
         printf("TCPAWorkerThread::Execute aircraftList->Count : %d\n", mgr->aircraftList->Count);
 #endif
@@ -445,7 +445,7 @@ void __fastcall TCPAWorkerThread::Execute() {
 #endif
             }
         }
-        // ¸Þ¸ð¸® ÇØÁ¦
+        // ï¿½Þ¸ï¿½ ï¿½ï¿½ï¿½ï¿½
 
         for (int i = 0; i < mgr->aircraftList->Count; i++) {
             delete (TAircraftPair*)(mgr->aircraftList->Items[i]);
@@ -455,7 +455,7 @@ void __fastcall TCPAWorkerThread::Execute() {
         printf("Update cache\n");
 #endif
         Cache->Update(NewCache);
-        TThread::Sleep(500); // 0.5ÃÊ¸¶´Ù °»½Å
+        TThread::Sleep(500); // 0.5ï¿½Ê¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     }
 }
 

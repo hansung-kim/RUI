@@ -43,6 +43,8 @@
 #include <System.Net.URLClient.hpp>    // CustomHeaders�� TNetHeaders ��
 #endif
 
+#include <DeadReckoning.h>
+
 #define AIRCRAFT_DATABASE_URL   "https://opensky-network.org/datasets/metadata/aircraftDatabase.zip"
 #define AIRCRAFT_DATABASE_FILE   "aircraftDatabase.csv"
 #define ARTCC_BOUNDARY_FILE      "Ground_Level_ARTCC_Boundary_Data_2025-05-15.csv"
@@ -749,7 +751,32 @@ void __fastcall TForm1::DrawObjects(void)
 	for(Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetFirst(&iterator,(const void **) &Key);
 			  Data; Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iterator, (const void **)&Key))
 	{
-	  if (Data->HaveLatLon)
+    // hansungkim DeadReckoning
+    int64_t currTimeInMsec = GetCurrentTimeInMsec();
+	  if(Data->LastSeen < (currTimeInMsec - 3000)) {
+      int64_t deltaTimeInMsec;
+      if(Data->isEnabledDeadReckoning) {
+         deltaTimeInMsec = currTimeInMsec - Data->updatedTimeInMsec;
+         Data->updatedTimeInMsec = currTimeInMsec;
+      } else {
+        Data->isEnabledDeadReckoning = true;
+        Data->updatedTimeInMsec = currTimeInMsec;
+        deltaTimeInMsec = (currTimeInMsec - Data->LastSeen);
+      }
+
+      // printf("===== DEBUG DeadReckoning Activated, LastSeen:%ld currTimeInMsec:%ld updatedTimeInMsec:%ld, deltaTimeInMsec:%ld, speed:%lf, heading:%lf, VerticalRate:%lf\n",
+        // Data->LastSeen, currTimeInMsec, Data->updatedTimeInMsec, deltaTimeInMsec, Data->Speed, Data->Heading, Data->VerticalRate);
+      NextPosition_t nextPosition =  DeadReckoning::PredictNextPosition(Data->Latitude, Data->Longitude, Data->Altitude, Data->Speed*0.514444, Data->Heading, Data->VerticalRate, deltaTimeInMsec*0.001);
+      Data->Latitude = nextPosition.latitude;
+      Data->Longitude = nextPosition.longitude;
+      Data->Altitude = nextPosition.altitude;
+    } else {
+      // printf("===== DEBUG DeadReckoning Deactivated\n");
+      Data->isEnabledDeadReckoning = false;
+      Data->updatedTimeInMsec = 0;
+    }
+
+if (Data->HaveLatLon)
 	  {
 #ifndef YAKI_TEST_CODE
           Data->visible = 0;
@@ -1856,6 +1883,10 @@ void __fastcall TTCPClientRawHandleThread::HandleInput(void)
 			printf("ght_insert Error - Should Not Happen\n");
 		  }
 	  }
+
+    // hansungkim
+    ADS_B_Aircraft->isEnabledDeadReckoning = false;
+    ADS_B_Aircraft->updatedTimeInMsec = 0;
 
 	  RawToAircraft(&mm,ADS_B_Aircraft);
   }

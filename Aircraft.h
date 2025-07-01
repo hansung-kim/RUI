@@ -45,6 +45,10 @@ typedef struct
  unsigned char visible;
 #endif
     TList *LatLonHistory;
+
+    // hansungkim for DeadReckoning 
+    __int64 updatedTimeInMsec;
+    bool isEnabledDeadReckoning;
 } TADS_B_Aircraft;
 
 struct TAircraftPair {
@@ -81,16 +85,16 @@ public:
 };
 #endif
 
-// CPA ¡Æa¡Æu CN ¨öO
+// CPA ï¿½ï¿½aï¿½ï¿½u CN ï¿½ï¿½O
 struct TCpaPair {
     uint32_t ICAO1;
     uint32_t ICAO2;
-    double a_Lat, a_Lon; // C¡¿¡Æ©ª¡¾a1 CPA A¡×A¢®
-    double b_Lat, b_Lon; // C¡¿¡Æ©ª¡¾a2 CPA A¡×A¢®
-    double Lat1, Lon1; // C¡¿¡Æ©ª¡¾a1 CPA A¡×A¢®
-    double Lat2, Lon2; // C¡¿¡Æ©ª¡¾a2 CPA A¡×A¢®
-    double Tcpa;       // ¨öA¡Æ¡Ì
-    double Dist;       // CPA 3D ¡ÆA¢¬¢ç
+    double a_Lat, a_Lon; // Cï¿½ï¿½ï¿½Æ©ï¿½ï¿½ï¿½a1 CPA Aï¿½ï¿½Aï¿½ï¿½
+    double b_Lat, b_Lon; // Cï¿½ï¿½ï¿½Æ©ï¿½ï¿½ï¿½a2 CPA Aï¿½ï¿½Aï¿½ï¿½
+    double Lat1, Lon1; // Cï¿½ï¿½ï¿½Æ©ï¿½ï¿½ï¿½a1 CPA Aï¿½ï¿½Aï¿½ï¿½
+    double Lat2, Lon2; // Cï¿½ï¿½ï¿½Æ©ï¿½ï¿½ï¿½a2 CPA Aï¿½ï¿½Aï¿½ï¿½
+    double Tcpa;       // ï¿½ï¿½Aï¿½Æ¡ï¿½
+    double Dist;       // CPA 3D ï¿½ï¿½Aï¿½ï¿½ï¿½ï¿½
     bool Valid;
 };
 
