@@ -922,7 +922,7 @@ if (Data->HaveLatLon)
        } else {
            float r, g, b;
            GetAltitudeColor(Data->Altitude, r, g, b);
-           glColor4f(r, g, b, 1.0);
+           glColor4f(r, g, b, Data->isEnabledDeadReckoning ? 0.5 : 1.0);
 
        }
        if (aircraft_is_helicopter(Data->ICAO, NULL)) {
