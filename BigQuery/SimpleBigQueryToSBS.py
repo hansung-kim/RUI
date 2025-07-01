@@ -13,6 +13,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 
 stime = time.time()
+now = datetime.now()
+print(now)
+
 if len(sys.argv) == 4:  
    global_filepath = sys.argv[1]
    start_time_arg = sys.argv[2]
