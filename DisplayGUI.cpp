@@ -299,7 +299,7 @@ __fastcall TForm1::TForm1(TComponent* Owner)
  //MapComboBox->ItemIndex=SkyVector_IFR_Low;
  //MapComboBox->ItemIndex=SkyVector_IFR_High;
  LoadMap(MapComboBox->ItemIndex);
-#ifndef YAKI_TEST_CODE
+#ifdef YAKI_TEST_CODE
  LoadAirport();
  LoadRoute();
 #endif
@@ -1340,7 +1340,7 @@ void __fastcall TForm1::ObjectDisplayMouseMove(TObject *Sender,
   TADS_B_Aircraft* Data;
 
 #ifndef YAKI_TEST_CODE
-  MinRange=8.0;
+  MinRange=1.0;
 #else
   MinRange=8.0;
 #endif
@@ -1377,7 +1377,7 @@ mouseover_aircraft = NULL;
     }
 #endif
 #ifndef YAKI_TEST_CODE
-  MinRange=8.0;
+  MinRange=1.0;
   for(Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetFirst(&iterator,(const void **) &Key);
 			  Data; Data = (TADS_B_Aircraft *)AircraftManager::GetInstance()->GetNext(&iterator, (const void **)&Key))
 	{
@@ -1568,7 +1568,7 @@ double HaversineNM(double lat1, double lon1, double lat2, double lon2)
   VLon=(Map_w[1].x-(xf*(Map_v[1].x-X1)))*360.0;
 
 #ifndef YAKI_TEST_CODE
-  MinRange=16.0;
+  MinRange=1.0;
   Form2->Hide();
 #else
   MinRange=8.0;
@@ -1609,10 +1609,10 @@ double HaversineNM(double lat1, double lon1, double lat2, double lon2)
 				//String url = "https://www.planespotters.net/search?q=VH-VKB";
 				//String url = "https://www.bing.com";
 				//String url = "https://globe.adsbexchange.com/?icao=" + reg;
-				Form2->Show();
                 Form2->WebBrowser1->Silent = true;
 				//Form2->EdgeBrowser1->AdditionalBrowserArguments = L"--user-agent=\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36\"";
 				Form2->WebBrowser1->Navigate(WideString(url).c_bstr());
+				Form2->Show();
                 //Form2->EdgeBrowser1->Navigate(WideString(url).c_bstr());
             }
 #endif
@@ -1631,6 +1631,8 @@ double HaversineNM(double lat1, double lon1, double lat2, double lon2)
 		 if (!CPA_Hook)
 		  {
 		   TrackHook.Valid_CC=false;
+             CountryText->Caption ="N/A";
+             AirlineText->Caption ="N/A";           
            ICAOLabel->Caption="N/A";
 		   FlightNumLabel->Caption="N/A";
 		   CLatLabel->Caption="N/A";
@@ -3125,7 +3127,7 @@ void __fastcall TForm1::IdUDPServer1UDPRead(TIdUDPListenerThread *AThread, const
           TIdSocketHandle *ABinding)
 {
     int length = AData.Length;
-	printf("received heartbeat: %d\n", length);
+	//printf("received heartbeat: %d\n", length);
 
     uint8_t buf[64];
     memcpy(buf, &AData[0], 64);
